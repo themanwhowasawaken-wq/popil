@@ -1,0 +1,48 @@
+import glob, os
+root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "src")
+css = open(f"{root}/style.css", encoding="utf-8").read()
+js = "\n".join(open(f, encoding="utf-8").read() for f in sorted(glob.glob(f"{root}/[0-9][0-9]-*.js")))
+html = f'''<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Попелястий Шпиль</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700&family=PT+Sans:wght@400;700&display=swap">
+<style>
+{css}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="game" role="application" aria-label="Попелястий Шпиль">
+    <header id="top"></header>
+    <div id="mid">
+      <aside id="belt" aria-label="Пояс"></aside>
+      <main id="view"></main>
+      <aside id="panel"></aside>
+    </div>
+    <section id="chat" aria-label="Чат">
+      <div class="cmain">
+        <div class="tabs" role="tablist" aria-label="Канали чату" id="tabs"></div>
+        <div class="clog" id="clog" aria-live="polite"></div>
+        <form class="cin" id="cform"><label class="sr" for="cinp">Повідомлення</label><input id="cinp" type="text" autocomplete="off" placeholder="Написати в локацію"></form>
+      </div>
+      <div class="res">
+        <div class="h"><b>Мешканці</b><span id="rcount"></span></div>
+        <div class="rlist" id="rlist"></div>
+      </div>
+    </section>
+    <div id="modal" role="dialog" aria-modal="true"></div>
+  </div>
+</div>
+<script>
+{js}
+</script>
+</body>
+</html>
+'''
+open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "index.html"), "w", encoding="utf-8").write(html)
+print(len(html))

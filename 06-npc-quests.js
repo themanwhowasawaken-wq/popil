@@ -1,0 +1,66 @@
+/* ============ персонажі ============ */
+const NPCS = {
+  ostap:{name:"Зброяр Остап", letter:"О", role:"коваль і зброяр Шпиля", quests:["rats","fangs"], shop:"ostap", hello:"Заходь, мандрівнику. Клинки, обладунки, зілля: усе чесне, без попелу в швах."},
+  healer:{name:"Цілителька Ганна", letter:"Г", role:"цілителька", heal:true, hello:"Рани від попелястих звірів гояться довго. Сядь, я подивлюся."},
+  myroslava:{name:"Шинкарка Мирослава", letter:"М", role:"господиня таверни", quests:["warden","crypt"], rest:true, hello:"Гарячий юшник і тепле ліжко. А як хочеш заробити, маю оповідку про Руїни Варти."},
+  stakh:{name:"Перевізник Стах", letter:"П", role:"перевізник на Сірому Броді", quests:["frogs","marauders"], hello:"Брід уже не той. Жаби розплодилися, мародери шастають. Поможеш?"},
+  yarema:{name:"Капітан Ярема", letter:"Я", role:"капітан найманців", quests:["alpha","shade","beyond"], hello:"Найманці платять за голови, не за балачки. Маєш меч, маєш і роботу."},
+  sutler:{name:"Маркітант Луць", letter:"Л", role:"маркітант табору", shop:"sutler", hello:"Товар для тих, хто ходить далі за брід. Дорого, бо чесно."},
+  ulf:{name:"Капітан Ульф", letter:"У", role:"начальник варти Кабаллону", quests:["ulf_tiger","ulf_cross","ulf_jal","ulf_order"], hello:"Варта Кабаллону завжди шукає сміливців. Звірі, мерці, Орден: роботи на всіх вистачить."},
+  isak:{name:"Купець Ісак", letter:"І", role:"торговий центр Кабаллону", shop:"isak", hello:"Найкращий товар на заході. Ну, майже найкращий."},
+  todor:{name:"Майстер Тодор", letter:"Т", role:"учитель ремесел", quests:["todor_herb","todor_ore","todor_fish","todor_craft"], hello:"Меч годує тебе сьогодні, а ремесло годуватиме завжди. Навчу збирати й майструвати."},
+  safar:{name:"Маг Сафар", letter:"С", role:"господар білої вежі", quests:["safar_ghosts","safar_citadel"], hello:"Академію зруйнували, але її тіні досі тут. І під Цитаделлю щось ворушиться."},
+  kotr:{name:"Торговець Котр", letter:"К", role:"ярмарковий торговець", quests:["kotr_basket"], shop:"kotr", hello:"Шкатулки-сюрпризи! Усередині може бути рідкісна зброя, зілля, талони… А може й нічого, але то рідко!"},
+  olena:{name:"Знахарка Олена", letter:"О", role:"знахарка Села Джерела", quests:["olena_sting"], shop:"olena", heal:true, hello:"Вода в нашому джерелі лікує. А от скорпіонове жало треба вміти знешкодити."},
+  myron:{name:"Рибалка Мирон", letter:"М", role:"старий рибалка з бухти", quests:["myron_mermen"], hello:"Колись тут була найкраща риба на заході. Тепер мермани."},
+  bandura:{name:"Бандурист Северин", letter:"Б", role:"сліпий бандурист з Ужгорода", quests:["q_mavka","q_potercha","q_deep"], hello:"Співаю про тих, хто пішов у морок і вернувся. Хочеш, щоб і про тебе заспівали?"},
+  paraska:{name:"Знахарка Параска", letter:"З", role:"знає обереги на кожну нечисть", shop:"paraska", heal:true, hello:"На кожну нечисть є своє зілля чи оберіг. Упиря бере осика, мавку рута-м'ята, потерча свячена крейда."},
+  marichka:{name:"Травниця Марічка", letter:"Т", role:"травниця зі Сваляви", quests:["q_pavuk","marichka_herbs"], shop:"marichka", hello:"Джерела тут цілющі, а в хащах павуки. Мені їхня павутина для зілля потрібна."},
+  yurko:{name:"Коваль Юрко", letter:"Ю", role:"коваль під Паланком", quests:["q_upyr","yurko_clear","q_boss"], shop:"yurko", hello:"Срібло проти упирів кую, бартки й топірці для опришків."},
+  ivan:{name:"Сотник Іван", letter:"І", role:"сотник Хустської сотні", quests:["ivan_zlydni","ivan_vidma"], hello:"Злидні тягнуть останнє, а у Виноградові відьма. Сотні рук бракує."},
+  dmytro:{name:"Опришок Дмитро", letter:"Д", role:"опришок з Чорногори", quests:["dmytro_hoard","dmytro_abyss","dmytro_clear"], hello:"Скарби опришків стереже змій, а під Чорногорою спить Безодня. Не боїшся?"},
+};
+
+/* ============ квести ============ */
+// goal: kill | item | items | visit | strong | gather | craft | clear | clearAny | dungeon
+// reward: cop, xp, item, items, perk, choice:[{item,n}|{cop}|{perk}]
+const QUESTS = {
+  // Попелясті землі
+  rats:{name:"Щурі в кузні", giver:"ostap", text:"У Старій Кузні завелися щурі завбільшки з пса. Прожени п'ятьох, і я віддам тобі шолом.", goal:{kill:"rat", n:5}, reward:{cop:60, xp:60, item:"leather_cap"}},
+  fangs:{name:"Ікла для зброяра", giver:"ostap", req:"rats", text:"Мені треба п'ять вовчих іклів для руків'їв. Вовки водяться біля Сірого Броду й довкола Кабаллону.", goal:{item:"fang", n:5}, reward:{cop:200, xp:180, choice:[{item:"smith_sword"},{item:"leather_vest"},{item:"potion_s", n:5}]}},
+  frogs:{name:"Брід без жаб", giver:"stakh", text:"Болотяні жаби перекусили мені канат. Убий чотирьох, поки не перегризли й пором.", goal:{kill:"frog", n:4}, reward:{cop:120, xp:150, item:"potion_l"}},
+  marauders:{name:"Мародери біля броду", giver:"stakh", req:"frogs", text:"Двоє мародерів грабують мандрівників на моєму березі. Розберися з ними.", goal:{kill:"marauder", n:2}, reward:{cop:320, xp:240, choice:[{item:"iron_boots"},{item:"silver_ring"},{cop:400}]}},
+  warden:{name:"Скарб Варти", giver:"myroslava", text:"Кажуть, у Руїнах Варти досі ходить кістяний вартовий. Принеси вістку, що його більше нема.", goal:{kill:"warden", n:1}, reward:{cop:400, xp:350, choice:[{item:"iron_helm"},{item:"chain"},{item:"gem_ruby1", n:2}]}},
+  crypt:{name:"Капітан у склепах", giver:"myroslava", req:"warden", text:"Під руїнами склепи, а в них сам капітан варти. Спустися й упокой його.", goal:{dungeon:"crypt", n:1}, reward:{cop:800, xp:600, choice:[{item:"gem_topaz2"},{item:"gem_ruby2"},{item:"elix_str", n:3}]}},
+  alpha:{name:"Ватажок з Вовчого Яру", giver:"yarema", text:"Зграю з Вовчого Яру веде ватажок. Убий його, і дороги стануть тихіші.", goal:{kill:"alpha", n:1}, reward:{cop:600, xp:500}},
+  shade:{name:"Тінь над Каплицею", giver:"yarema", req:"alpha", text:"У Чорній Каплиці прокинулася Тінь. Наші не повернулися. Ти, може, повернешся.", goal:{kill:"shade", n:1}, reward:{cop:1600, xp:1200, perk:{hp:20}}, perkText:"+20 до макс. здоров'я назавжди"},
+  beyond:{name:"Шлях за Карпати", giver:"yarema", req:"alpha", text:"За Карпатами лежить Закарпаття. Там нечисть стара, як самі гори. Дійди до Ужгорода й знайди бандуриста Северина.", goal:{visit:"uzhgorod", n:1}, reward:{cop:300, xp:250, items:{w_garlic:2, w_chalk:1}}},
+  // Землі Кабаллону
+  ulf_tiger:{name:"Тигр-людожер", giver:"ulf", text:"Біля Старого млина завівся лютий тигр. Він не з голоду полює, а спеціально чатує на мандрівників. Убий трьох таких.", goal:{kill:"tiger", n:3}, reward:{cop:300, xp:300, choice:[{item:"iron_helm"},{item:"iron_boots"},{item:"potion_l", n:3}]}},
+  ulf_cross:{name:"Захоплена переправа", giver:"ulf", req:"ulf_tiger", text:"Мерці захопили Північну переправу. Знищ шістьох зомбі, поки вони не дійшли до мурів.", goal:{kill:"zombie", n:6}, reward:{cop:400, xp:420, perk:{hp:15}}, perkText:"+15 до макс. здоров'я назавжди"},
+  ulf_jal:{name:"Король Джалів", giver:"ulf", req:"ulf_cross", text:"На Піщаній косі править Король Джалів, найбільший скорпіон, якого я бачив.", goal:{kill:"jal_king", n:1}, reward:{cop:600, xp:500, choice:[{item:"silver_ring"},{item:"chain"},{item:"gem_topaz1", n:2}]}},
+  ulf_order:{name:"Похід на Табір Ордену", giver:"ulf", req:"ulf_jal", text:"Орден зміцнює табір. Розбий їхнього отамана й зачисти табір.", goal:{clear:"order_camp", n:1}, reward:{cop:900, xp:700, perk:{dmg:5}}, perkText:"+5% урону назавжди"},
+  todor_herb:{name:"Перші трави", giver:"todor", text:"Почнемо з простого. Збери п'ять пучків попелиці: вона росте біля Села Джерела, біля млина й довкола Кабаллону.", goal:{item:"h1", n:5}, reward:{cop:50, xp:80, items:{potion_s:3}}},
+  todor_ore:{name:"Руда для кузні", giver:"todor", req:"todor_herb", text:"Тепер руда. Мідна жила є на Іскристому броді й у Старій Кузні. Принеси п'ять шматків.", goal:{item:"o1", n:5}, reward:{cop:80, xp:100, item:"copper_ring"}},
+  todor_fish:{name:"Свіжа риба", giver:"todor", req:"todor_ore", text:"Риб'ячий жир потрібен для чорнил. Злови чотири плітки на млині або на Сірому Броді.", goal:{item:"f1", n:4}, reward:{cop:80, xp:100, items:{scroll_heal:2}}},
+  todor_craft:{name:"Своїми руками", giver:"todor", req:"todor_fish", text:"Звари три малі зілля здоров'я. Відкрий «Ремесла» і вибери Алхіміка.", goal:{craft:"potion_s", n:3}, reward:{cop:150, xp:250, perk:{en:10}}, perkText:"+10 до макс. енергії назавжди"},
+  safar_ghosts:{name:"Тіні Академії", giver:"safar", text:"У руїнах Академії досі блукають мої колишні колеги. Упокой чотирьох привидів магістрів.", goal:{kill:"ghost_mage", n:4}, reward:{cop:500, xp:600, choice:[{item:"scroll_fire", n:3},{item:"elix_str", n:2},{item:"gem_ame1", n:2}]}},
+  safar_citadel:{name:"Чорний Магістр", giver:"safar", req:"safar_ghosts", text:"Під Темною Цитаделлю засів Чорний Магістр. Пройди підземелля й зупини його.", goal:{dungeon:"citadel", n:1}, reward:{cop:1500, xp:1200, choice:[{item:"safar_ring"},{item:"knight_helm"},{item:"gem_emer2", n:2}]}},
+  kotr_basket:{name:"Ярмарковий кошик", giver:"kotr", text:"Для ярмаркових гостей мені треба свіжої форелі й звіробою. По три штуки, будь ласка!", goal:{items:{f2:3, h2:3}}, reward:{cop:200, xp:250, items:{box:2}}},
+  olena_sting:{name:"Отрута скорпіонів", giver:"olena", text:"Із жала скорпіона я роблю протиотруту. Принеси чотири жала з Піщаної коси.", goal:{item:"sting", n:4}, reward:{cop:250, xp:300, choice:[{item:"elix_skin", n:2},{item:"potion_l", n:3},{item:"scroll_shield", n:2}]}},
+  myron_mermen:{name:"Мермани в бухті", giver:"myron", text:"Прожени мерманів з бухти. П'ятьох буде досить, щоб інші злякалися.", goal:{kill:"merman", n:5}, reward:{cop:600, xp:700, choice:[{item:"gem_sapph2"},{item:"postoly"},{cop:900}]}},
+  // Закарпаття
+  q_mavka:{name:"Струни з коси Мавки", giver:"bandura", text:"Мені на бандуру треба струни з коси мавки. Убий п'ятьох мавок у лісах Ужгородщини й Перечинщини.", goal:{kill:"mavka", n:5}, reward:{cop:600, xp:600, perk:{en:15}}, perkText:"+15 до макс. енергії назавжди"},
+  q_potercha:{name:"Вогні болота", giver:"bandura", req:"q_mavka", text:"Потерчата заманюють людей у трясовину під Хустом. Погаси десятеро.", goal:{kill:"potercha", n:10}, reward:{cop:700, xp:800, choice:[{item:"gem_ruby2"},{item:"scroll_curse", n:3},{item:"w_chalk", n:4}]}},
+  q_deep:{name:"Глибше в морок", giver:"bandura", req:"q_potercha", text:"Пісня не скінчена, доки хтось не дійде до Чорногори. Дійди до Рахівщини.", goal:{visit:"rah", n:1}, reward:{cop:1200, xp:900, perk:{hp:30}}, perkText:"+30 до макс. здоров'я назавжди"},
+  q_pavuk:{name:"Павутина для зілля", giver:"marichka", text:"Розчави шістьох павуків-хрестовиків. Їхня павутина мені на ліки.", goal:{kill:"pavuk", n:6}, reward:{cop:500, xp:550, item:"potion_l"}},
+  marichka_herbs:{name:"Цілющі трави", giver:"marichka", req:"q_pavuk", text:"Збери п'ять пучків рути в лісах Свалявщини.", goal:{item:"h3", n:5}, reward:{cop:300, xp:500, choice:[{item:"elix_agi", n:2},{item:"elix_skin", n:2},{item:"potion_xe", n:3}]}},
+  q_upyr:{name:"Срібло проти упирів", giver:"yurko", text:"Упирі під Паланком не дають спати. Упокой вісьмох, і я загартую твій клинок.", goal:{kill:"upyr", n:8}, reward:{cop:900, xp:800, perk:{dmg:8}}, perkText:"+8% урону назавжди"},
+  yurko_clear:{name:"Перша зачистка", giver:"yurko", req:"q_upyr", text:"У кожного району є свій отаман. Як наб'єш досить нечисті, він вийде сам. Зачисти будь-який район Закарпаття.", goal:{clearAny:"zak", n:1}, reward:{cop:800, xp:900, choice:[{item:"krysania"},{item:"keptar"},{item:"postoly"}]}},
+  q_boss:{name:"Голова отамана", giver:"yurko", req:"yurko_clear", text:"Найлютіша нечисть (Чугайстер, Вампір, Водяник, Лихо) ходить по наших краях. Подолай трьох таких.", goal:{strong:true, n:3}, reward:{cop:2000, xp:1200, perk:{crit:10}}, perkText:"+10% шансу криту назавжди"},
+  ivan_zlydni:{name:"Злидні в Іршаві", giver:"ivan", text:"Злидні крадуть у людей останнє. Знищ п'ятьох.", goal:{kill:"zlydni", n:5}, reward:{cop:900, xp:700}},
+  ivan_vidma:{name:"Відьма з Севлюша", giver:"ivan", req:"ivan_zlydni", text:"У хащах Виноградівщини живе відьма, що насилає порчу на виноградники. Покінчи з нею.", goal:{kill:"vidma", n:1}, reward:{cop:1000, xp:900, choice:[{item:"gerdan"},{item:"gem_ame2"},{item:"elix_str", n:4}]}},
+  dmytro_hoard:{name:"Скарб опришків", giver:"dmytro", text:"Скарби опришків стереже скарбник-змій. Убий двох, і поділимося.", goal:{kill:"skarbnyk", n:2}, reward:{cop:1500, xp:1000, choice:[{item:"bartka"},{item:"gem_topaz2", n:2},{cop:2500}]}},
+  dmytro_abyss:{name:"Безодня Чорногори", giver:"dmytro", req:"dmytro_hoard", text:"Під Чорногорою спить Владар Безодні. Пройди всю печеру до самого дна.", goal:{dungeon:"abyss", n:1}, reward:{cop:3000, xp:1500, choice:[{item:"chorno_bartka"},{item:"abyss_plate"},{item:"chorno_ring"}]}},
+  dmytro_clear:{name:"Тиша над Чорногорою", giver:"dmytro", req:"dmytro_abyss", text:"Зачисти Рахівщину тричі, щоб нечисть пам'ятала, хто тут господар.", goal:{clear:"rah", n:3}, reward:{cop:4000, xp:1500, perk:{crit:5, hp:40}}, perkText:"+5% криту і +40 здоров'я назавжди"},
+};
