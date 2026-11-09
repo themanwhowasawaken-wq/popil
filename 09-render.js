@@ -20,7 +20,7 @@ function locRT(id){
   const rt = {mobs:[], residents:[], spots:[], uid:0}, L = LOCS[id], N = NODES[id], tier = tierOf(id);
   LR[id] = rt;
   const add = (type, lvl, o = {}) => rt.mobs.push(spawnMob(id, type, lvl, Object.assign({tier}, o)));
-  for (const [type, n, lvl] of L.mobs) for (let i = 0; i < n; i++) add(type, lvl);
+  for (const [type, n, lvl] of L.mobs){ if (S.order && mobDef(type).side === S.order) continue; for (let i = 0; i < n; i++) add(type, lvl); }
   if (L.demons){
     const pool = BESTIARY.filter(d => d.reg.includes(N.reg)), weak = pool.filter(d => d.tier < 3), strong = pool.filter(d => d.tier >= 3);
     for (let i = 0; i < 6; i++){
@@ -36,7 +36,7 @@ function locRT(id){
   }
   const k = isSafe(id) ? ri(2,5) : ri(0,2), names = [...NAMES].sort(() => Math.random() - .5);
   const lvGuess = N.L || parseInt(N.lv) || ri(2, 8);
-  for (let i = 0; i < k; i++) rt.residents.push([names[i], clamp(lvGuess + ri(-1, 2), 1, 10)]);
+  for (let i = 0; i < k; i++) rt.residents.push([names[i], clamp(lvGuess + ri(-1, 2), 1, MAXLVL)]);
   return rt;
 }
 function freeSpot(locId, others, minD = 100){
@@ -80,7 +80,7 @@ function playerPos(){
 }
 
 /* ============ верхня панель, пояс, чат ============ */
-const MENU = [["hero","Персонаж"],["book","Вміння"],["map","Карта світу"],["quest","Квести"],["craft","Ремесла"],["codex","Бестіарій"],["auction","Аукціон"],["clan","Клан"],["arena","Арена"],["gear","Налаштування"]];
+
 function renderTop(){
   const st = stats();
   const bar = (v, max, cls, lbl) => `<div class="bar ${cls}"><div class="tr"><div class="fl" style="width:${clamp(v / max * 100, 0, 100)}%"></div></div><span>${lbl}</span></div>`;
@@ -88,19 +88,20 @@ function renderTop(){
   $("#top").innerHTML = `<div class="who"><div class="portrait-ring"><div class="avatar" style="${crestBg(S.crest)}">${esc(S.name[0])}</div><span class="lvgem" title="Рівень">${S.lvl}</span></div><div class="bars">
     <div class="nm"><b>${esc(S.name)}</b>${S.buffs.length ? `<span class="buffs" title="${S.buffs.map(b => ITEMS[b.id].name + ": ще " + b.n + " бої").join(", ")}">${svg("elixir", 14)} ${S.buffs.length}</span>` : ""}</div>
     ${bar(S.hp, st.maxHp, "hp", Math.ceil(S.hp) + " / " + st.maxHp)}${bar(S.en, st.maxEn, "en", Math.floor(S.en) + " / " + st.maxEn)}${bar(S.lvl >= MAXLVL ? 1 : S.xp, S.lvl >= MAXLVL ? 1 : need(S.lvl), "xp", xpLbl)}</div></div>
-    <nav class="menu" aria-label="Головне меню">${MENU.map(([i, l]) => `<button class="ib${(l === "Карта світу" && UI.view === "map") ? " on" : ""}" data-menu="${l}" aria-label="${l}" title="${l}" ${B ? "disabled" : ""}>${svg(i, 21)}</button>`).join("")}</nav>
+    <nav class="menu2" aria-label="Головне меню">${BOOK.map(([id, l, ic, key], i) => { const on = id === "map" ? UI.view === "map" : modalOpen() && $("#modal .kvw") && (UI.book === id || (id === "hero" && UI.book === "bag") || (id === "codex" && UI.book === "zcodex")), b = bookBadge(id);
+      return `${i === 3 || i === 7 ? `<span class="msep" aria-hidden="true"></span>` : ""}<button class="rb${on ? " on" : ""}" ${id === "map" ? `data-menu="Карта світу"` : `data-book="${id}"`} aria-label="${l}" title="${l}${key ? " (" + key + ")" : ""}" ${B ? "disabled" : ""}><span class="rr">${gi(ic, 22)}${b ? `<i class="bdg">${b}</i>` : ""}</span><span class="rl">${l}</span></button>`; }).join("")}</nav>
     <div class="money">${money(S.cop)}<span class="clock" id="clock">${now()}</span></div>`;
 }
 function beltSlot(i){
   const id = S.belt[i], it = id && ITEMS[id], n = id ? inv(id) : 0;
   if (!it) return `<button class="slot empty" data-beltslot="${i}" aria-label="Порожня комірка пояса" title="Порожньо: додайте зілля чи сувій з торби"></button>`;
-  const icon = it.scroll ? svg("scroll", 22, "#e2c88a") : it.buff ? svg("elixir", 22, "#9fd08f") : it.open ? svg("box", 22, "#e0b25a") : svg("flask", 22, it.use && it.use.en && !it.use.hp ? "#6f9bd1" : id === "potion_l" ? "#e8857a" : "#d0574d");
+  const icon = gi(itemIc(id), 28, it.use && it.use.en && !it.use.hp ? "#6f9bd1" : it.scroll ? "#e2c88a" : it.buff ? "#9fd08f" : it.open ? "#e0b25a" : "#e0675a");
   return `<button class="slot" data-belt="${id}" aria-label="${it.name}, ${n} шт." title="${it.name}${n ? "" : " (закінчилось)"}" ${n ? "" : "disabled"}>${icon}${n ? `<span class="n">${n}</span>` : ""}</button>`;
 }
 function renderBelt(){
   const used = Object.keys(S.inv).length;
   $("#belt").innerHTML = `<span class="cap">ПОЯС</span>${beltSlot(0)}${beltSlot(1)}${beltSlot(2)}
-    <button class="bagbtn" data-menu="Торба" aria-label="Торба" title="Торба (B)" ${B ? "disabled" : ""}>${svg("bag", 26)}<span class="pg">${used}</span></button>
+    <button class="bagbtn" data-book="bag" aria-label="Торба" title="Торба (B)" ${B ? "disabled" : ""}>${gi("knapsack", 28)}<span class="pg">${used}</span></button>
     ${beltSlot(3)}${beltSlot(4)}${beltSlot(5)}`;
 }
 function renderChat(){
@@ -142,7 +143,7 @@ function renderMap(){
       <div class="hint${rd.danger ? " warn" : ""}">${rd.danger ? "Небезпечна дорога: можлива засідка." : "Дорога безпечна."}</div>
       <button class="btn sm" data-act="turnback">Повернути назад</button></div>`;
   }
-  v.innerHTML = `<div class="mapwrap" id="mapwrap"><div id="world" style="width:${WORLD.w}px;height:${WORLD.h}px">${mapSVG()}</div><div id="mapov">${nodes}<div class="me" id="me"><i></i><b>Ви</b></div></div>
+  v.innerHTML = `<div class="mapwrap" id="mapwrap"><div id="world" style="width:${WORLD.w}px;height:${WORLD.h}px">${mapLayer()}${mapFX()}</div><div id="mapov">${nodes}<div class="me" id="me"><i></i><b>Ви</b></div></div>
     ${travel}
     <div class="mapctl"><button class="ib sm" data-zoom="1" aria-label="Наблизити">+</button><button class="ib sm" data-zoom="-1" aria-label="Віддалити">−</button><button class="ib sm" data-act="mecenter" aria-label="До мене" title="До мене">${svg("hero", 16)}</button></div>
     ${T ? "" : `<div class="legend"><div><span class="ln safe"></span>безпечна дорога</div><div><span class="ln danger"></span>небезпечна, засідки</div><div><span class="badge inl">!</span> квест <span class="badge inl">?</span> здати <span class="dgi">${svg("door", 10, "#fff", 2.2)}</span> підземелля</div></div>`}
@@ -172,7 +173,7 @@ function placeMap(){
   const me = document.getElementById("me"); if (me){ const p = mePos(); me.style.left = (p.x - cx) * z + "px"; me.style.top = (p.y - cy) * z + "px"; }
 }
 function zoomMap(dir, ax = 450, ay = 264){
-  const zs = [.6, .8, 1, 1.2], i = clamp(zs.indexOf(UI.zoom) + dir, 0, zs.length - 1); if (zs.indexOf(UI.zoom) < 0){ UI.zoom = .8; return placeMap(); }
+  const zs = [.4, .6, .8, 1, 1.2], i = clamp(zs.indexOf(UI.zoom) + dir, 0, zs.length - 1); if (zs.indexOf(UI.zoom) < 0){ UI.zoom = .8; return placeMap(); }
   const wx = UI.cam.x + ax / UI.zoom, wy = UI.cam.y + ay / UI.zoom; UI.zoom = zs[i]; UI.cam.x = wx - ax / UI.zoom; UI.cam.y = wy - ay / UI.zoom; camClamp(); placeMap();
 }
 
@@ -180,7 +181,7 @@ function zoomMap(dir, ax = 450, ay = 264){
 function renderLoc(){
   const id = S.loc, L = LOCS[id], rt = locRT(id), n = NODES[id];
   const v = $("#view"), alive = rt.mobs.filter(m => !m.dead && !m.busy).length;
-  let h = `<svg class="scene" width="900" height="528" viewBox="0 0 900 528" aria-hidden="true">${sceneSVG(id)}</svg>`;
+  let h = sceneImg(id);
   const tierTxt = (S.clears[id] ? ` · зачищено ×${S.clears[id]}` : "") + (L.boss ? ` · до отамана: ${Math.max(0, 8 - (S.kc[id] || 0))}` : "");
   h += `<div class="title-plate"><b>${n.name}</b><span>${n.kind === "city" || n.kind === "town" ? "Безпечне місце" : "Рівень " + n.lv}${rt.mobs.length ? " · мобів: " + alive : ""}${tierTxt}</span></div>`;
   for (const sp of rt.spots){ if (!sp.ready) continue; const P = PROFS[sp.type], ok = S.prof[sp.type].lv >= TIER_LV[sp.t];
@@ -204,9 +205,9 @@ function renderLoc(){
   for (const m of rt.mobs) if (!m.dead && !m.busy){ const k = m.st.name + "|" + m.lvl; groups[k] = (groups[k] || 0) + 1; }
   const timer = T ? `<div class="trbox"><div><span>Перехід до ${NODES[T.legs[T.i][1]].name}</span><b id="tleft"></b></div><div class="ptr"><div id="tbar" style="width:0%"></div></div></div>` : "";
   const resTxt = Object.entries(L.res).map(([k, t]) => `${PROFS[k].name.toLowerCase()} (до ${t} тіру)`).join(", ");
-  $("#panel").innerHTML = `<h2 class="ph">${n.name}</h2><div class="hint it">${L.desc}</div>${timer}
+  $("#panel").innerHTML = `<h2 class="ph">${n.name}</h2><div class="hint it">${L.desc}</div>${regRuleHTML(id)}${timer}
     <div class="sub">Переходи</div><div>${neighbors(id).map(nb => { const rd = roadOf(id, nb), q = questMarks(nb); return `<button class="row" data-go="${nb}" ${T ? "disabled" : ""} title="${NODES[nb].name}"><span class="qm${q ? "" : " no"}">${q}</span><span class="g">${NODES[nb].name}</span><span class="r${rd.danger ? " d" : ""}">${rd.dur} с</span></button>`; }).join("")}
-      <button class="row" data-act="map"><span class="qm no">${svg("map", 14)}</span><span class="g">Відкрити карту світу</span></button></div>
+      <button class="row" data-act="map"><span class="qm no">${svg("map", 14)}</span><span class="g">Відкрити карту світу</span></button>${inZak() ? `<button class="row" data-book="zcodex"><span class="qm no">${gi("crowned-skull", 14, "#8a7a60")}</span><span class="g">Бестіарій Закарпаття</span></button>` : ""}</div>
     ${L.buildings.length ? `<div class="sub">Будівлі</div><div>${L.buildings.map(([nm, act]) => { const mk = act.startsWith("npc:") ? npcMark(act.slice(4)) : ""; const isD = act.startsWith("dungeon:"); return `<button class="row" data-build="${act}" ${T ? "disabled" : ""}><span class="qm${mk ? "" : " no"}">${mk || (isD ? svg("door", 13) : "")}</span><span class="g">${nm}</span>${isD ? `<span class="r d">рів. ${DUNGEONS[act.slice(8)].lvl}</span>` : ""}</button>`; }).join("")}</div>` : ""}
     ${resTxt ? `<div class="sub">Ремесла</div><div class="hint">Тут можна збирати: ${resTxt}.</div>` : ""}
     ${rt.mobs.length || L.boss ? `<div class="sub">Моби тут</div><div>${Object.entries(groups).map(([k, c]) => { const [nm, lv] = k.split("|"); return `<div class="row"><span class="qm no"></span><span class="g">${nm}${c > 1 ? " ×" + c : ""}</span><span class="r">[${lv}]</span></div>`; }).join("") || `<div class="hint">Усіх перебили. Скоро повернуться.</div>`}</div>` : `<div class="hint">Тут безпечно: моби не водяться.</div>`}`;
@@ -225,6 +226,21 @@ function renderMobs(full){
     for (const m of rt.mobs){ const el = document.getElementById("m-" + m.uid); if (!el) continue; el.style.transform = `translate(${m.x}px,${m.y}px)`; const cv = el.firstChild; cv.dataset.flip = m.flip ? 1 : 0; cv.dataset.mv = m.wait > 0 ? 0 : 1; }
   }
 }
+function mobFxText(st){
+  const t = [];
+  if (st.rise) t.push("Повстає один раз після звичайного удару. Сильний удар, булава, вогонь, буря чи оберіг кладуть назавжди.");
+  if (st.regrow) t.push("Голови відростають щораунду, поки не припечеш вогнем, бурею чи оберегом.");
+  if (st.venom) t.push("Отруює: 3 раунди шкоди після удару.");
+  if (st.drain) t.push(`Кожен удар забирає ${st.drain} енергії.`);
+  if (st.lifesteal) t.push("П'є кров: лікується з кожного удару.");
+  if (st.cleave) t.push("Кожен третій раунд б'є з розмаху, у 1,6 раза сильніше.");
+  if (st.mend) t.push("Молиться за союзників: лікує поранених.");
+  if (st.evade) t.push(`Важко влучити: +${st.evade}% до ухилення.`);
+  if (st.duel) t.push("Кодекс честі: б'ється сам на сам, інші не втручаються.");
+  if (st.side){ const o = ORDERS[st.side]; t.push(o.name + ". " + (!S.order ? "Поки ви без присяги, сам не нападає." : S.order === st.side ? "Ваш брат по ордену." : "Ворог вашого ордену: нападає першим.")); }
+  return t;
+}
+function fxHTML(st){ const t = mobFxText(st); return t.length ? `<div class="fxl">${t.map(x => `<span>${x}</span>`).join("")}</div>` : ""; }
 function wardHTML(st){ if (!st.wards.length) return ""; return `<div><span class="lbl">Боїться</span><div class="wards">${st.wards.map(w => { const it = WARD_ITEMS[w], own = it && inv(it[0]) > 0; return `<span class="${own ? "own" : ""}" title="${it ? (own ? "Є в торбі" : "Продає знахарка Параска в Ужгороді") : "Не предмет"}">${w}</span>`; }).join("")}</div></div>`; }
 function renderMobCard(){
   const box = $("#mobcard"); if (!box) return;
@@ -236,7 +252,8 @@ function renderMobCard(){
   const left = m.x > 450 ? m.x - 380 : m.x + 64, top = clamp(m.y - 180, 60, 150);
   box.innerHTML = `<div class="card mobcard" style="left:${left}px;top:${top}px">
     <div class="hd"><span class="ic">${sprite(m.type, 56, 56, 1.25, false)}</span><div><h3>${st.name}</h3><div class="k">${st.kind} · рівень ${m.lvl}${m.tier > 1 ? " · тір " + m.tier : ""}</div></div></div>
-    ${st.lore ? `<div class="lore">${st.lore}</div>` : ""}
+    ${st.lore ? `<div class="lore">${st.lore}</div>` : ""}${fxHTML(st)}
+    ${m.stolen ? `<div class="lore" style="color:var(--ember)"><b>Несе ваші гроші (${moneyTxt(m.stolen)}).</b> Переможіть, щоб повернути.</div>` : ""}
     <div class="stats"><div class="st"><span>Здоров'я</span><b>${st.hp}</b></div><div class="st"><span>Урон</span><b>${st.dmg[0]}–${st.dmg[1]}</b></div><div class="st"><span>Захист</span><b>${st.def}</b></div><div class="st"><span>Спритн.</span><b>${st.agi}</b></div></div>
     ${wardHTML(st)}
     <div class="drops"><span class="lbl">Можна здобути</span>${drops ? drops + ", " : ""}мідь${st.boss ? ", самоцвіти" : ""}</div>

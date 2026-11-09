@@ -71,11 +71,12 @@ const ROADS = [
   ["khust","hust",0,10],["khust","vyn",1,-10],["khust","irsh",0,8],["rakhiv","rah",1,10],["rakhiv","tia",1,-10],
   ["uzh","perech",0,10],["perech","velbz",1,12],["muk","sval",0,12],["muk","ber",1,-10],["ber","vyn",1,12],["sval","irsh",0,-12],["irsh","vyn",1,-10],["irsh","hust",1,12],
   ["hust","mizh",1,-12],["volv","mizh",1,10],["hust","tia",1,-12],["mizh","tia",1,12],["tia","rah",1,-12],["mizh","rah",1,10],
-].map(([a, b, danger, k, name]) => {
+].map(mkRoad);
+function mkRoad([a, b, danger, k, name]){
   const A = NODES[a], B = NODES[b];
   const cx = (A.x + B.x) / 2 + k, cy = (A.y + B.y) / 2 - k;
   return {a, b, danger:!!danger, cx, cy, name:name || "", dur:clamp(Math.round(Math.hypot(B.x - A.x, B.y - A.y) / 22), 5, 22)};
-});
+}
 const roadOf = (a, b) => ROADS.find(r => (r.a === a && r.b === b) || (r.a === b && r.b === a));
 const neighbors = id => ROADS.filter(r => r.a === id || r.b === id).map(r => r.a === id ? r.b : r.a);
 function route(from, to){
@@ -132,7 +133,8 @@ const LOCS = {
 const ZAK_RES = {uzh:{herb:3}, perech:{herb:3}, velbz:{herb:4}, sval:{herb:3, fish:3}, muk:{mine:3}, ber:{herb:3}, vyn:{herb:4}, irsh:{fish:3}, hust:{fish:3}, volv:{herb:4, mine:4}, mizh:{fish:4}, tia:{mine:4}, rah:{mine:5, herb:5}};
 for (const [id, n] of Object.entries(NODES)) if (n.reg){ LOCS[id] = {desc:n.lore, demons:true, res:ZAK_RES[id] || {}, boss:"auto"}; }
 LOCS.rah.buildings = [["Вхід у Безодню","dungeon:abyss"]];
-for (const L of Object.values(LOCS)){ L.npcs = L.npcs || []; L.mobs = L.mobs || []; L.buildings = L.buildings || []; L.res = L.res || {}; }
+function prepLoc(L){ L.npcs = L.npcs || []; L.mobs = L.mobs || []; L.buildings = L.buildings || []; L.res = L.res || {}; }
+for (const L of Object.values(LOCS)) prepLoc(L);
 
 /* ============ сцени: конфіг пейзажу ============ */
 const BIOME = {

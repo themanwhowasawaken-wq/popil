@@ -58,6 +58,7 @@ function drawDemonBody(e) {
   if (dsn.prop === "staff") { ctx.strokeStyle = "#5a4326"; ctx.lineWidth = Math.max(2, w * 0.08); ctx.beginPath(); ctx.moveTo(w * 0.5, -h * 0.52); ctx.lineTo(w * 0.44, h * 0.48); ctx.stroke();
     const pul = 0.8 + 0.3 * Math.sin(t * 4); ctx.fillStyle = eye; ctx.shadowColor = eye; ctx.shadowBlur = (eg + 6) * pul; ctx.beginPath(); ctx.arc(w * 0.51, -h * 0.57, w * 0.11, 0, TAU); ctx.fill(); ctx.shadowBlur = 0; }
 
+  if (typeof NEW_SHAPES !== "undefined" && NEW_SHAPES[dsn.shape]){ ctx.save(); ctx.scale(1, breath); NEW_SHAPES[dsn.shape]({w, h, t, R, R2, eye, eyes, px, tri, m, has, dsn, id, reach, e}); ctx.restore(); return; }
   ctx.save(); ctx.scale(1, breath);
   if (dsn.shape === "humanoid") {
     px(-w * 0.22, h * 0.28, w * 0.16, h * 0.27, R[0]); px(w * 0.06, h * 0.28, w * 0.16, h * 0.27, R[0]);

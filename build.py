@@ -1,5 +1,6 @@
 import glob, os
-root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "src")
+here = os.path.dirname(os.path.abspath(__file__))
+root = os.path.join(here, "src") if os.path.isdir(os.path.join(here, "src")) else here
 css = open(f"{root}/style.css", encoding="utf-8").read()
 js = "\n".join(open(f, encoding="utf-8").read() for f in sorted(glob.glob(f"{root}/[0-9][0-9]-*.js")))
 html = f'''<!DOCTYPE html>

@@ -16,10 +16,10 @@ function useItem(id, inBattle){
     if (it.use.en){ const h = Math.min(it.use.en, st.maxEn - S.en); S.en += h; txt += (txt ? " " : "+") + Math.round(h) + " ен."; }
     msg(`${it.name}: ${txt}.`, "good", inBattle ? "fight" : "loc");
   }
-  if (it.buff){ S.buffs = S.buffs.filter(b => b.id !== id); S.buffs.push({id, k:it.buff, n:3}); txt = Object.entries(it.buff).map(([k, v]) => `+${v} ${STATN[k]}`).join(", "); msg(`${it.name}: ${txt} на 3 бої.`, "good", inBattle ? "fight" : "loc"); }
+  if (it.buff){ S.buffs = S.buffs.filter(b => b.id !== id); S.buffs.push({id, k:it.buff, n:it.bn || 3}); txt = Object.entries(it.buff).map(([k, v]) => k === "bog" ? "захист від туману Трясовини" : `+${v} ${STATN[k]}`).join(", "); msg(`${it.name}: ${txt} на ${it.bn || 3} боїв.`, "good", inBattle ? "fight" : "loc"); }
   save(); renderBelt(); renderTop(); return txt;
 }
-const STATN = {hp:"здоров'я", en:"енергії", agi:"спритності", str:"сили", def:"захисту", crit:"% криту"};
+const STATN = {hp:"здоров'я", en:"енергії", agi:"спритності", str:"сили", def:"захисту", crit:"% криту", wil:"волі"};
 function openBox(){
   const roll = Math.random(); let got = [];
   if (roll < .04){ msg("Шкатулка порожня. Буває і таке.", "warn"); return; }
@@ -28,7 +28,7 @@ function openBox(){
   else if (roll < .6) got.push([pick(["scroll_fire","scroll_shield","scroll_heal","scroll_tp"]), ri(1, 2)]);
   else got.push([pick(["potion_l","potion_s","potion_e","elix_str","elix_skin"]), ri(1, 3)]);
   if (Math.random() < .5) got.push(["box_coin", ri(40, 160)]);
-  for (const [id, n] of got){ if (id === "box_coin") S.cop += n; else give(id, n, true); }
+  for (const [id, n] of got){ if (id === "box_coin") earn("box", n); else give(id, n, true); }
   msg(`У шкатулці: ${got.map(([id, n]) => id === "box_coin" ? moneyTxt(n) : ITEMS[id].name + (n > 1 ? " ×" + n : "")).join(", ")}.`, "good");
 }
 
@@ -85,7 +85,7 @@ function doCraft(rid){
   questEvent("craft", r.out);
   const p = S.prof[r.prof]; profXp(r.prof, Math.round(8 * (p.lv - r.lv <= 1 ? 1.5 : p.lv - r.lv <= 3 ? 1 : .4) + r.lv));
   msg(`${PROFS[r.prof].name}: створено ${ITEMS[r.out].name}.`, "good");
-  save(); renderBelt(); openCrafts();
+  save(); renderBelt(); if (modalOpen()) openCrafts();
 }
 
 /* ============ гнізда й самоцвіти ============ */
@@ -98,7 +98,7 @@ function insertGem(slot, idx, gem){
 function removeGem(slot, idx){
   const a = sockArr(slot), g = a[idx]; if (!g) return; const cost = 30 * ITEMS[g].g;
   if (S.cop < cost){ msg(`Щоб вийняти камінь, ювелір бере ${moneyTxt(cost)}.`, "warn"); return; }
-  S.cop -= cost; a[idx] = null; give(g, 1, true); S.hp = Math.min(S.hp, stats().maxHp);
+  spend("gem", cost); a[idx] = null; give(g, 1, true); S.hp = Math.min(S.hp, stats().maxHp);
   msg(`Ви вийняли ${ITEMS[g].name} (${moneyTxt(cost)}).`); save(); openChar(); renderTop();
 }
 function returnGems(slot){ for (const g of S.sock[slot] || []) if (g) give(g, 1, true); S.sock[slot] = []; }

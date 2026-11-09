@@ -3,7 +3,7 @@ function render(){
   renderTop(); renderBelt();
   $("#mid").classList.toggle("battle", !!B);
   if (B) renderBattle(); else if (DG && UI.view === "dungeon") renderDungeon(); else if (UI.view === "map") renderMap(); else renderLoc();
-  renderChat(); drawAllSprites();
+  renderChat(); drawAllSprites(); renderTracker();
 }
 
 /* ============ подорожі ============ */
@@ -20,7 +20,7 @@ function turnBack(){ if (!T) return; const leg = T.legs[T.i]; T = {legs:[[leg[1]
 function ambushPool(locId){
   const L = LOCS[locId], N = NODES[locId];
   if (L.demons) return BESTIARY.filter(d => d.reg.includes(N.reg) && d.tier < 3).map(d => [d.id, Math.min(10, N.L + d.tier - 1)]);
-  return L.mobs.filter(([t]) => !mobDef(t).boss).map(([t,, l]) => [t, l]);
+  return L.mobs.filter(([t]) => !mobDef(t).boss && !(S.order && mobDef(t).side === S.order)).map(([t,, l]) => [t, l]);
 }
 function tickTravel(dt){
   if (!T || B) return;
@@ -32,13 +32,13 @@ function tickTravel(dt){
   }
   if (T.t >= T.dur){
     const leg = T.legs[T.i];
-    if (T.i < T.legs.length - 1){ T.i++; S.prev = leg[0]; S.loc = leg[1]; setLeg(); msg(`Ви минули ${NODES[leg[1]].name}.`); questEvent("visit", S.loc); render(); }
+    if (T.i < T.legs.length - 1){ T.i++; S.prev = leg[0]; S.loc = leg[1]; S.visited[S.loc] = 1; setLeg(); msg(`Ви минули ${NODES[leg[1]].name}.`); questEvent("visit", S.loc); render(); }
     else { S.prev = leg[0]; S.loc = leg[1]; T = null; UI.view = "loc"; arrive(); }
   }
   updateTravelUI();
 }
 function arrive(){
-  const rt = locRT(S.loc); rt.arrived = performance.now();
+  const rt = locRT(S.loc); rt.arrived = performance.now(); S.visited[S.loc] = 1;
   msg(`Ви прибули: ${NODES[S.loc].name}.`);
   questEvent("visit", S.loc); checkDistrictBoss(S.loc);
   for (const [npc] of LOCS[S.loc].npcs){ const mk = npcMark(npc); if (mk === "!") msg(`${NPCS[npc].name} має для вас завдання.`, "quest"); if (mk === "?") msg(`Можна здати завдання: ${NPCS[npc].name}.`, "quest"); }
@@ -88,7 +88,7 @@ document.addEventListener("click", e => {
       case "Персонаж": UI.sockPick = null; openChar(); break;
       case "Торба": if (!B) openBag(); break;
       case "Вміння": openSkills(); break;
-      case "Карта світу": if (DG) { msg("Спершу вийдіть з підземелля.", "warn"); break; } UI.view = UI.view === "map" ? "loc" : "map"; if (UI.view === "map") camCenter(mePos()); render(); break;
+      case "Карта світу": if (DG) { msg("Спершу вийдіть з підземелля.", "warn"); break; } if (modalOpen()){ closeModal(); UI.view = "loc"; } UI.view = UI.view === "map" ? "loc" : "map"; if (UI.view === "map") camCenter(mePos()); render(); break;
       case "Квести": openJournal(); break;
       case "Ремесла": openCrafts(); break;
       case "Бестіарій": openCodex(); break;
@@ -98,6 +98,18 @@ document.addEventListener("click", e => {
     return;
   }
   if (d.tab){ UI.tab = d.tab; renderChat(); return; }
+  if (d.book){ if (B) return; UI.bsel = null; UI.sockPick = null; openBook(d.book); return; }
+  if (d.bsel){ const tn = Date.now(); if (UI.lastSel === d.bsel && tn - UI.lastSelT < 420){ UI.lastSel = null; dblItem(d.bsel); return; } UI.lastSel = d.bsel; UI.lastSelT = tn; UI.bsel = d.bsel; UI.sockPick = null; openBook(); return; }
+  if (d.bsort){ UI.bagSort = d.bsort; openBook("bag"); return; }
+  if (d.branch){ if (S.branch && !t.dataset.sure){ t.dataset.sure = "1"; t.textContent = "Точно змінити?"; return; } chooseBranch(d.branch); openBook("skills"); return; }
+  if (d.qsel){ UI.qsel = d.qsel; openBook("quests"); return; }
+  if (d.qtrack){ S.track = S.track === d.qtrack ? null : d.qtrack; save(); openBook("quests"); renderTracker(); return; }
+  if (d.qmap){ if (DG){ msg("Спершу вийдіть з підземелля.", "warn"); return; } closeModal(); UI.view = "map"; camCenter({x:NODES[d.qmap].x, y:NODES[d.qmap].y}); UI.follow = false; render(); return; }
+  if (d.ctdone){ contractDone(d.ctdone); openBook("market"); return; }
+  if (d.forge){ openForge(); return; }
+  if (d.sharp){ sharpen(d.sharp); openForge(); return; }
+  if (d.junk){ sellJunk(); openShop(d.junk); return; }
+  if (d.drop){ if (!t.dataset.sure){ t.dataset.sure = "1"; t.textContent = "Точно викинути?"; return; } take(d.drop); msg(`Ви викинули: ${ITEMS[d.drop].name}.`); save(); openBook("bag"); return; }
   if (d.zoom){ zoomMap(+d.zoom); return; }
   if (d.node){ if (UI.dragMoved) return; if (T || DG) return; if (d.node === S.loc){ UI.view = "loc"; render(); } else startTravel(d.node); return; }
   if (d.go){ if (!T && !DG) startTravel(d.go); return; }
@@ -108,7 +120,8 @@ document.addEventListener("click", e => {
   if (d.cx){ UI.cxSel = d.cx; openCodex(); return; }
   if (d.door !== undefined){ chooseDoor(+d.door); return; }
   if (d.build){ const a = d.build;
-    if (a.startsWith("npc:")) openNpc(a.slice(4)); else if (a.startsWith("dungeon:")) enterDungeon(a.slice(8)); else if (a === "rest") openNpc("myroslava");
+    if (a.startsWith("npc:")) openNpc(a.slice(4)); else if (a.startsWith("dungeon:")) enterDungeon(a.slice(8));
+    else if (a.startsWith("heal:")){ const st = stats(); S.hp = st.maxHp; S.en = st.maxEn; S.buffs = S.buffs.filter(x => x.n > 0); msg(a.slice(5), "good"); save(); render(); } else if (a === "rest") openNpc("myroslava");
     else if (a === "spring"){ const st = stats(); S.hp = st.maxHp; S.en = st.maxEn; msg("Мінеральна вода з джерела. Сили повністю відновилися.", "good"); save(); renderTop(); }
     else if (a === "board") openInfo("Дошка оголошень", "«Шукаю групу на Руїни Варти». «Під руїнами склепи, кажуть, там капітан». «Продам кольчугу, питати в Табір Найманців». «Хто бачив ватажка зграї, не ходіть у Вовчий Яр самі». «Майстер Тодор у Кабаллоні вчить ремесел задарма»."); else openInfo("Зачинено", "Ця будівля відкриється, коли гра стане мережевою.");
     return; }
@@ -116,11 +129,11 @@ document.addEventListener("click", e => {
   if (d.tgt){ if (B && B.phase === "choose"){ B.target = +d.tgt; renderBattle(); } return; }
   if (d.belt){ if (B){ if (B.phase === "choose") act("item", d.belt); } else { useItem(d.belt); if (modalOpen()) openBag(); } return; }
   if (d.beltslot !== undefined){ if (!B){ UI.bagTab = "use"; openBag(); } return; }
-  if (d.use){ useItem(d.use); if (modalOpen() && $("#modal .mtabs")) openBag(); return; }
-  if (d.tobelt){ const i = S.belt.indexOf(null); S.belt[i >= 0 ? i : 5] = d.tobelt; save(); renderBelt(); openBag(); return; }
+  if (d.use){ useItem(d.use); if (modalOpen() && $("#modal .kvw")) openBook(); return; }
+  if (d.tobelt){ const i = S.belt.indexOf(null); S.belt[i >= 0 ? i : S.belt.length - 1] = d.tobelt; save(); renderBelt(); openBag(); return; }
   if (d.unbelt !== undefined){ S.belt[+d.unbelt] = null; save(); renderBelt(); openBag(); return; }
-  if (d.equip){ equip(d.equip); openBag(); return; }
-  if (d.unequip){ unequip(d.unequip); openChar(); return; }
+  if (d.equip){ equip(d.equip); UI.bsel = null; openBag(); return; }
+  if (d.unequip){ unequip(d.unequip); UI.bsel = null; openChar(); return; }
   if (d.sockpick){ UI.sockPick = d.sockpick; openChar(); return; }
   if (d.insgem){ const [s, i] = UI.sockPick.split(":"); insertGem(s, +i, d.insgem); return; }
   if (d.unsock){ const [s, i] = d.unsock.split(":"); removeGem(s, +i); return; }
@@ -129,14 +142,18 @@ document.addEventListener("click", e => {
   if (d.craft){ doCraft(d.craft); return; }
   if (d.shop){ UI.shopTab = "buy"; openShop(d.shop); return; }
   if (d.shoptab){ UI.shopTab = d.shoptab; openShop(d.shopid); return; }
-  if (d.buy){ const it = ITEMS[d.buy]; if (S.cop < it.price) return; S.cop -= it.price; give(d.buy, 1, true); msg(`Ви купили: ${it.name} за ${moneyTxt(it.price)}.`); save(); openShop(d.shopid); renderTop(); renderBelt(); return; }
-  if (d.sell || d.sellall){ const id = d.sell || d.sellall, it = ITEMS[id], n = d.sellall ? inv(id) : 1, p = Math.max(1, Math.floor(it.price / 2)) * n; take(id, n); S.cop += p; msg(`Ви продали: ${it.name}${n > 1 ? " ×" + n : ""} за ${moneyTxt(p)}.`); save(); openShop(d.shopid); renderTop(); renderBelt(); return; }
+  if (d.buy){ const it = ITEMS[d.buy], pr = buyPrice(d.buy); if (S.cop < pr) return; spend("shop", pr); give(d.buy, 1, true); msg(`Ви купили: ${it.name} за ${moneyTxt(pr)}.`); save(); openShop(d.shopid); renderTop(); renderBelt(); return; }
+  if (d.sell || d.sellall){ const id = d.sell || d.sellall, it = ITEMS[id], n = d.sellall ? inv(id) : 1, p = sellPrice(id) * n;
+    if (S.opt.confirmRare && rarity(it) >= 2 && !t.dataset.sure){ t.dataset.sure = "1"; t.textContent = "Точно продати?"; return; }
+    take(id, n); earn("sale", p); msg(`Ви продали: ${it.name}${n > 1 ? " ×" + n : ""} за ${moneyTxt(p)}.`); save(); openShop(d.shopid); renderTop(); renderBelt(); return; }
+  if (d.oath){ takeOath(d.oath); return; }
+  if (d.renounce !== undefined){ if (!t.dataset.sure){ t.dataset.sure = "1"; t.textContent = "Точно зректися присяги?"; return; } renounceOrder(); return; }
   if (d.qtake){ takeQuest(d.qtake); return; }
   if (d.qdone){ doneQuest(d.qdone, d.choice !== undefined ? +d.choice : undefined); return; }
   switch (d.act){
     case "close": closeModal(); render(); break;
     case "unsel": UI.sel = null; renderMobs(true); renderMobCard(); drawAllSprites(); break;
-    case "map": UI.view = "map"; camCenter(mePos()); render(); break;
+    case "map": if (DG){ msg("Спершу вийдіть з підземелля.", "warn"); break; } UI.view = "map"; camCenter(mePos()); render(); break;
     case "toLoc": UI.view = "loc"; render(); break;
     case "mecenter": camCenter(mePos()); UI.follow = true; placeMap(); break;
     case "turnback": turnBack(); break;
@@ -144,18 +161,24 @@ document.addEventListener("click", e => {
     case "chest": openChest(); break;
     case "pray": pray(); break;
     case "leaveDg": leaveDungeon(); break;
-    case "heal": { const st = stats(), c = Math.max(5, Math.round((st.maxHp - S.hp) * .3)); if (S.cop < c){ msg("Не вистачає грошей на лікування.", "warn"); break; } S.cop -= c; S.hp = st.maxHp; S.en = st.maxEn; msg("Рани перев'язано. Ви повністю здорові.", "good"); save(); openNpc(d.npcid || "healer"); renderTop(); break; }
-    case "rest": { if (S.cop < 5){ msg("Не вистачає грошей.", "warn"); break; } const st = stats(); S.cop -= 5; S.hp = st.maxHp; S.en = st.maxEn; msg("Ви відпочили в таверні. Сили повернулися.", "good"); save(); openNpc("myroslava"); renderTop(); break; }
+    case "heal": { const st = stats(), c = Math.max(5, Math.round((st.maxHp - S.hp) * .3)); if (S.cop < c){ msg("Не вистачає грошей на лікування.", "warn"); break; } spend("heal", c); S.hp = st.maxHp; S.en = st.maxEn; msg("Рани перев'язано. Ви повністю здорові.", "good"); save(); openNpc(d.npcid || "healer"); renderTop(); break; }
+    case "rest": { if (S.cop < 5){ msg("Не вистачає грошей.", "warn"); break; } const st = stats(); spend("heal", 5); S.hp = st.maxHp; S.en = st.maxEn; msg("Ви відпочили в таверні. Сили повернулися.", "good"); save(); openNpc("myroslava"); renderTop(); break; }
     case "reset": if (t.dataset.sure){ const nm = S.name, cr = S.crest; S = fresh(); S.name = nm; S.crest = cr; save(); for (const k in LR) delete LR[k]; T = null; B = null; DG = null; MSG.length = 0; UI.cam = null; UI.view = "loc"; closeModal(); intro(); render(); } else { t.dataset.sure = "1"; t.textContent = "Точно? Натисніть ще раз"; } break;
     case "logout": logout(); break;
   }
 });
-document.addEventListener("change", e => { const t = e.target; if (t.dataset && t.dataset.avail){ UI.onlyAvail = t.checked; openShop(t.dataset.avail); } });
+document.addEventListener("change", e => { const t = e.target; if (t.dataset && t.dataset.avail){ UI.onlyAvail = t.checked; openShop(t.dataset.avail); }
+  if (t.dataset && t.dataset.opt){ S.opt[t.dataset.opt] = t.checked; applyOpts(); save(); } });
+function applyOpts(){}
 $("#modal").addEventListener("click", e => { if (e.target.id === "modal" && !modalLocked){ closeModal(); render(); } });
 document.addEventListener("keydown", e => {
   if (!READY || e.target.tagName === "INPUT") return;
   if (e.key === "Escape" && modalOpen() && !modalLocked){ closeModal(); render(); }
-  else if (!modalOpen() && !B){ const k = e.key.toLowerCase(); if (k === "b" || k === "и") openBag(); else if (k === "c" || k === "с") openChar(); else if ((k === "m" || k === "ь") && !DG){ UI.view = UI.view === "map" ? "loc" : "map"; if (UI.view === "map") camCenter(mePos()); render(); } }
+  else if (!B){ const k = e.key.toLowerCase();
+    const HK = {c:"hero", "с":"hero", b:"bag", "и":"bag", k:"skills", "л":"skills", q:"quests", "й":"quests", r:"craft", "к":"craft", x:"codex", "ч":"codex", t:"market", "е":"market", a:"ach", "ф":"ach"};
+    const same = HK[k] && modalOpen() && $("#modal .kvw") && (UI.book === HK[k] || (["hero","bag"].includes(UI.book) && ["hero","bag"].includes(HK[k])));
+    if (HK[k]){ if (same){ closeModal(); render(); } else if (!modalOpen() || $("#modal .kvw")){ UI.bsel = null; UI.sockPick = null; openBook(HK[k]); } }
+    else if ((k === "m" || k === "ь") && !DG && (!modalOpen() || $("#modal .kvw"))){ if (modalOpen()){ closeModal(); UI.view = "loc"; } UI.view = UI.view === "map" ? "loc" : "map"; if (UI.view === "map") camCenter(mePos()); render(); } }
 });
 // перетягування карти
 document.addEventListener("pointerdown", e => {
@@ -198,6 +221,8 @@ function loop(){
     tickSpots();
     tradeT -= 1; if (tradeT <= 0){ tradeT = rnd(18, 35); msg(`${pick(NAMES)}: ${pick(TRADE)}`, "trade", "trade"); }
     ambT -= 1; if (ambT <= 0){ ambT = rnd(25, 50); if (!T && !B && !DG && AMB[S.loc]) msg(pick(AMB[S.loc])); }
+    if (READY && !document.hidden) S.econ.sec++;
+    if (Math.floor(game.t) % 5 === 0) checkAch();
     if (Math.random() < .1) save();
   }
   requestAnimationFrame(loop);
@@ -209,10 +234,12 @@ function intro(){
   if (!Object.keys(S.quests).length) msg("Зброяр Остап шукає помічника: знайдіть його в місті (знак «!»).", "quest");
   msg("Торба на поясі зліва (клавіша B), карта світу (M). Світ великий: на заході Землі Кабаллону, на сході Закарпаття.");
   if (!S.intro && S.lvl > 1){ msg("Світ оновився: тепер максимальний рівень 10, а далі сила йде від спорядження, самоцвітів, ремесел, підземель і зачисток районів.", "quest"); }
+  if (!S.v4intro){ msg("Оновлення: вікно Персонажа разом з торбою (перетягуйте речі просто на героя, а зілля на пояс), гілка розвитку з 3 рівня, 5 нових слотів спорядження, заточка в кузні, комплекти й щоденні контракти гільдій.", "quest"); msg("Нечисть стала міцнішою з рівнем. Купіть у зброярів плащ, пояс, наголінники, рукавиці й щит.", "warn"); S.v4intro = true; }
+  if (!S.v5intro){ msg("Нові краї: Кістяна Марка на схід від Чорногори (7–9), Чорна Трясовина на південь від Попелястих земель (8–10) і Землі Світанку й Ночі на південь від Закарпаття (9–10). П'ять нових підземель, два ордени й понад 40 квестів. З 7 рівня шлях покажуть опришок Дмитро в Рахові, капітан Ярема в Таборі найманців і сотник Іван у Хусті.", "quest"); S.v5intro = true; }
   S.intro = true;
 }
 function startGame(){
   S.hp = Math.min(S.hp, stats().maxHp); S.en = Math.min(S.en, stats().maxEn);
-  READY = true; intro(); locRT(S.loc).arrived = performance.now(); checkDistrictBoss(S.loc); render(); save(); requestAnimationFrame(loop);
+  READY = true; applyOpts(); intro(); locRT(S.loc).arrived = performance.now(); checkDistrictBoss(S.loc); render(); save(); requestAnimationFrame(loop); setTimeout(prebakeMap, 1200);
 }
 fit();

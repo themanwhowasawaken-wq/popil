@@ -140,4 +140,3 @@ function showLogin(){
   renderLogin();
 }
 function logout(){ save(); SS.del(SESS); LS.del(REMEMBER); location.reload(); }
-showLogin();

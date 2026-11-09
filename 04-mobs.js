@@ -9,12 +9,12 @@ const MOBS = {
   frog:{name:"Болотяна жаба", passive:true, lore:"Жаба завбільшки з собаку. Перегризає канати й чоботи.", p:{hp:1.1, dmg:.85}, drop:[["slime",.7]], design:D("blob","#5a7a3a","#2f4a22","#ffe24f",["fin"])},
   marauder:{name:"Мародер", arch:"thief", aggro:true, lore:"Грабує мандрівників на броді. Вихопить гаманець і дремене.", p:{cop:2.5}, drop:[["potion_s",.3]], design:D("humanoid","#7a5a40","#3a2a1a","#ffd0a0",["cape"],{prop:"sword"})},
   skel:{name:"Скелет-лучник", arch:"kiter", lore:"Колишній стрілець варти. Тримає віддаль і стріляє.", p:{}, drop:[["bone",.6]], design:D("humanoid","#e8e0cc","#9a8f72","#9fe0ff",["skull"],{prop:"sword"})},
-  warden:{name:"Кістяний вартовий", arch:"shielded", boss:true, lore:"Капітан варти, що не покинув пост і по смерті. За щитом його не взяти в лоб.", p:{}, drop:[["warden_amulet",1]], design:D("humanoid","#d8d0bc","#6a6252","#7fd0ff",["skull","shield"],{prop:"sword", size:1.35})},
+  warden:{name:"Кістяний вартовий", arch:"shielded", boss:true, lore:"Капітан варти, що не покинув пост і по смерті. За щитом його не взяти в лоб.", p:{}, drop:[["warden_amulet",1],["warden_shield",.35]], design:D("humanoid","#d8d0bc","#6a6252","#7fd0ff",["skull","shield"],{prop:"sword", size:1.35})},
   wolf2:{name:"Чорний вовк", arch:"chaser", lore:"Вовки Вовчого Яру. Чорніші й лютіші за попелястих.", p:{agi:2, dmg:1.05}, drop:[["fang",.75],["wolf_skin",.5]], design:D("beast","#3a3530","#1f1b18","#ff5a2a",["claws","tail","fangs"])},
   alpha:{name:"Ватажок зграї", arch:"bruiser", boss:true, pack:true, lore:"Здоровенний вовк з рогами на лобі. Зграя йде за ним на смерть.", p:{}, drop:[["alpha_pelt",1]], design:D("beast","#2e2a28","#14110f","#ff3a1a",["claws","tail","fangs","horns"],{size:1.35})},
   whisper:{name:"Болотяний шептун", arch:"wisp", aggro:true, lore:"Шепоче твоє ім'я з туману, а коли підійдеш, обпікає холодом.", p:{hp:.9}, drop:[["wisp_dust",.6]], design:D("wisp","#a8d4b0","#6fbf8a","#1a2a22",["glow","hair"])},
   cultist:{name:"Культист Каплиці", arch:"caster", aggro:true, lore:"Служить Тіні. Його закляття проходять крізь будь-яку броню.", p:{}, drop:[["dark_shard",.5],["potion_l",.2]], design:D("humanoid","#3a2a3a","#1a1020","#ff4a4a",["cape","mask"],{prop:"staff"})},
-  shade:{name:"Тінь Каплиці", arch:"summoner", boss:true, summon:"cultist", lore:"Те, що прокинулося під Каплицею. Кличе своїх слуг собі на поміч.", p:{}, drop:[["shade_blade",1]], design:D("wisp","#4a3a5a","#1a1024","#ff3a6a",["glow","hair"],{size:1.6})},
+  shade:{name:"Тінь Каплиці", arch:"summoner", boss:true, summon:"cultist", lore:"Те, що прокинулося під Каплицею. Кличе своїх слуг собі на поміч.", p:{}, drop:[["shade_blade",1],["shadow_cloak",.35]], design:D("wisp","#4a3a5a","#1a1024","#ff3a6a",["glow","hair"],{size:1.6})},
   // --- Землі Кабаллону ---
   forest_wolf:{name:"Лісовий вовк", arch:"chaser", lore:"Сіро-бурі вовки з перелісків довкола Кабаллону.", p:{hp:.9}, drop:[["fang",.6],["wolf_skin",.35]], design:D("beast","#6e5c48","#3e3226","#ffb04a",["claws","tail","fangs"])},
   boar:{name:"Дикий кабан", arch:"bruiser", lore:"Ікла як ножі. Б'є з розгону.", p:{hp:1.15}, drop:[["boar_tusk",.6]], design:D("beast","#5a4434","#2e2218","#ff7a3a",["horns","fangs"],{size:1.05})},
@@ -36,13 +36,16 @@ const MOBS = {
   troll:{name:"Хащовий троль", arch:"bruiser", lore:"Гора м'язів, моху й злості.", p:{hp:1.5, agi:-3}, drop:[["troll_hide",.5]], design:D("beast","#4a5a3a","#2a3420","#ffcf3a",["claws","horns"],{size:1.35})},
   merman:{name:"Мерман", arch:"chaser", lore:"Луската тварюка з бухти. Виходить на берег зграями.", p:{}, drop:[["scale",.6]], design:D("blob","#3a6a8a","#1a3a5a","#bfffff",["fin"])},
   chosen_merman:{name:"Обраний мерман", arch:"caster", lore:"Жрець мерманів у короні з мушель.", p:{hp:1.4}, drop:[["scale",1],["raw2",.2]], design:D("blob","#2a5a7a","#0f2a3a","#dfffff",["fin","crown"],{size:1.3})},
-  black_knight:{name:"Чорний лицар", arch:"shielded", lore:"Лицар Цитаделі. Колись присягав світлу.", p:{hp:1.2, def:1.4}, drop:[["order_badge",.5],["order_blade",.03]], design:D("humanoid","#2a2a34","#101018","#ff3a3a",["cape","shield"],{prop:"sword"})},
+  black_knight:{name:"Чорний лицар", arch:"shielded", lore:"Лицар Цитаделі. Колись присягав світлу.", p:{hp:1.2, def:1.4}, drop:[["order_badge",.5],["order_blade",.03],["knight_legs",.03],["order_shield",.04]], design:D("humanoid","#2a2a34","#101018","#ff3a3a",["cape","shield"],{prop:"sword"})},
   // --- боси підземель ---
   crypt_captain:{name:"Капітан Склепів", arch:"shielded", dboss:true, summon:"skel", lore:"Мертвий капітан варти. Кличе своїх стрільців.", p:{}, drop:[["captain_ring",1],["raw2",1]], design:D("humanoid","#d8d0bc","#4a4232","#ff5a3a",["skull","shield","cape"],{prop:"sword", size:1.6})},
-  dark_magister:{name:"Чорний Магістр", arch:"caster", dboss:true, summon:"order_mage", lore:"Володар Темної Цитаделі.", p:{}, drop:[["knight_helm",.6],["order_blade",.5],["raw3",1]], design:D("humanoid","#2a1a3a","#0a0510","#bf6fff",["cape","mask","horns"],{prop:"staff", size:1.6})},
-  abyss_lord:{name:"Владар Безодні", arch:"summoner", dboss:true, summon:"chort", lore:"Те, що спить під Чорногорою. Арідник серед арідників.", p:{}, drop:[["chorno_bartka",.5],["abyss_plate",.5],["chorno_ring",.4],["raw3",1]], design:D("humanoid","#2a1a2a","#120812","#ff3a3a",["horns","cape"],{prop:"staff", size:1.8})},
+  dark_magister:{name:"Чорний Магістр", arch:"caster", dboss:true, summon:"order_mage", lore:"Володар Темної Цитаделі.", p:{}, drop:[["knight_helm",.6],["order_blade",.5],["knight_legs",.4],["raw3",1]], design:D("humanoid","#2a1a3a","#0a0510","#bf6fff",["cape","mask","horns"],{prop:"staff", size:1.6})},
+  abyss_lord:{name:"Владар Безодні", arch:"summoner", dboss:true, summon:"chort", lore:"Те, що спить під Чорногорою. Арідник серед арідників.", p:{}, drop:[["chorno_bartka",.5],["abyss_plate",.5],["chorno_ring",.4],["abyss_gloves",.3],["chorno_shield",.3],["dovbush_belt",.25],["molfar_amulet",.3],["raw3",1]], design:D("humanoid","#2a1a2a","#120812","#ff3a3a",["horns","cape"],{prop:"staff", size:1.8})},
 };
-for (const [id, m] of Object.entries(MOBS)){ m.id = id; m.p = Object.assign({hp:1, dmg:1, def:1, agi:0, xp:1, cop:1}, m.p); }
+function prepMob(id, m){ m.id = id; m.p = Object.assign({hp:1, dmg:1, def:1, agi:0, xp:1, cop:1}, m.p); }
+for (const [id, m] of Object.entries(MOBS)) prepMob(id, m);
+// особливі властивості мобів: повстання, висмоктування енергії, отрута, відростання голів…
+const MOB_FX = ["rise","drain","venom","lifesteal","regrow","cleave","mend","evade","duel","side"];
 // демони: профіль з бази бестіарію
 for (const d of BESTIARY){
   d.p = {hp:clamp(d.base.hp / 45, .4, 1.8), dmg:clamp(d.base.dmg / 13, .6, 1.4), def:["bruiser","shielded"].includes(d.arch) ? 1.4 : 1, agi:Math.round((d.base.spd - 140) / 25), xp:1, cop:1};
@@ -53,7 +56,8 @@ function designOf(type){ if (MOBS[type]) return {id:type, design:MOBS[type].desi
 function mobDef(type){ return MOBS[type] || bestById(type); }
 
 // базова «звичайна» потвора рівня L
-const BASE = {hp:L => 20 + 18 * L, dmg:L => 6 + 6 * L, def:L => L * 1.4, agi:L => 2 + L * .8, xp:L => 8 + 7 * L, cop:L => [L * 3, L * 8]};
+// v4: мобам з рівнем росте живучість і удар, бо герой має 12 слотів і вміння
+const BASE = {hp:L => (20 + 18 * L) * (1 + .035 * L), dmg:L => (6 + 6 * L) * (1 + .022 * L), def:L => L * 1.4, agi:L => 2 + L * .8, xp:L => 8 + 7 * L, cop:L => [L * 3, L * 8]};
 const MOD = {
   elite:{hp:2.0, dmg:1.25, xp:2.5, cop:2, label:"еліта"},
   strong:{hp:1.25, dmg:1.1, xp:1.8, cop:1.5},
@@ -78,7 +82,8 @@ function mobStats(type, lvl, o = {}){
   const nm = (o.distBoss ? "Отаман: " : "") + d.name + (o.elite ? " (еліта)" : "");
   return {type, name:nm, lvl, hp:Math.round(hp), dmg:[Math.round(dmg * .8), Math.round(dmg * 1.2)], def:Math.round(BASE.def(lvl) * p.def), agi:Math.round(BASE.agi(lvl) + p.agi),
     xp:Math.round(xp), cop:cop.map(Math.round), drop, arch, boss:!!(d.boss || o.distBoss || d.dboss), dboss:!!d.dboss, strong, elite:!!o.elite, distBoss:!!o.distBoss,
-    pack:!!d.pack || ["chaser","swarmer"].includes(arch), aggro:!!d.aggro || (isDemon(type) && ["chaser","flyer","swarmer","thief"].includes(arch)), passive:!!d.passive,
+    pack:!d.duel && (!!d.pack || ["chaser","swarmer"].includes(arch)), aggro:d.side ? !!(S && S.order && S.order !== d.side) : !!d.aggro || (isDemon(type) && ["chaser","flyer","swarmer","thief"].includes(arch)), passive:d.side ? !(S && S.order && S.order !== d.side) : !!d.passive,
+    ...Object.fromEntries(MOB_FX.filter(k => d[k]).map(k => [k, d[k]])),
     speed:isDemon(type) ? d.base.spd / 7 : 6 + (p.agi + 4) * 3, lore:d.lore, wards:d.ward || [], summon:d.summon,
     kind:(ARCHL[arch] || "Звір") + (d.dboss ? " · бос підземелля" : (d.boss || o.distBoss) ? " · бос" : strong ? " · сильний" : ""), size:(d.design.size || 1) * (o.distBoss ? 1.25 : 1)};
 }

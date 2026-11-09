@@ -37,7 +37,7 @@ function openChest(){
   got.push([Dn.lvl >= 8 && Math.random() < .4 ? "raw2" : "raw1", 1]);
   got.push([pick(["potion_l","scroll_fire","scroll_shield","elix_str","elix_skin","potion_xe"]), 1]);
   if (Math.random() < .25) got.push([pick(["gem_ruby1","gem_topaz1","gem_onyx1","gem_emer1"]), 1]);
-  for (const [id, n] of got) give(id, n, true); S.cop += Math.round(cop);
+  for (const [id, n] of got) give(id, n, true); earn("loot", Math.round(cop));
   DG.cur.text = `У скрині: ${got.map(([id]) => ITEMS[id].name).join(", ")}, ${moneyTxt(Math.round(cop))}.`;
   msg(DG.cur.text, "good"); DG.cur.done = true; nextRoom(true); save(); render();
 }
@@ -56,7 +56,7 @@ function dungeonAfterFight(res){
 function completeDungeon(){
   const Dn = DUNGEONS[DG.id];
   S.dung[DG.id] = (S.dung[DG.id] || 0) + 1; questEvent("dungeon", DG.id);
-  const cop = Math.round(Dn.lvl * 120 * (1 + .15 * (dTier() - 1))); S.cop += cop;
+  const cop = Math.round(Dn.lvl * 120 * (1 + .15 * (dTier() - 1))); earn("loot", cop);
   const raw = Dn.lvl >= 8 ? "raw3" : "raw2"; give(raw, 1, true);
   DG.done = true; DG.cur = {type:"boss", done:true, text:`Підземелля пройдено! Нагорода: ${moneyTxt(cop)}, ${ITEMS[raw].name}. Наступний похід буде важчим.`};
   msg(`${Dn.name}: пройдено (похід ${DG.run})!`, "good"); save(); UI.view = "dungeon";

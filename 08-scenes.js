@@ -118,7 +118,8 @@ function sceneRoad(c){
   const col = c.b === "snow" ? "#d9dcdf" : c.b === "sand" ? "#c9b88a" : "#7d7461";
   return `<path d="M-10 312 Q220 290 450 304 T910 292" fill="none" stroke="${shade(col, .7)}" stroke-width="34" stroke-linecap="round" opacity=".55"/><path d="M-10 312 Q220 290 450 304 T910 292" fill="none" stroke="${col}" stroke-width="26" stroke-linecap="round"/><path d="M-10 312 Q220 290 450 304 T910 292" fill="none" stroke="${shade(col, 1.15)}" stroke-width="2" stroke-dasharray="3 26" stroke-linecap="round"/>`;
 }
-function sceneSVG(id){
+const BIG_STRUCT = ["spire","tower","chapel","tavern","forge","mill","citadel"];
+function sceneSVGOld(id){
   if (SCN_CACHE[id]) return SCN_CACHE[id];
   const c = SCENE[id] || {b:"ash"}, Bm = BIOME[c.b], r = rng("scene-" + id), u = id.replace(/[^a-z0-9]/gi, "");
   const g = Bm.ground;
@@ -132,7 +133,7 @@ function sceneSVG(id){
   const items = [];
   for (const x of c.x || []) if (STRUCT[x]) for (const it of STRUCT[x](r)) items.push({y:it.y, s:it.s.replace(/_U/g, u)});
   const blocked = (x, y) => (c.road && y > 280 && y < 330) || (c.river && x > 545 && x < 735) || (c.lake && Math.hypot((x - 540) / 320, (y - 250) / 135) < 1) || (c.sea && x + (y - 230) * 1.0 > 820) ||
-    (c.x || []).some(k => ["city","palisade"].includes(k) ? y < 140 : ["peaks","cliffs"].includes(k) ? y < 130 : false) || (y < 260 && x > 380 && x < 560 && (c.x || []).some(k => ["spire","tower","chapel","tavern","forge","mill","citadel"].includes(k)));
+    (c.x || []).some(k => ["city","palisade"].includes(k) ? y < 140 : ["peaks","cliffs"].includes(k) ? y < 130 : false) || (y < 260 && x > 380 && x < 560 && (c.x || []).some(k => BIG_STRUCT.includes(k)));
   const place = (n, fn, ymin = 70) => { for (let i = 0, tries = 0; i < n && tries < n * 6; tries++){ const x = 20 + r() * 860, y = ymin + r() * (520 - ymin); if (blocked(x, y)) continue; items.push({y, s:fn(x, y)}); i++; } };
   const v = Bm.veg, snow = !!Bm.snow, pal = c.b === "vineyard" ? ["#5a4a22","#7a6328","#9a7e34"] : null;
   if (v.pine) place(v.pine, (x, y) => V.pine(x, y, .8 + r() * .55, snow), 90);
@@ -156,9 +157,10 @@ function sceneSVG(id){
   SCN_CACHE[id] = s; return s;
 }
 // підземелля
+const DG_COL = {crypt:["#3a3632","#2a2724"], citadel_d:["#2a2830","#1c1a22"], abyss:["#2a2226","#1a1416"]}, DG_DECOR = {};
 function dungeonSVG(kind){
   const key = "dg-" + kind; if (SCN_CACHE[key]) return SCN_CACHE[key];
-  const col = {crypt:["#3a3632","#2a2724"], citadel_d:["#2a2830","#1c1a22"], abyss:["#2a2226","#1a1416"]}[kind] || ["#3a3632","#2a2724"];
+  const col = DG_COL[kind] || ["#3a3632","#2a2724"];
   const u = "dg" + kind.replace(/[^a-z]/g, ""), r = rng(key);
   let s = sceneDefs(u, 33).replace(/_U/g, u) + `<rect width="900" height="528" fill="${col[1]}"/>`;
   s += `<path d="M0 0h900v220H0z" fill="${col[0]}"/>`;
@@ -166,6 +168,7 @@ function dungeonSVG(kind){
   s += `<path d="M0 220h900v10H0z" fill="#000" opacity=".4"/>`;
   for (let y = 240; y < 528; y += 36) for (let x = (y / 36) % 2 ? -40 : 0; x < 900; x += 80) s += `<path d="M${x} ${y}h78l-4 34h-70z" fill="${shade(col[1], 1 + r() * .3)}"/>`;
   for (const x of [160, 740]) s += `<path d="M${x - 4} 90h8v30h-8z" fill="#3a2a1e"/><circle cx="${x}" cy="84" r="22" fill="#ff9a3a" opacity=".35" filter="url(#gw${u})"/><path d="M${x - 5} 90q5-20 10 0z" fill="#ffc24a"/>`;
+  if (DG_DECOR[kind]) s += DG_DECOR[kind](r);
   if (kind === "abyss") s += `<path d="M0 0h900v60q-200 40-450 0T0 60z" fill="#120c0e"/>${[...Array(14)].map((_, i) => `<path d="M${30 + i * 64} 0l10 ${30 + r() * 50}l10-${30 + r() * 50}z" fill="#1a1416"/>`).join("")}`;
   s += `<rect width="900" height="528" fill="#0a0810" opacity=".25"/><rect width="900" height="528" filter="url(#gr${u})" opacity=".6"/><rect width="900" height="528" fill="url(#vg${u})"/>`;
   SCN_CACHE[key] = s; return s;
@@ -173,45 +176,3 @@ function dungeonSVG(kind){
 
 /* ============ карта світу ============ */
 let MAP_SVG = null;
-function mapSVG(){
-  if (MAP_SVG) return MAP_SVG;
-  const r = rng("world-v3"), W = WORLD.w, H = WORLD.h, u = "wm";
-  let s = sceneDefs(u, 11).replace(/_U/g, u);
-  s += `<defs><linearGradient id="wmg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#5e6d3e"/><stop offset=".3" stop-color="#5c6939"/><stop offset=".355" stop-color="#55553f"/><stop offset=".385" stop-color="#4f4c41"/><stop offset=".61" stop-color="#4d4a3f"/><stop offset=".66" stop-color="#3f4c35"/><stop offset="1" stop-color="#3a4630"/></linearGradient></defs>`;
-  s += `<rect width="${W}" height="${H}" fill="url(#wmg)"/>`;
-  for (let i = 0; i < 40; i++){ const x = r() * W, y = r() * H, reg = x < 980 ? ["#6a7a46","#526132"] : x < 1760 ? ["#5a564a","#45433a"] : ["#465638","#33402b"]; s += `<ellipse cx="${x}" cy="${y}" rx="${120 + r() * 200}" ry="${60 + r() * 90}" fill="${pick(reg)}" filter="url(#bl${u})" opacity=".7"/>`; }
-  s += `<rect width="${W}" height="${H}" filter="url(#gl${u})" opacity=".3"/>`;
-  // море біля Бухти
-  s += `<path d="M0 640 C80 660 150 720 200 780 C240 840 250 880 300 920 L0 920z" fill="#1e3240"/><path d="M0 640 C80 660 150 720 200 780 C240 840 250 880 300 920" fill="none" stroke="#d8d0b4" stroke-width="5" opacity=".5"/><path d="M0 680 C70 700 130 750 170 800" fill="none" stroke="#4d6d80" stroke-width="3" stroke-dasharray="22 16"/>`;
-  // ріки
-  const river = (d, w) => `<path d="${d}" fill="none" stroke="#1d2c36" stroke-width="${w + 6}" stroke-linecap="round"/><path d="${d}" fill="none" stroke="#2e4858" stroke-width="${w}" stroke-linecap="round"/><path d="${d}" fill="none" stroke="#56788a" stroke-width="2" stroke-dasharray="16 20" opacity=".7"/>`;
-  s += river("M560 -10 C640 90 690 150 650 210 S 590 310 615 360 S 760 380 830 420 S 910 530 880 660 S 820 860 870 930", 14);
-  s += river("M1450 -10 C1400 200 1430 400 1380 518 S 1350 700 1410 930", 16);
-  s += river("M2120 -10 C2060 200 1990 380 1940 470 S 1860 620 1800 930", 13);
-  s += river("M1950 930 C2150 860 2350 900 2500 860 S 2700 860 2810 820", 20);
-  s += `<ellipse cx="2380" cy="760" rx="44" ry="20" fill="#1d2c36"/><ellipse cx="2380" cy="760" rx="38" ry="15" fill="#2e4858"/>`;
-  // ліси (за регіонами)
-  const forest = (cx, cy, rx, ry, n, col) => { let d = ""; for (let i = 0; i < n; i++){ const x = cx + (r() * 2 - 1) * rx, y = cy + (r() * 2 - 1) * ry, z = 5 + r() * 4; d += `M${x - z} ${y}l${z} -${z * 2.3} l${z} ${z * 2.3}z `; } return `<path d="${d}" fill="${col}"/>`; };
-  s += forest(150, 160, 120, 80, 50, "#33452a") + forest(390, 760, 160, 90, 120, "#2a3a22") + forest(560, 650, 70, 50, 30, "#2a3a22") + forest(330, 330, 70, 40, 20, "#3a5030") + forest(760, 260, 60, 50, 22, "#3a5030");
-  s += forest(1210, 260, 140, 60, 50, "#2e3428") + forest(1560, 320, 80, 60, 30, "#262c22") + forest(1700, 600, 60, 80, 22, "#2e3428");
-  s += forest(1980, 650, 150, 180, 170, "#22301d") + forest(2150, 600, 70, 70, 40, "#22301d") + forest(2450, 700, 90, 70, 45, "#243320") + forest(2560, 420, 100, 80, 50, "#243320");
-  // попелясті мертві дерева
-  let dd = ""; for (let i = 0; i < 90; i++){ const x = 1000 + r() * 740, y = 60 + r() * 840; if (Math.abs(x - 1380 - (y - 518) * .05) < 30) continue; dd += `M${x} ${y}v-9M${x} ${y - 5}l-4 -4M${x} ${y - 7}l4 -4 `; } s += `<path d="${dd}" stroke="#2c2924" stroke-width="1.6" fill="none"/>`;
-  // виноградники
-  for (let i = 0; i < 10; i++) s += `<path d="M${2120 + i * 22} 290l120 -60" stroke="#4a5a2a" stroke-width="4" stroke-dasharray="2 6"/>`;
-  // Карпатський хребет + Чорногора
-  const mtn = (x, y, z) => `<path d="M${x - z} ${y}L${x} ${y - z * 1.3}L${x + z} ${y}z" fill="#5d625f"/><path d="M${x} ${y - z * 1.3}L${x + z} ${y}h-${z * .7}z" fill="#4a4f4c"/><path d="M${x} ${y - z * 1.3}l-${z * .3} ${z * .4}l${z * .3} -${z * .12}l${z * .25} ${z * .1}z" fill="#eceff1"/>`;
-  let m = []; for (let y = 60; y < 900; y += 26){ if ((y > 360 && y < 450) || (y > 250 && y < 320) || (y > 610 && y < 690)) continue; m.push([1765 + (r() * 2 - 1) * 22 + (y - 480) * .03, y, 20 + r() * 14]); }
-  for (let i = 0; i < 40; i++) m.push([2560 + r() * 240, 620 + r() * 300, 20 + r() * 22]);
-  for (let i = 0; i < 18; i++) m.push([2620 + r() * 180, 80 + r() * 260, 18 + r() * 18]);
-  for (let i = 0; i < 12; i++) m.push([20 + r() * 260, 20 + r() * 90, 16 + r() * 14]);
-  m.sort((a, b) => a[1] - b[1]); s += m.map(([x, y, z]) => mtn(x, y, z)).join("");
-  // підписи регіонів
-  for (const [t, x, y] of [["ЗЕМЛІ КАББАЛОНУ", 470, 78], ["ПОПЕЛЯСТІ ЗЕМЛІ", 1360, 120], ["ЗАКАРПАТТЯ", 2320, 150]]) s += `<text x="${x}" y="${y}" text-anchor="middle" font-family="Alegreya, Georgia, serif" font-size="46" font-weight="700" letter-spacing="10" fill="#f2e8cf" opacity=".22">${t}</text>`;
-  // дороги
-  for (const rd of ROADS){ const A = NODES[rd.a], Bn = NODES[rd.b], d = `M${A.x} ${A.y} Q${rd.cx} ${rd.cy} ${Bn.x} ${Bn.y}`;
-    s += `<path d="${d}" fill="none" stroke="#1a1714" stroke-width="7" stroke-linecap="round" opacity=".35"/><path d="${d}" fill="none" stroke="${rd.danger ? "#d0603a" : "#e2d8a6"}" stroke-width="3.2" stroke-dasharray="1 9" stroke-linecap="round"/>`; }
-  s += `<rect width="${W}" height="${H}" filter="url(#gr${u})" opacity=".4"/>`;
-  MAP_SVG = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true" style="position:absolute;left:0;top:0">${s}</svg>`;
-  return MAP_SVG;
-}
