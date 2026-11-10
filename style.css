@@ -670,3 +670,11 @@ b.r1,.rr.r1{color:#4f8a33}b.r2,.rr.r2{color:#2f6eb8}b.r3,.rr.r3{color:#7b45b0}b.
 @media (prefers-reduced-motion: reduce){.mfx *{animation:none!important}.mcl,.mbd,.msm,.mgl{display:none}}
 
 .hid *{animation-play-state:paused!important}
+
+/* мальовані речі й герой */
+.iart{display:block;flex:none;pointer-events:none;user-select:none}
+.iart.off{filter:grayscale(1) brightness(.55)}
+.gcell .iart{filter:drop-shadow(0 2px 2px rgba(0,0,0,.5))}
+.gcell.lock .iart{filter:grayscale(.7)}
+.hart{display:block;pointer-events:none;filter:drop-shadow(0 6px 10px rgba(0,0,0,.35))}
+.shoprow .ii .iart{margin:-4px}

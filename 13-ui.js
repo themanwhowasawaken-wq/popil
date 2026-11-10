@@ -47,7 +47,7 @@ function openNpc(id){
     if (qAvail(qid)) qs += `<div class="qbox"><b>${Q.name}</b><p>${Q.text}</p><p class="hint">Нагорода: ${rewardTxt(Q)}</p><button class="btn p" data-qtake="${qid}">Взяти завдання</button></div>`;
     else if (qReady(qid)){
       const R = Q.reward;
-      qs += `<div class="qbox ready"><b>${Q.name}</b><p>Ти впорався. Тримай, що обіцяв.</p><p class="hint">Нагорода: ${rewardTxt(Q)}</p>${R.choice ? `<div class="choice"><span class="lbl">Оберіть одну річ:</span>${R.choice.map((c, i) => `<button class="cell" data-qdone="${qid}" data-choice="${i}">${c.item ? `<span class="ii">${gi(itemIc(c.item), 22, icCol(c.item))}</span>` : `<span class="ii">${svg("star", 18, "#e0b25a")}</span>`}<span class="tx"><b>${rewTxt(c)}</b><span>${c.item ? itemLine(ITEMS[c.item]) : "гроші"}</span></span></button>`).join("")}</div>` : `<button class="btn p" data-qdone="${qid}">Здати завдання</button>`}</div>`;
+      qs += `<div class="qbox ready"><b>${Q.name}</b><p>Ти впорався. Тримай, що обіцяв.</p><p class="hint">Нагорода: ${rewardTxt(Q)}</p>${R.choice ? `<div class="choice"><span class="lbl">Оберіть одну річ:</span>${R.choice.map((c, i) => `<button class="cell" data-qdone="${qid}" data-choice="${i}">${c.item ? `<span class="ii">${itemArt(c.item, 30)}</span>` : `<span class="ii">${svg("star", 18, "#e0b25a")}</span>`}<span class="tx"><b>${rewTxt(c)}</b><span>${c.item ? itemLine(ITEMS[c.item]) : "гроші"}</span></span></button>`).join("")}</div>` : `<button class="btn p" data-qdone="${qid}">Здати завдання</button>`}</div>`;
     }
     else if (q && q.st === "active") qs += `<div class="qbox"><b>${Q.name}</b><p class="hint">Виконано: ${qProgressTxt(qid)}.</p></div>`;
   }
@@ -136,7 +136,7 @@ function craftBody(){
   if (P.kind === "gather"){
     const L = id => Object.keys(LOCS).filter(l => LOCS[l].res[k]).map(l => ({l, t:LOCS[l].res[k]}));
     body += `<div class="sub">Ресурси</div>` + [1,2,3,4,5].map(t => { const it = ITEMS[{herb:"h", mine:"o", fish:"f"}[k] + t], ok = p.lv >= TIER_LV[t];
-      return `<div class="shoprow${ok ? "" : " off"}"><span class="ii">${gi(itemIc(it.id), 24, ok ? icCol(it.id) : "#5a534b")}</span><span class="tx"><b>${it.name}</b><span>тір ${t} · потрібен ${TIER_LV[t]} рівень · у торбі: ${inv(it.id)}</span></span></div>`; }).join("");
+      return `<div class="shoprow${ok ? "" : " off"}"><span class="ii">${itemArt(it.id, 32, ok ? "" : "off")}</span><span class="tx"><b>${it.name}</b><span>тір ${t} · потрібен ${TIER_LV[t]} рівень · у торбі: ${inv(it.id)}</span></span></div>`; }).join("");
     body += `<div class="sub">Де шукати</div><div class="hint">${L().map(x => `${NODES[x.l].name} (до ${x.t})`).join(", ")}</div><div class="hint">Збирайте, натискаючи на значки трав, руди й риби просто на сцені локації.</div>`;
   } else {
     const gOrd = g => g === "Огранювання" ? 1 : g === "З'єднання" ? 2 : 0;
@@ -144,7 +144,7 @@ function craftBody(){
     let lastG = null;
     body += list.map(r => { const it = ITEMS[r.out], ok = canCraft(r), lvOk = p.lv >= r.lv;
       const head = r.group && r.group !== lastG ? `<div class="sub">${(lastG = r.group)}</div>` : "";
-      return head + `<div class="shoprow${lvOk ? "" : " off"}"><span class="ii">${gi(itemIc(r.out), 24, icCol(r.out))}</span><span class="tx"><b>${it.name}</b><span>${Object.entries(r.in).map(([i, n]) => `<em class="${inv(i) >= n ? "ok" : "no"}">${ITEMS[i].name} ${inv(i)}/${n}</em>`).join(" · ")}${lvOk ? "" : ` · потрібен ${r.lv} рівень`}</span></span><button class="btn p sm" data-craft="${r.id}" ${ok ? "" : "disabled"}>Створити</button></div>`; }).join("");
+      return head + `<div class="shoprow${lvOk ? "" : " off"}"><span class="ii">${itemArt(r.out, 32)}</span><span class="tx"><b>${it.name}</b><span>${Object.entries(r.in).map(([i, n]) => `<em class="${inv(i) >= n ? "ok" : "no"}">${ITEMS[i].name} ${inv(i)}/${n}</em>`).join(" · ")}${lvOk ? "" : ` · потрібен ${r.lv} рівень`}</span></span><button class="btn p sm" data-craft="${r.id}" ${ok ? "" : "disabled"}>Створити</button></div>`; }).join("");
     if (k === "jewel") body += `<div class="hint">Огранені самоцвіти вставляються в гнізда речей у вікні «Персонаж».</div>`;
   }
   return `<div class="craft2"><div class="craftrow"><div class="ptabs bcard">${tabs}</div><div class="craftbody bcard">${body}</div></div></div>`;

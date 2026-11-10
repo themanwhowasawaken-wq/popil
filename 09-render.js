@@ -95,7 +95,7 @@ function renderTop(){
 function beltSlot(i){
   const id = S.belt[i], it = id && ITEMS[id], n = id ? inv(id) : 0;
   if (!it) return `<button class="slot empty" data-beltslot="${i}" aria-label="Порожня комірка пояса" title="Порожньо: додайте зілля чи сувій з торби"></button>`;
-  const icon = gi(itemIc(id), 28, it.use && it.use.en && !it.use.hp ? "#6f9bd1" : it.scroll ? "#e2c88a" : it.buff ? "#9fd08f" : it.open ? "#e0b25a" : "#e0675a");
+  const icon = itemArt(id, 34);
   return `<button class="slot" data-belt="${id}" aria-label="${it.name}, ${n} шт." title="${it.name}${n ? "" : " (закінчилось)"}" ${n ? "" : "disabled"}>${icon}${n ? `<span class="n">${n}</span>` : ""}</button>`;
 }
 function renderBelt(){

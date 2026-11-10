@@ -30,7 +30,7 @@ const icCol = id => { const it = ITEMS[id]; if (!it) return "#cfc6b4"; if (it.ge
 function cellIt(id, o = {}){
   const it = ITEMS[id], r = rarity(it), sz = o.size || 56, n = o.n, sh = sharpOf(id);
   const mark = o.cmp ? (o.cmp > 0 ? `<i class="mk up">▲</i>` : o.cmp < 0 ? `<i class="mk dn">▼</i>` : "") : "";
-  return `<button class="gcell r${r}${o.sel ? " sel" : ""}${o.lock ? " lock" : ""}" style="width:${sz}px;height:${sz}px" ${o.data || ""} aria-label="${esc(it.name)}${n > 1 ? ", " + n + " шт." : ""}"${o.notitle ? "" : ` title="${esc(it.name)}"`}>${gi(itemIc(id), Math.round(sz * .6), icCol(id))}${n > 1 ? `<b class="n">${n}</b>` : ""}${sh && it.slot ? `<b class="sh">+${sh}</b>` : ""}${mark}</button>`;
+  return `<button class="gcell r${r}${o.sel ? " sel" : ""}${o.lock ? " lock" : ""}" style="width:${sz}px;height:${sz}px" ${o.data || ""} aria-label="${esc(it.name)}${n > 1 ? ", " + n + " шт." : ""}"${o.notitle ? "" : ` title="${esc(it.name)}"`}>${itemArt(id, Math.round(sz * .86))}${n > 1 ? `<b class="n">${n}</b>` : ""}${sh && it.slot ? `<b class="sh">+${sh}</b>` : ""}${mark}</button>`;
 }
 // наскільки річ краща за надягнуту: сума зважених характеристик
 function itemScore(it){ if (!it) return 0; const d = it.dmg ? (it.dmg[0] + it.dmg[1]) / 2 : 0; return d * 3 + (it.hp || 0) * .5 + (it.def || 0) * 3 + (it.str || 0) * 3 + (it.agi || 0) * 2.5 + (it.wil || 0) * 2 + (it.crit || 0) * 3 + (it.sock || 0) * 4; }
@@ -96,7 +96,7 @@ function winHero(){
     return `<div class="setb"><b>${St.name} ${n}/${St.items.length}</b>${Object.entries(St.bonus).map(([need, bon]) => `<span class="${n >= +need ? "on" : ""}">${n >= +need ? "✓" : need + ":"} ${statsText(bon)}</span>`).join("")}</div>`; }).join("");
   const doll = `<section class="hdoll" data-dz="doll">
       <div class="dcols"><div class="dc">${DOLL_L.map(dollSlot).join("")}</div>
-        <div class="dfig">${gi("person", 250, "rgba(70,52,28,.2)")}<div class="dlv"><b>${S.lvl}</b><span>рівень</span></div></div>
+        <div class="dfig">${heroArt(165)}<div class="dlv"><b>${S.lvl}</b><span>рівень</span></div></div>
         <div class="dc">${DOLL_R.map(dollSlot).join("")}</div></div>
       ${bar("hp", S.hp, st.maxHp, `Здоров'я ${Math.ceil(S.hp)} / ${st.maxHp}`)}${bar("en", S.en, st.maxEn, `Енергія ${Math.floor(S.en)} / ${st.maxEn}`)}${bar("xp", xpPct, 100, S.lvl >= MAXLVL ? "Максимальний рівень" : `Досвід ${S.xp} / ${need(S.lvl)}`)}
       ${sets ? `<div class="dsets">${sets}</div>` : ""}</section>`;
