@@ -70,7 +70,7 @@ function renderLogin(){
       <div class="lg-f"><span>Знак роду</span><div class="lg-crests">${CRESTS.map((c, i) => `<button type="button" class="lg-crest${LG.crest === i ? " on" : ""}" data-lg="crest" data-i="${i}" title="${c[2]}"><span class="avatar sm" style="${crestBg(i)}">${esc((LG.name || "?")[0])}</span></button>`).join("")}</div></div>
       <button class="btn p big lg-go" data-lg="reg" type="submit">Створити героя</button>`;
   $("#login").innerHTML = `
-    <svg class="lg-bg" viewBox="0 0 900 528" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${sceneSVG("spire")}</svg>
+    ${sceneImg("spire").replace('class="scene"', 'class="lg-bg" style="object-fit:cover"')}
     <div class="lg-shade"></div>
     <div class="lg-logo"><h1>Попелястий Шпиль</h1><p>Землі Кабаллону · Попелясті землі · Закарпаття</p></div>
     <form class="lg-box" id="lgForm" autocomplete="on" novalidate>

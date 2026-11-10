@@ -46,8 +46,8 @@ const battleOver = () => !B.enemies.some(alive);
 const overResult = () => B.enemies.some(e => e.hp <= 0 && !e.fled) ? "win" : "gone";
 function renderBattle(){
   const v = $("#view"), st = stats(), tg = B.enemies[B.target];
-  const bg = B.origin === "dungeon" ? dungeonSVG(DUNGEONS[DG.id].scene) : sceneSVG(B.scene);
-  let h = `<svg class="scene" width="1216" height="528" viewBox="0 0 900 528" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${bg}</svg><div class="bshade"></div>`;
+  const bst = "width:1216px;height:528px;object-fit:cover";
+  let h = (B.origin === "dungeon" ? dungeonImg(DUNGEONS[DG.id].scene, bst) : sceneImg(B.scene, bst)) + `<div class="bshade"></div>`;
   const phase = B.phase === "choose" ? `<div class="go"><i id="btimer" style="width:100%"></i><span>ВАШ ХІД</span><b id="bsec">20</b></div>` : B.phase === "end" ? `<div class="fight done">БІЙ ЗАВЕРШЕНО</div>` : `<div class="fight">БІЙ</div>`;
   const chips = (B.poison ? `<span class="po">Отрута ${B.poison}</span>` : "") + (B.rage ? `<span class="bf">Лють ${B.rage}</span>` : "") + (B.block ? `<span class="bl">Блок</span>` : "") + (B.shield ? `<span class="bl">Щит ${B.shield}</span>` : "") + S.buffs.map(b => `<span class="bf">${ITEMS[b.id].name.replace("Еліксир ", "")}</span>`).join("");
   h += `<div class="bstat"><div class="side"><div class="avatar sm">${esc(S.name[0])}</div><div class="bb"><b>${esc(S.name)} [${S.lvl}]</b><div class="bar hp"><div class="tr"><div class="fl" style="width:${S.hp / st.maxHp * 100}%"></div></div><span>${Math.ceil(S.hp)}/${st.maxHp}</span></div><div class="bar en"><div class="tr"><div class="fl" style="width:${S.en / st.maxEn * 100}%"></div></div><span>${Math.floor(S.en)}/${st.maxEn}</span></div>${chips ? `<div class="fx-chips">${chips}</div>` : ""}</div></div>

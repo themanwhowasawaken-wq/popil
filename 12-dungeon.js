@@ -64,7 +64,7 @@ function completeDungeon(){
 function leaveDungeon(){ if (!DG) return; msg(DG.done ? "Ви вийшли з підземелля переможцем." : "Ви вийшли з підземелля.", DG.done ? "good" : ""); DG = null; UI.view = "loc"; render(); }
 function renderDungeon(){
   const Dn = DUNGEONS[DG.id], v = $("#view");
-  let h = `<svg class="scene" width="900" height="528" viewBox="0 0 900 528" aria-hidden="true">${dungeonSVG(Dn.scene)}</svg>`;
+  let h = `${dungeonImg(Dn.scene, "")}`;
   h += `<div class="title-plate"><b>${Dn.name}</b><span>Похід ${DG.run} · рівень ${Dn.lvl}${dTier() > 1 ? " · тір " + dTier() : ""}</span></div>`;
   h += `<div class="droom">${[...Array(Dn.rooms)].map((_, i) => `<i class="${i < DG.room ? "ok" : i === DG.room ? "cur" : ""}${i === Dn.rooms - 1 ? " boss" : ""}"></i>`).join("")}</div>`;
   h += `<div class="npc me-tok" style="left:140px;top:380px"><span class="c">${esc(S.name[0])}</span><span class="n">Ви</span></div>`;
