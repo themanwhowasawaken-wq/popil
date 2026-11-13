@@ -465,7 +465,7 @@ const Z_BIO = {
   bone:{line:"dead", edge:{dead:7}, mid:{rock:5}, fg:"dead"},
   battle:{line:null, edge:{oak:3, dead:3}, mid:{rock:4}, fg:null},
 };
-function zTree(K, kind, x, y, s){ const snow = K.c.b === "snow";
+function zTree(K, kind, x, y, s){ const snow = K.c.b === "snow" || K.c.b === "ice";
   return kind === "pine" ? zPine(x, y, s, {snow}) : kind === "oak" ? zOak(x, y, s, K.c.b === "vineyard" ? Z_PAL.olive : null) : kind === "birch" ? zBirch(x, y, s) : kind === "dead" ? zDead(x, y, s * 1.2) : kind === "willow" ? zWillow(x, y, s * .9) : kind === "bush" ? zBush(x, y, s * 1.1) : kind === "reeds" ? zReeds(x, y, s, K.r) : zRock(x, y, s * .9, K.c.b === "snow" ? "#8a9096" : K.c.b === "sand" ? "#a8987a" : "#77726a", {snow, moss:["forest", "swamp", "bog"].includes(K.c.b)}); }
 function zDress(K){
   const B = Z_BIO[K.c.b] || Z_BIO.meadow, d = K.dress || {}, r = K.r;
@@ -508,7 +508,7 @@ function sceneSVG(id){
 // сцена як картинка: малюється один раз, далі браузер просто показує її
 const SCN_URL = {};
 function sceneImg(id){
-  if (!SCN_URL[id]){ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${ZW}" height="${ZH}" viewBox="0 0 ${ZW} ${ZH}">${sceneSVG(id)}</svg>`; try { SCN_URL[id] = URL.createObjectURL(new Blob([svg], {type:"image/svg+xml"})); } catch (e){ SCN_URL[id] = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg); } }
+  if (!SCN_URL[id]){ const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${ZW}" height="${ZH}" viewBox="0 0 ${ZW} ${ZH}">${sceneSVG(id)}</svg>`; SCN_URL[id] = svgURL(svg); }
   return `<img class="scene" src="${SCN_URL[id]}" width="${ZW}" height="${ZH}" alt="" aria-hidden="true" draggable="false">`;
 }
 

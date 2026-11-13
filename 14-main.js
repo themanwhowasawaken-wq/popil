@@ -121,11 +121,13 @@ document.addEventListener("click", e => {
   if (d.door !== undefined){ chooseDoor(+d.door); return; }
   if (d.build){ const a = d.build;
     if (a.startsWith("npc:")) openNpc(a.slice(4)); else if (a.startsWith("dungeon:")) enterDungeon(a.slice(8));
-    else if (a.startsWith("heal:")){ const st = stats(); S.hp = st.maxHp; S.en = st.maxEn; S.buffs = S.buffs.filter(x => x.n > 0); msg(a.slice(5), "good"); save(); render(); } else if (a === "rest") openNpc("myroslava");
+    else if (a === "pets") openPets(); else if (a.startsWith("heal:")){ const st = stats(); S.hp = st.maxHp; S.en = st.maxEn; S.mp = maxMp(); healPets(); S.buffs = S.buffs.filter(x => x.n > 0); msg(a.slice(5), "good"); save(); render(); } else if (a === "rest") openNpc("myroslava");
     else if (a === "spring"){ const st = stats(); S.hp = st.maxHp; S.en = st.maxEn; msg("Мінеральна вода з джерела. Сили повністю відновилися.", "good"); save(); renderTop(); }
     else if (a === "board") openInfo("Дошка оголошень", "«Шукаю групу на Руїни Варти». «Під руїнами склепи, кажуть, там капітан». «Продам кольчугу, питати в Табір Найманців». «Хто бачив ватажка зграї, не ходіть у Вовчий Яр самі». «Майстер Тодор у Кабаллоні вчить ремесел задарма»."); else openInfo("Зачинено", "Ця будівля відкриється, коли гра стане мережевою.");
     return; }
   if (d.bact){ act(d.bact); return; }
+  if (d.pet){ petAction(d.pet); return; }
+  if (d.rpage){ UI.ringPage = (UI.ringPage || 0) + 1; const nk = 4 + (ownedWard(B && B.enemies[B.target]) ? 1 : 0) + ['w4','h4','m4'].filter(tal).length + skillsKnown().length; if (UI.ringPage >= Math.ceil(nk / 8)) UI.ringPage = 0; render(); return; }
   if (d.tgt){ if (B && B.phase === "choose"){ B.target = +d.tgt; renderBattle(); } return; }
   if (d.belt){ if (B){ if (B.phase === "choose") act("item", d.belt); } else { useItem(d.belt); if (modalOpen()) openBag(); } return; }
   if (d.beltslot !== undefined){ if (!B){ UI.bagTab = "use"; openBag(); } return; }
@@ -161,7 +163,7 @@ document.addEventListener("click", e => {
     case "chest": openChest(); break;
     case "pray": pray(); break;
     case "leaveDg": leaveDungeon(); break;
-    case "heal": { const st = stats(), c = Math.max(5, Math.round((st.maxHp - S.hp) * .3)); if (S.cop < c){ msg("Не вистачає грошей на лікування.", "warn"); break; } spend("heal", c); S.hp = st.maxHp; S.en = st.maxEn; msg("Рани перев'язано. Ви повністю здорові.", "good"); save(); openNpc(d.npcid || "healer"); renderTop(); break; }
+    case "heal": { const st = stats(), ph = Object.keys(S.pets || {}).reduce((a, k) => a + Math.max(0, petStats(k).maxHp - S.pets[k].hp), 0), c = Math.max(5, Math.round((st.maxHp - S.hp + ph) * .3)); if (S.cop < c){ msg("Не вистачає грошей на лікування.", "warn"); break; } spend("heal", c); S.hp = st.maxHp; S.en = st.maxEn; S.mp = maxMp(); healPets(); msg("Рани перев'язано. Ви повністю здорові.", "good"); save(); openNpc(d.npcid || "healer"); renderTop(); break; }
     case "rest": { if (S.cop < 5){ msg("Не вистачає грошей.", "warn"); break; } const st = stats(); spend("heal", 5); S.hp = st.maxHp; S.en = st.maxEn; msg("Ви відпочили в таверні. Сили повернулися.", "good"); save(); openNpc("myroslava"); renderTop(); break; }
     case "reset": if (t.dataset.sure){ const nm = S.name, cr = S.crest; S = fresh(); S.name = nm; S.crest = cr; save(); for (const k in LR) delete LR[k]; T = null; B = null; DG = null; MSG.length = 0; UI.cam = null; UI.view = "loc"; closeModal(); intro(); render(); } else { t.dataset.sure = "1"; t.textContent = "Точно? Натисніть ще раз"; } break;
     case "logout": logout(); break;
@@ -216,7 +218,7 @@ function loop(){
   sprT += dt; if (sprT > 1 / 30){ sprT = 0; drawAllSprites(); }
   acc += dt;
   if (acc >= 1){ acc = 0;
-    if (!B){ const st = stats(), oh = S.hp, oe = S.en; S.hp = Math.min(st.maxHp, S.hp + st.maxHp * .012); S.en = Math.min(st.maxEn, S.en + st.maxEn * .02); if (oh !== S.hp || oe !== S.en) renderTop(); }
+    if (!B){ const st = stats(), oh = S.hp, oe = S.en; S.hp = Math.min(st.maxHp, S.hp + st.maxHp * .012); S.en = Math.min(st.maxEn, S.en + st.maxEn * .02); const mm = maxMp(); if (mm) S.mp = Math.min(mm, (S.mp || 0) + mm * .02); for (const k of Object.keys(S.pets || {})){ const o = S.pets[k]; if (o.hp > 0){ const ph = petStats(k).maxHp; o.hp = Math.min(ph, o.hp + ph * .012); } } if (oh !== S.hp || oe !== S.en) renderTop(); }
     const c = document.getElementById("clock"); if (c) c.textContent = now();
     tickSpots();
     tradeT -= 1; if (tradeT <= 0){ tradeT = rnd(18, 35); msg(`${pick(NAMES)}: ${pick(TRADE)}`, "trade", "trade"); }

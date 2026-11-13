@@ -101,17 +101,17 @@ function maRock(x, y, z, wet){
 }
 // дрібна фактура землі по краях: трава, квіти, тріщини, гравій, мох, вирви, поля
 function maTextures(r, near, coast, W, H){
-  const f = MA.f, seaCtx = document.createElement("canvas").getContext("2d"), seaP = new Path2D(coast + " L0 1600z");
+  const f = MA.f, seaCtx = document.createElement("canvas").getContext("2d"), seaP = new Path2D(coast + " L0 3070z");
   const inSea = (x, y) => seaCtx.isPointInPath(seaP, x, y), nodes = Object.values(NODES);
   const nearNode = (x, y, d) => nodes.some(n => Math.abs(n.x - x) < d && Math.abs(n.y - y) < d * .7);
-  const GR = {kab:["#7e8e4a","#56682e"], zak:["#5a6e3a","#34462a"], ord:["#8a7e52","#5a5236"], mark:["#a49a7c","#6e6854"], bog:["#5a6a34","#34421e"], ash:["#4a463c","#2e2b26"], wild:["#5a5e48","#3a3e30"]};
+  const GR = {kab:["#7e8e4a","#56682e"], zak:["#5a6e3a","#34462a"], ord:["#8a7e52","#5a5236"], mark:["#a49a7c","#6e6854"], bog:["#5a6a34","#34421e"], ash:["#4a463c","#2e2b26"], ice:["#e8eef2","#9ab0c0"], steppe:["#a8a050","#6a6a34"], coast:["#7a8a5a","#4a5a3a"], sand:["#d8bd78","#a28a4a"], wild:["#5a5e48","#3a3e30"]};
   const tufts = {}; let s = "";
-  for (let i = 0; i < 11000; i++){ const x = r() * W, y = r() * H; if (inSea(x, y)) continue; const reg = near(x, y), c = GR[reg][r() < .5 ? 0 : 1];
+  for (let i = 0, N = Math.round(11000 * W * H / 5865600); i < N; i++){ const x = r() * W, y = r() * H; if (inSea(x, y)) continue; const reg = near(x, y), c = (GR[reg] || GR.wild)[r() < .5 ? 0 : 1];
     (tufts[c] = tufts[c] || []).push(`M${f(x)} ${f(y)}l-1.6 -3.4M${f(x)} ${f(y)}l.2 -4.4M${f(x)} ${f(y)}l1.8 -3.2`); }
   for (const [c, a] of Object.entries(tufts)) s += `<path d="${a.join("")}" stroke="${c}" stroke-width="1" fill="none" opacity=".75"/>`;
   // квіти на луках
   const FL = ["#e8d070","#f2ece0","#d8705a","#b89ae0"]; const fl = {};
-  for (let i = 0; i < 2600; i++){ const x = r() * W, y = r() * H; const reg = near(x, y); if (!["kab","ord","zak"].includes(reg) || inSea(x, y)) continue; if (reg === "zak" && r() < .6) continue; const c = MA.pk(r, FL); (fl[c] = fl[c] || []).push(`M${f(x)} ${f(y)}h.01`); }
+  for (let i = 0, N = Math.round(2600 * W * H / 5865600); i < N; i++){ const x = r() * W, y = r() * H; const reg = near(x, y); if (!["kab","ord","zak"].includes(reg) || inSea(x, y)) continue; if (reg === "zak" && r() < .6) continue; const c = MA.pk(r, FL); (fl[c] = fl[c] || []).push(`M${f(x)} ${f(y)}h.01`); }
   for (const [c, a] of Object.entries(fl)) s += `<path d="${a.join("")}" stroke="${c}" stroke-width="2.2" stroke-linecap="round" opacity=".7"/>`;
   // попелище: тріщини й випалені плями
   let cr = "", sc = ""; for (let i = 0; i < 420; i++){ const x = 980 + r() * 780, y = 30 + r() * 880; if (near(x, y) !== "ash") continue; let px = x, py = y; cr += `M${f(px)} ${f(py)}`; for (let k = 0; k < 4; k++){ px += (r() * 2 - 1) * 9; py += (r() * 2 - 1) * 6; cr += `L${f(px)} ${f(py)}`; } }
@@ -442,7 +442,7 @@ function maRelief(peaks, coastD, rivers, W, H){
     for (let y = Math.max(0, cy - 14 | 0); y <= Math.min(h - 1, cy + 14 | 0); y++) for (let x = Math.max(0, cx - 14 | 0); x <= Math.min(w - 1, cx + 14 | 0); x++){ const d2 = ((x - cx) ** 2 + (y - cy) ** 2) / (sg * sg); hm[y * w + x] -= .06 * Math.exp(-d2 * .5); } }
   // море й болото рівні
   const cv = document.createElement("canvas"); cv.width = w; cv.height = h; const cx2 = cv.getContext("2d");
-  const sea = new Path2D(coastD + " L0 1600z"), bogN = Object.values(NODES).filter(n => n.r === "bog");
+  const sea = new Path2D(coastD + " L0 3070z"), bogN = Object.values(NODES).filter(n => n.r === "bog");
   for (let y = 0; y < h; y++) for (let x = 0; x < w; x++){ const wx = x * S2, wy = y * S2;
     if (cx2.isPointInPath(sea, wx, wy)) hm[y * w + x] = -.2;
     else { let bd = 1e9; for (const n of bogN){ const d = (n.x - wx) ** 2 + (n.y - wy) ** 2; if (d < bd) bd = d; } const wgt = Math.max(0, Math.min(1, 1 - (Math.sqrt(bd) - 160) / 240)); if (wgt) hm[y * w + x] *= 1 - wgt * .85; } }
@@ -520,9 +520,9 @@ function maTreeDefs(){
 }
 function maForests(r, near, inSea, avoid, W, H){
   const f1 = maNoise("fo1", W, H, 240), f2 = maNoise("fo2", W, H, 70);
-  const BIAS = {zak:.2, kab:.02, wild:.16, ash:-.06, mark:-.12, bog:-.09, ord:-.12};
+  const BIAS = {zak:.2, kab:.02, wild:.16, ash:-.06, mark:-.12, bog:-.09, ord:-.12, ice:-.22, steppe:-.5, coast:-.3, sand:-.95};
   const HOT = [[150, 165, 120, 80], [390, 760, 170, 100], [560, 650, 80, 60], [1210, 260, 140, 60], [1560, 320, 80, 60], [1980, 650, 160, 190], [2150, 600, 80, 80], [2450, 700, 100, 80], [2560, 420, 110, 90], [2180, 1120, 80, 50], [2620, 1320, 100, 70]];
-  const TYPES = {zak:["tp0","tp0","tp2","tp1","tl2"], kab:["tl0","tl1","tl2","tp1","tl0"], wild:["tp2","tp3","tp0"], ash:["td0","td0","tp3"], mark:["td0"], bog:["tw0","td0","tw0"], ord:["tl3","tl0","tl1"]};
+  const TYPES = {zak:["tp0","tp0","tp2","tp1","tl2"], kab:["tl0","tl1","tl2","tp1","tl0"], wild:["tp2","tp3","tp0"], ash:["td0","td0","tp3"], mark:["td0"], bog:["tw0","td0","tw0"], ord:["tl3","tl0","tl1"], ice:["tp0","tp3","tp2"], steppe:["tl3","tl0"], coast:["tl2","tp1","tl0"], sand:["td0"]};
   const trees = [], floor = [];
   for (let y = 14; y < H; y += 11) for (let x = 6; x < W; x += 11){ const px = x + (r() * 2 - 1) * 5, py = y + (r() * 2 - 1) * 5, reg = near(px, py);
     let d = f1(px, py) * .75 + f2(px, py) * .35 + (BIAS[reg] || 0);
@@ -577,9 +577,19 @@ function mapSVG(){
   s += `<defs><radialGradient id="wmvig" cx="50%" cy="50%" r="75%"><stop offset=".62" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".42"/></radialGradient>
     <linearGradient id="wmsea" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a4658"/><stop offset=".55" stop-color="#1c3240"/><stop offset="1" stop-color="#12222c"/></linearGradient>
     <filter id="wmshallow" x="-5%" y="-5%" width="110%" height="110%"><feGaussianBlur stdDeviation="14"/></filter></defs>` + maTreeDefs();
-  const PAL = {kab:["#6c7c46","#5f6f3d","#556534"], ash:["#5e594b","#524e42","#47453b"], zak:["#4c5c3a","#425034","#37442d"], mark:["#7a7461","#6c6756","#605c4d"], bog:["#34422c","#2b3824","#232e1d"], ord:["#6c6249","#605742","#564e3c"], wild:["#41463a","#3a3f32","#34392d"]};
-  const near = (x, y) => { let best = "wild", bd = 420; for (const n of Object.values(NODES)){ const d = Math.hypot(n.x - x, n.y - y); if (d < bd){ bd = d; best = n.r; } } return PAL[best] ? best : "wild"; };
-  const field = []; for (let y = -60; y < H + 120; y += 110) for (let x = -60; x < W + 120; x += 120){ const px = x + (r() * 2 - 1) * 50, py = y + (r() * 2 - 1) * 40; field.push([px, py, 110 + r() * 80, 70 + r() * 50, pk(PAL[near(px, py)])]); }
+  const PAL = {kab:["#6c7c46","#5f6f3d","#556534"], ash:["#5e594b","#524e42","#47453b"], zak:["#4c5c3a","#425034","#37442d"], mark:["#7a7461","#6c6756","#605c4d"], bog:["#34422c","#2b3824","#232e1d"], ord:["#6c6249","#605742","#564e3c"], ice:["#dfe7ee","#d2dce5","#c4d0da"], steppe:["#a4a254","#989650","#8c8a48"], coast:["#8c8c62","#80805a","#747450"], sand:["#c8ac68","#bc9f5c","#af9250"], wild:["#41463a","#3a3f32","#34392d"]};
+  // кордони країв: точку трохи «гойдаємо» хвилями, тому межі виходять звивистими, а не рівними
+  const wob = (x, y) => [x + Math.sin(y * .0047 + x * .0019) * 70 + Math.sin(y * .013 - x * .009 + 1.7) * 38 + Math.sin(x * .031 + y * .023 + .4) * 16,
+    y + Math.sin(x * .0041 - y * .0022 + 2.1) * 70 + Math.sin(x * .012 + y * .011 + .9) * 38 + Math.sin(y * .029 - x * .026) * 16];
+  const near = (x, y) => { const [wx, wy] = wob(x, y); let best = "wild", bd = 520; for (const n of Object.values(NODES)){ const d = Math.hypot(n.x - wx, n.y - wy); if (d < bd){ bd = d; best = n.r; } } return PAL[best] ? best : "wild"; };
+  const hx = c => [parseInt(c.slice(1, 3), 16), parseInt(c.slice(3, 5), 16), parseInt(c.slice(5, 7), 16)];
+  // колір землі: сусідні краї плавно перетікають один в одного
+  const soft = (x, y, k) => { const [wx, wy] = wob(x, y), dm = {}; let lo = 420;
+    for (const n of Object.values(NODES)){ const d = Math.hypot(n.x - wx, n.y - wy), g = PAL[n.r] ? n.r : "wild"; if (d < 420 && (dm[g] === undefined || d < dm[g])) dm[g] = d; if (d < lo) lo = d; }
+    let R = 0, G = 0, B = 0, W = 0; const ks = Object.keys(dm); if (!ks.length) ks.push("wild"), dm.wild = 420;
+    for (const g of ks){ const w = Math.exp(-(dm[g] - lo) / 120), c = hx(PAL[g][k]); R += c[0] * w; G += c[1] * w; B += c[2] * w; W += w; }
+    return "#" + [R, G, B].map(v => Math.round(v / W).toString(16).padStart(2, "0")).join(""); };
+  const r3 = rng("world-v7"), field = []; for (let y = -60; y < H + 120; y += 110) for (let x = -60; x < W + 120; x += 120){ const q = (x < 3880 && y < 1680) ? r : r3, px = x + (q() * 2 - 1) * 50, py = y + (q() * 2 - 1) * 40; field.push([px, py, 110 + q() * 80, 70 + q() * 50, soft(px, py, Math.floor(q() * 3))]); }
   // гори
   const m = [];
   for (let y = 60; y < 900; y += 24){ if ((y > 360 && y < 450) || (y > 250 && y < 320) || (y > 610 && y < 690)) continue; m.push([1765 + (r() * 2 - 1) * 24 + (y - 480) * .03, y, 20 + r() * 14]); }
@@ -587,13 +597,22 @@ function mapSVG(){
   for (let i = 0; i < 22; i++) m.push([2620 + r() * 180, 80 + r() * 260, 18 + r() * 18]);
   for (let i = 0; i < 14; i++) m.push([20 + r() * 260, 20 + r() * 90, 16 + r() * 14]);
   for (let i = 0; i < 80; i++){ const x = 2900 + r() * 840, y = 1000 + r() * 540; if (Math.hypot(x - 2760, y - 1420) < 160 || Math.abs(x - 3560 - (y - 1300) * .2) < 44) continue; m.push([x, y, 18 + r() * 26]); }
+  // Крижані Пустки: хребти на півночі й навколо перевалу; Дике Поле: димна гора Горинича
+  const nodeFar = (x, y, d) => Object.values(NODES).every(n => Math.hypot(n.x - x, (n.y - y) * 1.2) > d);
+  for (let i = 0; i < 90; i++){ const x = 3830 + r3() * 1400, y = 20 + r3() * 760; if (!nodeFar(x, y, 92) || Math.abs(x - 4170 - (y - 150) * .3) < 60) continue; m.push([x, y, 18 + r3() * 26]); }
+  for (let i = 0; i < 26; i++){ const x = 4640 + r3() * 560, y = 470 + r3() * 300; if (nodeFar(x, y, 100)) m.push([x, y, 24 + r3() * 20]); }
+  for (let i = 0; i < 26; i++){ const x = 4900 + r3() * 320, y = 1360 + r3() * 260; if (nodeFar(x, y, 90)) m.push([x, y, 20 + r3() * 24]); }
+  for (let i = 0; i < 22; i++){ const x = 3800 + r3() * 160, y = 620 + r3() * 160; if (nodeFar(x, y, 80)) m.push([x, y, 16 + r3() * 16]); }
+  for (let i = 0; i < 16; i++){ const x = 600 + r3() * 160, y = 2300 + r3() * 700; if (nodeFar(x, y, 100) && x > 760 - (3000 - y) * .0) m.push([x + 300, y, 14 + r3() * 16]); }
   const RV = [
     ["M560 -10 C640 90 690 150 650 210 S 590 310 615 360 S 760 380 830 420 S 910 530 880 660 S 820 860 870 930 S 680 1090 560 1205", 14, "#2e4858"],
     ["M1450 -10 C1400 200 1430 400 1380 518 S 1350 700 1410 930 S 1440 1060 1400 1150 S 1330 1250 1360 1330 S 1480 1420 1590 1455", 16, "#2e4858"],
     ["M2120 -10 C2060 200 1990 380 1940 470 S 1860 620 1815 860 S 1890 1080 1880 1200 S 1900 1440 1870 1590", 15, "#2e4858"],
     ["M1815 860 C1950 900 2150 860 2350 900 S 2560 850 2700 860 S 2920 810 3060 790 S 3350 770 3528 800", 18, "#2e4858"],
+    ["M4060 -10 C4130 70 4190 140 4172 220 S 4290 330 4410 420 S 4590 560 4540 780", 16, "#8ab8d4"],
+    ["M3890 780 C4050 840 4230 810 4400 860 S 4660 780 4820 790 S 5120 750 5250 790", 15, "#2e4858"],
     ["M3540 -10 C3500 160 3560 300 3520 460 S 3560 640 3500 760 S 3560 860 3530 960 S 3480 1150 3560 1300 S 3620 1450 3600 1590", 15, "#33444c"]];
-  const coast = "M0 640 C80 660 150 720 200 780 C240 840 250 880 300 920 C360 1000 470 1060 560 1140 C640 1210 700 1320 760 1420 C790 1480 805 1530 815 1600";
+  const coast = "M0 640 C80 660 150 720 200 780 C240 840 250 880 300 920 C360 1000 470 1060 560 1140 C640 1210 700 1320 760 1420 C790 1480 805 1530 815 1600 C830 1700 905 1760 872 1900 C842 2040 700 2120 722 2300 C744 2480 802 2640 782 2800 C772 2900 792 2980 802 3070";
   // струмки (форма випадкова, але завжди та сама)
   const ST = [];
   const stream = (x0, y0, x1, y1, w = 3.5) => { let d = `M${x0} ${y0}`, px = x0, py = y0; const n = 5; for (let i = 1; i <= n; i++){ const t = i / n, x = x0 + (x1 - x0) * t + (i < n ? (r() * 2 - 1) * 26 : 0), y = y0 + (y1 - y0) * t + (i < n ? (r() * 2 - 1) * 18 : 0); d += ` Q${(px + x) / 2 + (r() * 2 - 1) * 22 | 0} ${(py + y) / 2 + (r() * 2 - 1) * 16 | 0} ${x | 0} ${y | 0}`; px = x; py = y; } ST.push([d, w]); };
@@ -607,13 +626,17 @@ function mapSVG(){
   s += maTextures(r, near, coast, W, H);
   // море з мілиною й піщаним берегом
   s += `<path d="${coast}" fill="none" stroke="#5a5432" stroke-width="30" opacity=".5" transform="translate(4,3)"/><path d="${coast}" fill="none" stroke="#cdbd8a" stroke-width="24"/><path d="${coast}" fill="none" stroke="#e2d6a8" stroke-width="10" opacity=".7"/>`;
-  s += `<path d="${coast} L0 1600z" fill="url(#wmsea)"/>`;
+  s += `<path d="${coast} L0 3070z" fill="url(#wmsea)"/>`;
   s += `<path d="${coast}" fill="none" stroke="#4a7a88" stroke-width="44" opacity=".55" filter="url(#wmshallow)"/>`;
   s += `<path d="${coast}" fill="none" stroke="#c9bf98" stroke-width="7" opacity=".55"/><path d="${coast}" fill="none" stroke="#f2ecd8" stroke-width="2" opacity=".5" transform="translate(-6,4)"/>`;
-  const seaCtx = document.createElement("canvas").getContext("2d"), seaP = new Path2D(coast + " L0 1600z"), inSea = (x, y) => seaCtx.isPointInPath(seaP, x, y);
+  const seaCtx = document.createElement("canvas").getContext("2d"), seaP = new Path2D(coast + " L0 3070z"), inSea = (x, y) => seaCtx.isPointInPath(seaP, x, y);
   let wv = ""; for (let i = 0; i < 160; i++){ const x = r() * 760, y = 660 + r() * 920; if (!inSea(x, y) || !inSea(x + 30, y)) continue; wv += `M${x | 0} ${y | 0}q6 -4 12 0q6 4 12 0 `; }
   s += `<path d="${wv}" stroke="#7a9aa8" stroke-width="1.6" fill="none" opacity=".4"/>`;
   for (let i = 0; i < 30; i++){ const x = r() * 700, y = 660 + r() * 920; if (!inSea(x, y) || (inSea(x + 70, y) && inSea(x + 40, y + 40))) continue; s += maRock(x, y, 4 + r() * 6, true); }
+  { let wv2 = ""; for (let i = 0; i < 420; i++){ const x = r3() * 900, y = 1600 + r3() * 1450; if (!inSea(x, y) || !inSea(x + 30, y)) continue; wv2 += `M${x | 0} ${y | 0}q6 -4 12 0q6 4 12 0 `; }
+    s += `<path d="${wv2}" stroke="#7a9aa8" stroke-width="1.6" fill="none" opacity=".4"/>`;
+    for (let i = 0; i < 60; i++){ const x = r3() * 800, y = 1600 + r3() * 1400; if (!inSea(x, y) || (inSea(x + 70, y) && inSea(x + 40, y + 40))) continue; s += maRock(x, y, 4 + r3() * 6, true); }
+    s += maCompass(300, 2250, 66) + maShip(520, 2000, 1.1) + maShip(250, 2750, 1) + maSerpent(120, 2450, 1.1) + maSerpent(420, 2880, .9); }
   s += maCompass(250, 1330, 66) + maShip(520, 1470, 1.1) + maSerpent(130, 1110, 1);
   let fog = ""; for (let i = 0; i < 9; i++) fog += `<ellipse cx="${r() * 640 | 0}" cy="${1000 + r() * 520 | 0}" rx="${140 + r() * 120 | 0}" ry="${24 + r() * 26 | 0}" fill="#c9d4d8" opacity="${.07 + r() * .07}"/>`;
   s += `<g filter="url(#bl${u})">${fog}</g>`;
@@ -639,7 +662,7 @@ function mapSVG(){
   s += `<g filter="url(#bl${u})">${snow}</g>`;
   const foot = []; for (const [x, y, z] of m) if (r() < .55){ const a = r() * Math.PI * 2, d = z * (1.4 + r() * .9); foot.push([x + Math.cos(a) * d, y + Math.abs(Math.sin(a)) * d * .55 + 6, 9 + r() * 7]); }
   const all = [...m.map(v => [...v, 0]), ...foot.map(v => [...v, 1])].sort((a, b) => a[1] - b[1]);
-  s += all.map(([x, y, z, f]) => f ? maHill(x, y, z * 1.6, z * .8, "#5e6250") : maPeak(x, y, z, z > 24 || y < 400 || (x > 2550 && y > 600 && y < 940))).join("");
+  s += all.map(([x, y, z, f]) => f ? maHill(x, y, z * 1.6, z * .8, "#5e6250") : maPeak(x, y, z, z > 24 || y < 400 || (x > 2550 && y > 600 && y < 940) || (x > 3820 && y < 800))).join("");
   if (typeof mapExtra === "function") s += mapExtra(r);
   // дороги: біля міст бруківка, далі утоптана земля
   for (const rd of ROADS){ const A = NODES[rd.a], Bn = NODES[rd.b], d = `M${A.x} ${A.y} Q${rd.cx} ${rd.cy} ${Bn.x} ${Bn.y}`, paved = A.kind === "city" || Bn.kind === "city";
@@ -660,7 +683,7 @@ function mapSVG(){
   for (const id of Object.keys(NODES).sort((a, b) => NODES[a].y - NODES[b].y)){ const n = NODES[id], k = n.kind === "city" ? 1 : n.kind === "town" ? 1.3 : 1.25, site = maSite(id, rng("site-" + id), water);
     s += site != null ? site : `<g transform="translate(${n.x},${n.y}) scale(${k}) translate(${-n.x},${-n.y})">${maDiorama(id, rng("dio-" + id), water)}</g>`; }
   // назви країв
-  for (const [t, x, y, fs, rot] of [["ЗЕМЛІ КАББАЛОНУ", 470, 70, 46, -2], ["ПОПЕЛЯСТІ ЗЕМЛІ", 1330, 110, 46, 1.5], ["ЗАКАРПАТТЯ", 2300, 110, 48, -1.5], ["КІСТЯНА МАРКА", 3260, 80, 44, 2], ["ЧОРНА ТРЯСОВИНА", 1360, 1540, 40, -1.5], ["ЗЕМЛІ СВІТАНКУ Й НОЧІ", 2380, 1540, 38, 1], ["МОРЕ ТУМАНІВ", 230, 1200, 34, -18]])
+  for (const [t, x, y, fs, rot] of [["ЗЕМЛІ КАББАЛОНУ", 470, 70, 46, -2], ["ПОПЕЛЯСТІ ЗЕМЛІ", 1330, 110, 46, 1.5], ["ЗАКАРПАТТЯ", 2300, 110, 48, -1.5], ["КІСТЯНА МАРКА", 3260, 80, 44, 2], ["ЧОРНА ТРЯСОВИНА", 1360, 1540, 40, -1.5], ["ЗЕМЛІ СВІТАНКУ Й НОЧІ", 2380, 1540, 38, 1], ["МОРЕ ТУМАНІВ", 230, 1200, 34, -18], ["КРИЖАНІ ПУСТКИ", 4500, 62, 44, 1], ["ДИКЕ ПОЛЕ", 4600, 1395, 44, -1], ["ЗАТОПЛЕНЕ УЗБЕРЕЖЖЯ", 1190, 2390, 30, -4], ["ПІСКИ ЗАБУТИХ ЦАРІВ", 2480, 2160, 42, 0]])
     s += `<text x="${x}" y="${y}" transform="rotate(${rot} ${x} ${y})" text-anchor="middle" font-family="Alegreya, Georgia, serif" font-size="${fs}" font-weight="700" letter-spacing="12" fill="#efe3c4" stroke="#1d150c" stroke-width="7" stroke-linejoin="round" paint-order="stroke" opacity=".62">${t}</text>`;
   s += `<rect width="${W}" height="${H}" filter="url(#gr${u})" opacity=".24"/><rect width="${W}" height="${H}" fill="url(#wmvig)"/>`;
   s += `<rect x="5" y="5" width="${W - 10}" height="${H - 10}" fill="none" stroke="#1a140c" stroke-width="10" opacity=".75"/><rect x="14" y="14" width="${W - 28}" height="${H - 28}" fill="none" stroke="#c9a24a" stroke-width="2" opacity=".55"/>`;
@@ -671,6 +694,7 @@ function mapSVG(){
 /* ---------- карта як готова картинка: малюємо один раз, далі тільки рухаємо ---------- */
 let MAP_URL = null, MAP_BUSY = false;
 function mapLayer(){
+  if (!MAP_URL) ensureMapURL();
   if (MAP_URL) return `<img id="mapimg" src="${MAP_URL}" width="${WORLD.w}" height="${WORLD.h}" alt="" draggable="false" style="position:absolute;left:0;top:0;width:${WORLD.w}px;height:${WORLD.h}px;pointer-events:none">`;
   const svg = mapSVG();
   if (!MAP_BUSY){ MAP_BUSY = true; setTimeout(bakeMap, 30); }
@@ -679,15 +703,15 @@ function mapLayer(){
 function bakeMap(){
   try {
     const src = mapSVG().replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" ');
-    const url = URL.createObjectURL(new Blob([src], {type:"image/svg+xml"})), img = new Image(), K = 1.25;
+    const url = svgURL(src), img = new Image(), K = 1.25;
     img.onload = () => {
       try {
         const cv = document.createElement("canvas"); cv.width = Math.round(WORLD.w * K); cv.height = Math.round(WORLD.h * K);
-        const c = cv.getContext("2d"); c.drawImage(img, 0, 0, cv.width, cv.height); URL.revokeObjectURL(url);
-        cv.toBlob(b => { if (!b) return; MAP_URL = URL.createObjectURL(b); const w = document.getElementById("world"); const sv = w && w.querySelector(":scope > svg"); if (sv) sv.outerHTML = mapLayer(); }, "image/png");
-      } catch (e){ URL.revokeObjectURL(url); }
+        const c = cv.getContext("2d"); c.drawImage(img, 0, 0, cv.width, cv.height); freeURL(url);
+        canvasURL(cv, "image/png", .92, u => { MAP_URL = u; const w = document.getElementById("world"); const sv = w && w.querySelector(":scope > svg"); if (sv) sv.outerHTML = mapLayer(); });
+      } catch (e){ freeURL(url); }
     };
-    img.onerror = () => URL.revokeObjectURL(url);
+    img.onerror = () => freeURL(url);
     img.src = url;
   } catch (e){}
 }
@@ -699,13 +723,14 @@ function mapFX(){
   for (let i = 0; i < 10; i++){ const y = (i + r() * .8) / 10 * H - 120, dur = 240 + r() * 200, sc = .7 + r() * .8;
     h += `<div class="mcl" style="top:${y | 0}px;animation-duration:${dur | 0}s;animation-delay:${-(r() * dur) | 0}s"><div style="transform:scale(${sc.toFixed(2)})"><i class="sh"></i><i class="cl"></i></div></div>`; }
   for (const n of Object.values(NODES)) if (n.kind === "city" || n.kind === "town"){ const k = n.kind === "city" ? 3 : 2; for (let j = 0; j < k; j++) h += `<i class="msm" style="left:${n.x - 22 + j * 14 + (r() * 6 | 0)}px;top:${n.y - 50 - (j % 2) * 8}px;animation-delay:${-(r() * 6).toFixed(2)}s;animation-duration:${(4.5 + r() * 2.5).toFixed(2)}s"></i>`; }
-  const sc = document.createElement("canvas").getContext("2d"), sp = new Path2D("M0 640 C80 660 150 720 200 780 C240 840 250 880 300 920 C360 1000 470 1060 560 1140 C640 1210 700 1320 760 1420 C790 1480 805 1530 815 1600 L0 1600z");
+  const sc = document.createElement("canvas").getContext("2d"), sp = new Path2D("M0 640 C80 660 150 720 200 780 C240 840 250 880 300 920 C360 1000 470 1060 560 1140 C640 1210 700 1320 760 1420 C790 1480 805 1530 815 1600 C830 1700 905 1760 872 1900 C842 2040 700 2120 722 2300 C744 2480 802 2640 782 2800 C772 2900 792 2980 802 3070 L0 3070z");
   for (let i = 0; i < 70; i++){ const x = r() * 760, y = 650 + r() * 920; if (!sc.isPointInPath(sp, x, y) || !sc.isPointInPath(sp, x + 20, y)) continue; h += `<i class="mgl" style="left:${x | 0}px;top:${y | 0}px;animation-delay:${-(r() * 5).toFixed(2)}s;animation-duration:${(3 + r() * 3).toFixed(2)}s"></i>`; }
+  for (let i = 0; i < 90; i++){ const x = r() * 880, y = 1600 + r() * 1440; if (!sc.isPointInPath(sp, x, y) || !sc.isPointInPath(sp, x + 20, y)) continue; h += `<i class="mgl" style="left:${x | 0}px;top:${y | 0}px;animation-delay:${-(r() * 5).toFixed(2)}s;animation-duration:${(3 + r() * 3).toFixed(2)}s"></i>`; }
   const bird = `<svg width="60" height="30" viewBox="0 0 60 30"><path d="M4 12q5 -6 10 0q5 -6 10 0M26 4q4 -5 8 0q4 -5 8 0M30 20q4 -5 8 0q4 -5 8 0M44 10q3 -4 6 0q3 -4 6 0" stroke="#1a1612" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
   for (let i = 0; i < 3; i++) h += `<div class="mbd" style="top:${200 + i * 420 + (r() * 160 | 0)}px;animation-duration:${90 + r() * 60 | 0}s;animation-delay:${-(r() * 120) | 0}s">${bird}</div>`;
   return h + `</div>`;
 }
 
 // карту малюємо заздалегідь, поки гравець ще в локації, щоб вона відкривалася одразу
-function prebakeMap(){ if (MAP_URL || MAP_BUSY) return; const go = () => { if (MAP_URL || MAP_BUSY) return; MAP_BUSY = true; try { mapSVG(); } catch (e){} bakeMap(); };
+function prebakeMap(){ ensureMapURL(); if (MAP_URL || MAP_BUSY) return; const go = () => { if (MAP_URL || MAP_BUSY) return; MAP_BUSY = true; try { mapSVG(); } catch (e){} bakeMap(); };
   if (window.requestIdleCallback) requestIdleCallback(go, {timeout:4000}); else setTimeout(go, 1500); }

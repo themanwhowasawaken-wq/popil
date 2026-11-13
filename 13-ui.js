@@ -51,15 +51,16 @@ function openNpc(id){
     }
     else if (q && q.st === "active") qs += `<div class="qbox"><b>${Q.name}</b><p class="hint">Виконано: ${qProgressTxt(qid)}.</p></div>`;
   }
-  const st = stats(), healCost = Math.max(5, Math.round((st.maxHp - S.hp) * .3));
+  const st = stats(), petHurt = Object.keys(S.pets || {}).reduce((a, k) => a + Math.max(0, petStats(k).maxHp - S.pets[k].hp), 0), healCost = Math.max(5, Math.round((st.maxHp - S.hp + petHurt) * .3));
   let acts = "";
   if (N.shop && (!N.shopOrder || S.order === N.shopOrder)) acts += `<button class="btn p" data-shop="${N.shop}">Торгувати</button>`;
   else if (N.shop) qs += `<div class="qbox"><p class="hint">Крамниця відчинена лише для тих, хто присягнув ${ORDERS[N.shopOrder].gen}.</p></div>`;
   if (N.herald) qs += oathHTML();
-  if (N.heal) acts += `<button class="btn" data-act="heal" data-npcid="${id}" ${S.hp >= st.maxHp ? "disabled" : ""}>Вилікуватися (${moneyTxt(healCost)})</button>`;
+  if (N.heal) acts += `<button class="btn" data-act="heal" data-npcid="${id}" ${S.hp >= st.maxHp && !petHurt ? "disabled" : ""}>${petHurt ? "Вилікуватися з петом" : "Вилікуватися"} (${moneyTxt(healCost)})</button>`;
   if (N.rest) acts += `<button class="btn" data-act="rest">Відпочити (5 мід.)</button>`;
   if (SMITHS.includes(id)) acts += `<button class="btn" data-forge="1">${gi("anvil", 16)} Заточити спорядження</button>`;
-  openModal(`<div class="mbox" style="width:660px"><div class="mhead"><div class="npchd"><div class="portrait">${N.letter}</div><div><h2>${N.name}</h2><div class="hint">${N.role}</div></div></div><button class="x" data-act="close" aria-label="Закрити">×</button></div>
+  acts += npcExtraActs(id);
+  openModal(`<div class="mbox" style="width:660px"><div class="mhead"><div class="npchd"><div class="portrait pic">${npcPortrait(id, 64)}</div><div><h2>${N.name}</h2><div class="hint">${N.role}</div></div></div><button class="x" data-act="close" aria-label="Закрити">×</button></div>
     <p class="say">«${N.hello}»</p>${qs}${acts ? `<div class="acts">${acts}</div>` : ""}</div>`);
 }
 function itemLine(it){
@@ -112,7 +113,7 @@ function whereFound(type){
   return [...new Set(out)];
 }
 function codexBody(zak){
-  const types = zak ? BESTIARY.map(d => d.id) : Object.keys(MOBS), known = types.filter(t => S.codex[t]).length;
+  const types = zak ? BESTIARY.map(d => d.id) : Object.keys(MOBS).filter(k => !MOBS[k].hidden), known = types.filter(t => S.codex[t]).length;
   const sel = UI.cxSel && types.includes(UI.cxSel) && S.codex[UI.cxSel] ? UI.cxSel : types.find(t => S.codex[t]);
   const grid = types.map(t => S.codex[t] ? `<button class="cx${t === sel ? " on" : ""}" data-cx="${t}" aria-label="${mobDef(t).name}">${sprite(t, 72, 62, 1.45, false)}<span>${mobDef(t).name}</span></button>` : `<div class="cx unk">?</div>`).join("");
   let info = `<div class="hint">Ще нікого не зустріли. Вирушайте в дорогу.</div>`;

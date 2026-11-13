@@ -1,6 +1,23 @@
 "use strict";
 /* ============ helpers ============ */
 const $ = s => document.querySelector(s);
+
+/* ===== адреси картинок: blob; а якщо середовище блокує blob (наприклад, вікно попереднього перегляду), то data: ===== */
+let BLOB_OK = true;
+(function(){
+  try {
+    const i = new Image(); i.onerror = () => { BLOB_OK = false; };
+    i.src = URL.createObjectURL(new Blob(['<svg xmlns="http://www.w3.org/2000/svg" width="2" height="2"></svg>'], {type:"image/svg+xml"}));
+    document.addEventListener("securitypolicyviolation", e => { if (/blob/i.test(e.blockedURI || "")) BLOB_OK = false; });
+  } catch (e){ BLOB_OK = false; }
+})();
+const svgURL = svg => { if (BLOB_OK) try { return URL.createObjectURL(new Blob([svg], {type:"image/svg+xml"})); } catch (e){} return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg); };
+const bytesURL = (b64, mime) => { if (BLOB_OK) try { const b = atob(b64), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return URL.createObjectURL(new Blob([u], {type:mime})); } catch (e){} return "data:" + mime + ";base64," + b64; };
+function canvasURL(cv, mime, q, cb){
+  if (BLOB_OK && cv.toBlob) cv.toBlob(b => { if (b) cb(URL.createObjectURL(b)); else { try { cb(cv.toDataURL(mime, q)); } catch (e){} } }, mime, q);
+  else { try { cb(cv.toDataURL(mime, q)); } catch (e){} }
+}
+const freeURL = u => { if (u && u.startsWith("blob:")) URL.revokeObjectURL(u); };
 const rnd = (a, b) => a + Math.random() * (b - a);
 const ri = (a, b) => Math.floor(rnd(a, b + 1));
 const pick = a => a[Math.floor(Math.random() * a.length)];

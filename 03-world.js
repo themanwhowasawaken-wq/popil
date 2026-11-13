@@ -97,7 +97,7 @@ function nearestTown(from){
 // mobs: [тип, кількість, рівень]; res: тіри ресурсів; boss: бос району (з'являється після 8 вбивств)
 const LOCS = {
   // Кабаллон
-  kaballon:{desc:"Столиця заходу. Мури, торговий центр і замок.", npcs:[["ulf",330,210],["isak",560,250],["todor",250,360]], buildings:[["Замок Кабаллону","npc:ulf"],["Торговий центр","npc:isak"],["Майстерня Тодора","npc:todor"],["Банк","stub"],["Аукціон","stub"]]},
+  kaballon:{desc:"Столиця заходу. Мури, торговий центр і замок.", npcs:[["ulf",330,210],["isak",560,250],["todor",250,360]], buildings:[["Замок Кабаллону","npc:ulf"],["Торговий центр","npc:isak"],["Майстерня Тодора","npc:todor"],["Звіринець","pets"],["Банк","stub"],["Аукціон","stub"]]},
   spring:{desc:"Тихе село біля цілющого джерела.", npcs:[["olena",420,230]], buildings:[["Хата знахарки","npc:olena"],["Цілюще джерело","spring"]], res:{herb:1, fish:1}},
   fair:{desc:"Строкаті намети, музики й торговці шкатулками.", npcs:[["kotr",470,250]], buildings:[["Намет Котра","npc:kotr"]]},
   sagin:{desc:"Висока біла вежа мага Сафара.", npcs:[["safar",450,190]], buildings:[["Вежа Сафара","npc:safar"]]},
@@ -113,7 +113,7 @@ const LOCS = {
   bay:{desc:"Бухта, де з води виходять мермани.", npcs:[["myron",160,260]], mobs:[["merman",4,7],["chosen_merman",1,8]], res:{fish:4}, boss:["chosen_merman",9]},
   citadel:{desc:"Чорні мури Цитаделі. Під ними підземелля.", mobs:[["black_knight",3,8],["order_mage",2,8]], res:{mine:4}, buildings:[["Вхід у підземелля","dungeon:citadel"]], boss:["black_knight",9]},
   // Попелясті землі
-  spire:{desc:"Місто під старою вежею. Тут безпечно.", npcs:[["ostap",330,230],["healer",560,250]], buildings:[["Кузня зброяра Остапа","npc:ostap"],["Дім цілительки","npc:healer"],["Банк","stub"],["Міська рада","stub"]]},
+  spire:{desc:"Місто під старою вежею. Тут безпечно.", npcs:[["ostap",330,230],["healer",560,250]], buildings:[["Кузня зброяра Остапа","npc:ostap"],["Дім цілительки","npc:healer"],["Звіринець","pets"],["Банк","stub"],["Міська рада","stub"]]},
   tavern:{desc:"Тепло, гамір і запах юшки.", npcs:[["myroslava",450,260]], buildings:[["Зала таверни","rest"],["Дошка оголошень","board"]]},
   forge:{desc:"Покинута кузня. Щурі й іржаві механізми.", mobs:[["rat",5,1],["golem",2,2]], res:{mine:1, herb:1}, boss:["golem",3]},
   ford:{desc:"Кам'яний брід через сіру річку.", npcs:[["stakh",256,238]], mobs:[["wolf",3,3],["frog",3,3],["marauder",1,4]], res:{fish:1, herb:1}, buildings:[["Хата перевізника","npc:stakh"]], boss:["wolf",5]},

@@ -11,7 +11,7 @@ function drawSprite(cv){
   try { drawDemonBody(e); } catch (er) {}
 }
 function drawAllSprites(){ for (const cv of document.querySelectorAll("canvas.spr")) drawSprite(cv); }
-function discover(type){ if (!S.codex[type]){ S.codex[type] = true; msg(`Бестіарій поповнився: ${mobDef(type).name}.`, "good"); } }
+function discover(type){ if (MOBS[type] && MOBS[type].hidden) return; if (!S.codex[type]){ S.codex[type] = true; msg(`Бестіарій поповнився: ${mobDef(type).name}.`, "good"); } }
 
 /* ============ рантайм локацій ============ */
 const tierOf = id => 1 + Math.min(6, S.clears[id] || 0);
@@ -187,15 +187,16 @@ function renderLoc(){
   for (const sp of rt.spots){ if (!sp.ready) continue; const P = PROFS[sp.type], ok = S.prof[sp.type].lv >= TIER_LV[sp.t];
     h += `<button class="spot sp-${sp.type}${ok ? "" : " low"}" data-spot="${sp.id}" style="left:${sp.x}px;top:${sp.y}px" title="${resName(sp.type, sp.t)}${ok ? "" : ` (потрібен ${P.name.toLowerCase()} ${TIER_LV[sp.t]} рівня)`}" aria-label="${resName(sp.type, sp.t)}">${svg(P.icon, 18, "#fff", 2)}<span class="pips">${"·".repeat(sp.t)}</span>${UI.gathering && UI.gathering.spot === sp.id ? `<span class="gbar"><i id="gbar"></i></span>` : ""}</button>`; }
   for (const [npc, x, y] of L.npcs){ const N = NPCS[npc], mk = npcMark(npc);
-    h += `<button class="npc" data-npc="${npc}" style="left:${x}px;top:${y}px" aria-label="${N.name}"><span class="c">${N.letter}${mk ? `<span class="badge">${mk}</span>` : ""}</span><span class="n">${N.name}</span></button>`; }
+    h += `<button class="npc" data-npc="${npc}" style="left:${x}px;top:${y}px" aria-label="${N.name}"><span class="c nf" style="--nd:${(-(npc.length * 1.7) % 4).toFixed(1)}s">${npcArt(npc, 56)}${mk ? `<span class="badge">${mk}</span>` : ""}</span><span class="n">${N.name}</span></button>`; }
   const pp = playerPos();
-  h += `<div class="npc me-tok" style="left:${pp.x}px;top:${pp.y}px"><span class="c">${esc(S.name[0])}</span><span class="n">Ви</span></div><div id="mobs"></div>`;
+  h += `<div class="npc me-tok" style="left:${pp.x}px;top:${pp.y}px"><span class="c nf">${heroArt(48)}</span><span class="n">Ви</span></div><div id="mobs"></div>`;
   for (const nb of neighbors(id)){
     const b = NODES[nb], ang = dirTo(id, nb), rd = roadOf(id, nb);
     const ex = 450 + Math.cos(ang) * 400, ey = 290 + Math.sin(ang) * 210, left = Math.cos(ang) < -.35, right = Math.cos(ang) > .35;
     const style = left ? `left:10px;top:${clamp(ey - 17, 70, 474)}px` : right ? `right:10px;top:${clamp(ey - 17, 70, 474)}px` : `left:${clamp(ex - 90, 20, 690)}px;top:${Math.sin(ang) < 0 ? 72 : 478}px`;
     h += `<button class="exit${rd.danger ? " d" : ""}" data-go="${nb}" style="${style}" title="${b.name}${rd.name ? " (" + rd.name + ")" : ""}">${left ? "← " : ""}${b.name}${left ? "" : " →"}</button>`;
   }
+  h += entrancesHTML(id);
   if (T) h += `<div class="dim"><div class="card dimcard"><b>Ви в дорозі</b><span>${NODES[T.legs[T.i][0]].name} → ${NODES[T.legs[T.i][1]].name}</span></div></div>`;
   h += `<div id="mobcard"></div>`;
   v.innerHTML = h;

@@ -11,7 +11,7 @@ const MOBS = {
   skel:{name:"Скелет-лучник", arch:"kiter", lore:"Колишній стрілець варти. Тримає віддаль і стріляє.", p:{}, drop:[["bone",.6]], design:D("humanoid","#e8e0cc","#9a8f72","#9fe0ff",["skull"],{prop:"sword"})},
   warden:{name:"Кістяний вартовий", arch:"shielded", boss:true, lore:"Капітан варти, що не покинув пост і по смерті. За щитом його не взяти в лоб.", p:{}, drop:[["warden_amulet",1],["warden_shield",.35]], design:D("humanoid","#d8d0bc","#6a6252","#7fd0ff",["skull","shield"],{prop:"sword", size:1.35})},
   wolf2:{name:"Чорний вовк", arch:"chaser", lore:"Вовки Вовчого Яру. Чорніші й лютіші за попелястих.", p:{agi:2, dmg:1.05}, drop:[["fang",.75],["wolf_skin",.5]], design:D("beast","#3a3530","#1f1b18","#ff5a2a",["claws","tail","fangs"])},
-  alpha:{name:"Ватажок зграї", arch:"bruiser", boss:true, pack:true, lore:"Здоровенний вовк з рогами на лобі. Зграя йде за ним на смерть.", p:{}, drop:[["alpha_pelt",1]], design:D("beast","#2e2a28","#14110f","#ff3a1a",["claws","tail","fangs","horns"],{size:1.35})},
+  alpha:{name:"Ватажок зграї", arch:"bruiser", boss:true, pack:true, lore:"Здоровенний чорний вовк з іржавим ланцюгом на шиї. Зграя йде за ним на смерть.", p:{}, drop:[["alpha_pelt",1]], design:D("beast","#2e2a28","#14110f","#ff3a1a",["claws","tail","fangs"],{size:1.35})},
   whisper:{name:"Болотяний шептун", arch:"wisp", aggro:true, lore:"Шепоче твоє ім'я з туману, а коли підійдеш, обпікає холодом.", p:{hp:.9}, drop:[["wisp_dust",.6]], design:D("wisp","#a8d4b0","#6fbf8a","#1a2a22",["glow","hair"])},
   cultist:{name:"Культист Каплиці", arch:"caster", aggro:true, lore:"Служить Тіні. Його закляття проходять крізь будь-яку броню.", p:{}, drop:[["dark_shard",.5],["potion_l",.2]], design:D("humanoid","#3a2a3a","#1a1020","#ff4a4a",["cape","mask"],{prop:"staff"})},
   shade:{name:"Тінь Каплиці", arch:"summoner", boss:true, summon:"cultist", lore:"Те, що прокинулося під Каплицею. Кличе своїх слуг собі на поміч.", p:{}, drop:[["shade_blade",1],["shadow_cloak",.35]], design:D("wisp","#4a3a5a","#1a1024","#ff3a6a",["glow","hair"],{size:1.6})},
@@ -57,11 +57,11 @@ function mobDef(type){ return MOBS[type] || bestById(type); }
 
 // базова «звичайна» потвора рівня L
 // v4: мобам з рівнем росте живучість і удар, бо герой має 12 слотів і вміння
-const BASE = {hp:L => (20 + 18 * L) * (1 + .035 * L), dmg:L => (6 + 6 * L) * (1 + .022 * L), def:L => L * 1.4, agi:L => 2 + L * .8, xp:L => 8 + 7 * L, cop:L => [L * 3, L * 8]};
+const BASE = {hp:L => (28 + 30 * L) * (1 + .05 * L), dmg:L => (6 + 6.6 * L) * (1 + .025 * L), def:L => L * 1.4, agi:L => 2 + L * .8, xp:L => 8 + 7 * L, cop:L => [L * 3, L * 8]};
 const MOD = {
   elite:{hp:2.0, dmg:1.25, xp:2.5, cop:2, label:"еліта"},
   strong:{hp:1.25, dmg:1.1, xp:1.8, cop:1.5},
-  boss:{hp:3.0, dmg:1.25, xp:5, cop:4},
+  boss:{hp:3.6, dmg:1.3, xp:5, cop:4},
   dboss:{hp:4.5, dmg:1.3, xp:8, cop:6},
 };
 // tier: зачистки району (1..7) або походи в підземелля

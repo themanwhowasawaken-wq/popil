@@ -280,7 +280,7 @@ function bookAch(){
 }
 function bookSettings(){
   const o = S.opt, tg = (k, n, sub) => `<label class="opt"><span><b>${n}</b>${sub ? `<i>${sub}</i>` : ""}</span><input type="checkbox" data-opt="${k}" ${o[k] ? "checked" : ""}></label>`;
-  return `<div class="set2"><div class="ogrid">${tg("dmgnum", "Показувати цифри шкоди", "над героєм і ворогами в бою")}${tg("mapfx", "Живі хмари й дим на карті", "вимкніть, якщо карта гальмує")}${tg("confirmRare", "Підтверджувати продаж цінних речей", "від рідкісних і вище, щоб не продати випадково")}${tg("fast", "Швидкий бій", "коротші паузи між ударами")}</div>
+  return `<div class="set2"><div class="ogrid">${tg("dmgnum", "Показувати цифри шкоди", "над героєм і ворогами в бою")}${tg("mapfx", "Живі хмари й дим на карті", "вимкніть, якщо карта гальмує")}${tg("confirmRare", "Підтверджувати продаж цінних речей", "від рідкісних і вище, щоб не продати випадково")}${tg("fast", "Швидкий бій", "коротші паузи між ударами")}${tg("snd", "Звук", "удари, магія, перемоги й вітер: усе синтезується в браузері")}${tg("wx", "Погода на локаціях", "дощ, сніг, туман, пил і попіл")}</div>
     <div class="bcard dk"><span>Прогрес героя ${esc(S.name)} зберігається в цьому браузері автоматично.</span><div class="ibtn"><button class="btn dk" data-act="logout">Вийти до екрана входу</button><button class="btn p" data-act="reset">Почати цим героєм з 1 рівня</button></div></div>
     <p class="hint lm">Іконки: game-icons.net (Lorc, Delapouite та інші), ліцензія CC BY 3.0.</p></div>`;
 }

@@ -9,7 +9,7 @@ function fresh(){
     belt:["potion_s","potion_e","scroll_heal",null,null,null], loc:"spire", prev:null, quests:{}, kills:0, perks:{}, codex:{}, buffs:[],
     prof:{herb:{lv:1, xp:0}, mine:{lv:1, xp:0}, fish:{lv:1, xp:0}, alch:{lv:1, xp:0}, scribe:{lv:1, xp:0}, jewel:{lv:1, xp:0}},
     kc:{}, clears:{}, dung:{}, crafted:{}, intro:false, crest:0,
-    tal:{}, sharp:{}, ach:{}, visited:{}, track:null, contracts:null, econ:{in:{}, out:{}, sec:0}, opt:{dmgnum:true, confirmRare:true, fast:false, mapfx:true}, v4:true, order:null, v5:true, branch:null};
+    tal:{}, sharp:{}, ach:{}, visited:{}, track:null, contracts:null, econ:{in:{}, out:{}, sec:0}, opt:{dmgnum:true, confirmRare:true, fast:false, mapfx:true, snd:true, wx:true}, v4:true, order:null, v5:true, branch:null, pets:{}, pet:null, mp:0};
 }
 function migrate(s){
   if (!s || typeof s !== "object") return fresh();
@@ -36,6 +36,7 @@ function migrate(s){
   if (s.track && !QUESTS[s.track]) s.track = null;
   if (!["dawn","night"].includes(s.order)) s.order = null;
   if (!s.v4){ s.v4 = true; if (s.lvl >= 10) s.xp = 0; s.visited[s.loc] = 1; }
+  if (!s.pets || typeof s.pets !== "object") s.pets = {}; for (const k of Object.keys(s.pets)) if (!PETS[k]) delete s.pets[k]; if (s.pet && !s.pets[s.pet]) s.pet = null;
   s.belt = (s.belt || []).concat([null,null,null,null,null,null]).slice(0, 6).map(x => x && ITEMS[x] ? x : null);
   return s;
 }

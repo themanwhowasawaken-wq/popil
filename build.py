@@ -3,7 +3,7 @@ here = os.path.dirname(os.path.abspath(__file__))
 root = os.path.join(here, "src") if os.path.isdir(os.path.join(here, "src")) else here
 css = open(f"{root}/style.css", encoding="utf-8").read()
 import base64, hashlib
-mapsrc = "".join(open(f"{root}/{f}", encoding="utf-8").read() for f in ["03-world.js", "19-regions.js", "20-mapart.js", "21-sites.js"])
+mapsrc = "".join(open(f"{root}/{f}", encoding="utf-8").read() for f in ["03-world.js", "19-regions.js", "19-world2.js", "20-mapart.js", "21-sites.js", "48-newlands.js", "49-newsites.js"])
 mh = hashlib.md5(mapsrc.encode()).hexdigest()
 pre = ""
 if os.path.exists(f"{root}/map.webp") and os.path.exists(f"{root}/map.hash") and open(f"{root}/map.hash").read().strip() == mh:

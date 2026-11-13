@@ -45,7 +45,7 @@ function freeSkill(id){
   render(); fx(k.kind === "curse" ? document.getElementById("f-e" + B.target) : document.getElementById(toPet ? "f-pet" : "f-p"), k.name.toLowerCase(), k.kind === "curse" ? "#c88aff" : "#ffd27a");
 }
 // множник шкоди по ворогу від проклять і бафів
-const dmgTakenMul = e => (e.sunder ? 1.2 : 1) * (e.mark ? 1.25 : 1) * (e.hex ? 1.15 : 1);
+const dmgTakenMul = e => (e.sunder ? 1.2 : 1) * (e.mark ? 1.25 : 1) * (e.hex ? 1.15 : 1) * (hasA(e, "armor") && !e.heavy && !weaponBlunt() ? .8 : 1);
 const myDmgMul = () => (B.rage ? 1.35 : 1) * (B.cry ? 1.3 : 1) * (B.weak ? .8 : 1);
 
 /* ---------------- пети ---------------- */

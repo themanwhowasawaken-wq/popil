@@ -195,10 +195,10 @@ function spec(id){
 const A = {}, PX = 144;
 function ras(key, svg, w, h){
   let r = A[key]; if (r) return r.url;
-  r = A[key] = {url:URL.createObjectURL(new Blob([svg], {type:"image/svg+xml"}))};
+  r = A[key] = {url:svgURL(svg)};
   const img = new Image();
   img.onload = () => { const go = () => { try { const cv = document.createElement("canvas"); cv.width = w; cv.height = h; cv.getContext("2d").drawImage(img, 0, 0, w, h);
-      cv.toBlob(b => { if (!b) return; const old = r.url; r.url = URL.createObjectURL(b); document.querySelectorAll(`img[data-art="${key}"]`).forEach(e => { e.src = r.url; }); setTimeout(() => URL.revokeObjectURL(old), 4000); }, "image/webp", .92);
+      canvasURL(cv, "image/webp", .92, u => { const old = r.url; r.url = u; document.querySelectorAll(`img[data-art="${key}"]`).forEach(e => { e.src = r.url; }); setTimeout(() => freeURL(old), 4000); });
     } catch (e){} }; if (window.requestIdleCallback) requestIdleCallback(go, {timeout:900}); else setTimeout(go, 120); };
   img.src = r.url; return r.url;
 }
@@ -323,6 +323,6 @@ function heroArt(w = 170, st = S){
   return `<img class="hart" data-art="${key}" src="${ras(key, heroSVG(o, g), 360, 660)}" width="${w}" height="${h}" alt="" aria-hidden="true" draggable="false">`;
 }
 
-return {itemArt, itemSVG, heroArt, heroSVG, crestSVG, heroLook, gearLook, SHIELDS, DIVS, CHARGES, TINC, METAL, LOOK0};
+return {itemArt, itemSVG, heroArt, heroSVG, crestSVG, heroLook, gearLook, SHIELDS, DIVS, CHARGES, TINC, METAL, LOOK0, ras};
 })();
 const itemArt = ART.itemArt, heroArt = ART.heroArt;

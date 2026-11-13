@@ -167,7 +167,7 @@ async function act(a, itemId){
     fx(pEl(), "+" + hv, "#ffe08a"); B.log.push([B.round, `${S.name}: світанок`, "+" + hv, "heal"]); blog(`Світанок: +${hv} здоров'я, отрута зникла.`, "good");
   } else if (a === "ward"){
     take(wardId);
-    const d = Math.round((tg.maxHp * (tg.boss ? .05 : .1) + tg.lvl * 5) * spellMul() * elemMul(tg, "holy")); tg.heavy = true; tg.burn = 3; hitEnemy(tg, d, "оберіг", "#b7f0a0"); if (!tg.boss) tg.stun = 1; B.wardCd = 3;
+    const d = Math.round((tg.maxHp * (tg.boss ? BAL.wardBossPct : BAL.wardPct) + tg.lvl * BAL.wardLvl) * spellMul() * elemMul(tg, "holy")); tg.heavy = true; tg.burn = 3; hitEnemy(tg, d, "оберіг", "#b7f0a0"); if (!tg.boss) tg.stun = 1; B.wardCd = BAL.wardCd;
     B.log.push([B.round, `${S.name}: ${ITEMS[wardId].name} → ${tg.name}`, "−" + d + " оглуш.", "heal"]);
     blog(`${ITEMS[wardId].name} пече ${tg.name}: −${d}, нечисть оглушена!`, "good"); renderBelt();
   } else if (a === "block"){
@@ -182,7 +182,7 @@ async function act(a, itemId){
       else if (it.scroll === "shield"){ B.shield = 2; fx(pEl(), "щит", "#9fc2ea"); blog("Сувій щита: два раунди удари по вас слабші."); B.log.push([B.round, `${S.name}: ${it.name}`, "щит 2", "heal"]); }
       else if (it.scroll === "curse"){ tg.curse = 3; fx(document.getElementById("f-e" + B.target), "прокляття", "#c88aff"); blog(`${tg.name} проклятий: захист зник, урон по ньому +20%.`); B.log.push([B.round, `${S.name}: ${it.name} → ${tg.name}`, "прокляття", "hit"]); }
       else if (it.scroll === "storm"){ const d = Math.round((50 + 6 * S.lvl) * spellMul()); for (const e of B.enemies) if (alive(e)){ e.heavy = true; e.burn = 3; hitEnemy(e, Math.round(d * elemMul(e, "bolt")), "буря", "#9fd8ff"); } blog(`${it.name}: усім ворогам −${d}.`); B.log.push([B.round, `${S.name}: ${it.name}`, "−" + d + " усім", "hit"]); }
-      else if (it.scroll === "ward"){ const d = Math.round((tg.maxHp * (tg.boss ? .05 : .1) + tg.lvl * 5) * spellMul() * elemMul(tg, "holy")); tg.heavy = true; tg.burn = 3; hitEnemy(tg, d, "оберіг", "#b7f0a0"); if (!tg.boss) tg.stun = 1; B.wardCd = 3; blog(`${it.name}: −${d}, ${tg.name} оглушений.`, "good"); B.log.push([B.round, `${S.name}: ${it.name}`, "−" + d, "heal"]); }
+      else if (it.scroll === "ward"){ const d = Math.round((tg.maxHp * (tg.boss ? BAL.wardBossPct : BAL.wardPct) + tg.lvl * BAL.wardLvl) * spellMul() * elemMul(tg, "holy")); tg.heavy = true; tg.burn = 3; hitEnemy(tg, d, "оберіг", "#b7f0a0"); if (!tg.boss) tg.stun = 1; B.wardCd = BAL.wardCd; blog(`${it.name}: −${d}, ${tg.name} оглушений.`, "good"); B.log.push([B.round, `${S.name}: ${it.name}`, "−" + d, "heal"]); }
       else if (it.scroll === "tp"){ give(itemId, 1, true); blog("Сувій перенесення не діє в бою.", "warn"); }
       renderBelt();
     } else {
@@ -197,7 +197,7 @@ async function act(a, itemId){
   for (const e of B.enemies) if (e.hp <= 0 && !e.deadLogged){
     if (e.rise && !e.risen && !e.heavy){ e.risen = true; e.hp = Math.round(e.maxHp * (e.boss ? .2 : .35)); await bsleep(300); fx(document.getElementById("f-e" + B.enemies.indexOf(e)), "повстає!", "#e8e0cc");
       blog(`${e.name} розсипався, але кістки знову зібралися (+${e.hp})! Добивайте сильним ударом, булавою, вогнем чи святою водою.`, "warn"); B.log.push([B.round, `${e.name} повстає`, "+" + e.hp, "hurt"]); refreshBars(); continue; }
-    e.deadLogged = true; onEnemyDeath(e); abilDeath(e); await bsleep(300); blog(`${e.name} загинув.`, "good"); B.log.push([B.round, `${e.name} загинув`, "", "dead"]); const el = document.getElementById("f-e" + B.enemies.indexOf(e)); if (el) el.classList.add("dead"); }
+    e.deadLogged = true; onEnemyDeath(e); abilDeath(e); await bsleep(300); blog(isDuelMob(e) && e.type === "duel_guard" ? `${e.name} відступає.` : isDuelMob(e) ? `${e.name} підіймає руки: «Досить, ти переміг!»` : `${e.name} загинув.`, "good"); B.log.push([B.round, isDuelMob(e) ? `${e.name} здається` : `${e.name} загинув`, "", "dead"]); const el = document.getElementById("f-e" + B.enemies.indexOf(e)); if (el) el.classList.add("dead"); }
   if (!B.enemies.some(alive)){ await bsleep(500); endBattle("win"); return; }
   // хід ворогів
   for (let i = 0; i < B.enemies.length; i++){
@@ -224,6 +224,7 @@ async function act(a, itemId){
     if (e.cleave && B.round % 3 === 0){ mult = Math.max(mult, 1.6); fury = true; }
     if (e.hex) mult *= .7;
     mult *= enemyRegMul(e) * abilPre(e, i);
+    if (enemyPicksComp()){ const rc = rollHit(e, B.comp, mult); if (rc.miss){ fx(document.getElementById("f-comp"), "ухилення", "#ece6d8"); blog(`${B.comp.name} ухилився від ${e.name}.`); } else hurtComp(e, rc.dmg); refreshBars(); continue; }
     if (enemyPicksPet()){ const rp = rollHit(e, B.pet, mult); if (rp.miss){ fx(document.getElementById("f-pet"), "ухилення", "#ece6d8"); blog(`${B.pet.name} ухилився від ${e.name}.`); } else hurtPet(e, rp.dmg); refreshBars(); continue; }
     const r = rollHit(e, abilDefOf(e, e.arch === "caster" ? {agi:me.agi, def:0} : me), mult, (e.arch === "flyer" ? -5 : 0) + (st.dodge || 0));
     if (r.miss){ fx(pEl(), "ухилення", "#ece6d8"); B.log.push([B.round, `${e.name} → ${S.name}`, "ухилення", "miss"]); blog(`Ви ухилилися від удару ${e.name}.`); }
@@ -251,7 +252,7 @@ async function act(a, itemId){
   if (B.shield) B.shield--;
   enemyDots(); abilRoundEnd(); refreshBars();
   if (S.hp <= 0){ await bsleep(500); endBattle("lose"); return; }
-  for (const e of B.enemies) if (e.hp <= 0 && !e.deadLogged){ e.deadLogged = true; abilDeath(e); B.log.push([B.round, `${e.name} загинув`, "", "dead"]); const el = document.getElementById("f-e" + B.enemies.indexOf(e)); if (el) el.classList.add("dead"); }
+  for (const e of B.enemies) if (e.hp <= 0 && !e.deadLogged){ e.deadLogged = true; abilDeath(e); B.log.push([B.round, isDuelMob(e) ? `${e.name} здається` : `${e.name} загинув`, "", "dead"]); const el = document.getElementById("f-e" + B.enemies.indexOf(e)); if (el) el.classList.add("dead"); }
   if (battleOver()){ await bsleep(500); endBattle(overResult()); return; }
   await bsleep(400);
   if (B.rage) B.rage--; tickMyBuffs(); if (B.wardCd) B.wardCd--;
@@ -286,12 +287,12 @@ function endBattle(res){
       xp += Math.round(e.xp * (S.lvl > e.lvl + 2 ? .35 : 1)); cop += ri(e.cop[0], e.cop[1]) + e.stolen;
       if (e.stolen) msg(`Ви повернули вкрадене: ${moneyTxt(e.stolen)}.`, "good");
       for (const [it, ch] of e.drop) if (it && Math.random() < ch){ give(it, 1, true); loot.push(it); }
-      S.kills++; questKill(e); contractKill(e.type);
+      if (!isDuelMob(e)){ S.kills++; questKill(e); contractKill(e.type); }
       if (rt && e.uid){ const m = rt.mobs.find(x => x.uid === e.uid); if (m){ m.dead = true; m.busy = false; m.respawn = performance.now() + (m.distBoss ? 1e12 : e.boss ? 150000 : e.strong ? 90000 : 40000); } }
       if (b.origin === "loc"){
         if (e.distBoss){ S.clears[S.loc] = (S.clears[S.loc] || 0) + 1; S.kc[S.loc] = 0; questEvent("clear", S.loc);
           msg(`Район ${NODES[S.loc].name} зачищено! Тепер тут сильніша нечисть і кращий лут (тір ${tierOf(S.loc)}).`, "good"); b.cleared = S.loc; }
-        else if (!e.boss) S.kc[S.loc] = (S.kc[S.loc] || 0) + 1;
+        else if (!e.boss && !isDuelMob(e)) S.kc[S.loc] = (S.kc[S.loc] || 0) + 1;
       }
     }
     for (const it of loot){ const q = questNeedsItem(it); if (q) msg(`Зібрано: ${ITEMS[it].name}, ${q}.`, "quest"); }
@@ -302,7 +303,8 @@ function endBattle(res){
   } else {
     if (rt) for (const e of b.enemies) if (e.uid){ const m = rt.mobs.find(x => x.uid === e.uid); if (m){ m.busy = false; if (e.stolen) m.stolen = e.stolen; } }
     if (res === "gone") msg(b.lostCop ? `Бій завершено: ворог утік з вашими грошима (${moneyTxt(b.lostCop)}).` : "Бій завершено: ворог утік.", "warn");
-    if (res === "lose"){ const lost = Math.floor(S.cop * .1); spend("death", lost); S.hp = 0; msg(`Ви загинули. Втрачено ${moneyTxt(lost)}.`, "warn"); }
+    if (res === "lose" && b.duel){ S.hp = Math.max(1, Math.round(stats().maxHp * .25)); msg(`Ви програли поєдинок і втратили ставку (${moneyTxt(b.duel.stake)}). ${NPCS[b.duel.id].name} допомагає підвестися.`, "warn"); }
+    else if (res === "lose"){ const lost = Math.floor(S.cop * .1); spend("death", lost); S.hp = 0; msg(`Ви загинули. Втрачено ${moneyTxt(lost)}.`, "warn"); }
   }
   if (b.pet && S.pets[b.pet.key]){ S.pets[b.pet.key].hp = Math.max(0, b.pet.hp); if (res === "win" && b.pet.hp > 0) petGainXp(b.pet.key, Math.round(xp * .6)); }
   // еліксири діють кілька боїв
@@ -330,13 +332,13 @@ function gainXp(x){
 function showSummary(b, res, xp, cop, loot){
   const win = res === "win", gone = res === "gone";
   const mine = `<div class="side-col"><div class="hd ${win ? "w" : gone ? "n" : "l"}">${win ? "Переможці" : gone ? "Ви" : "Переможені"}</div><div class="bx"><h4>${esc(S.name)} <span class="hint">[${S.lvl}]</span></h4>
-    ${win && S.lvl < MAXLVL ? `<div class="kv"><span>Досвід</span><b>+${xp}</b></div>` : ""}<div class="kv"><span>Нанесено шкоди</span><b>${b.dealt}</b></div><div class="kv"><span>Отримано шкоди</span><b>${b.taken}</b></div><div class="kv"><span>Загинув</span><b>${win || gone ? "ні" : "так"}</b></div></div></div>`;
+    ${win && S.lvl < MAXLVL ? `<div class="kv"><span>Досвід</span><b>+${xp}</b></div>` : ""}<div class="kv"><span>Нанесено шкоди</span><b>${b.dealt}</b></div><div class="kv"><span>Отримано шкоди</span><b>${b.taken}</b></div><div class="kv"><span>Загинув</span><b>${win || gone || b.duel ? "ні" : "так"}</b></div></div></div>`;
   const theirs = `<div class="side-col"><div class="hd ${win ? "l" : gone ? "n" : "w"}">${win ? "Переможені" : gone ? "Втекли" : "Переможці"}</div>${b.enemies.map(e => `<div class="bx"><h4>${e.name} <span class="hint">[${e.lvl}]</span></h4><div class="kv"><span>${e.fled ? "Втік з грошима" : "Залишок здоров'я"}</span><b>${e.fled ? moneyTxt(e.stolen) : Math.max(0, Math.ceil(e.hp)) + " / " + e.maxHp}</b></div></div>`).join("")}</div>`;
   const col = {hit:"var(--ink)", hurt:"var(--ember)", miss:"var(--muted)", heal:"var(--green)", dead:"var(--ink)"};
   const log = `<div class="logcol"><div class="sub">Лог бою</div><div class="blog">${b.log.map(([r, w, v, k]) => `<div><span class="hint">р. ${r}</span><span class="${k === "dead" ? "bd" : ""}">${w}</span><span class="v" style="color:${col[k]}">${v}</span></div>`).join("")}</div></div>`;
   const lootH = win ? `<div class="loot"><span class="lbl">Здобич</span>${loot.map(i => { const q = questNeedsItem(i); return `<span class="${q ? "a" : ""}${ITEMS[i].rare ? " rare" : ""}">${ITEMS[i].name}${q ? ": квест " + q : ""}</span>`; }).join("")}<span>${moneyTxt(cop)}</span>${S.lvl < MAXLVL ? `<span>+${xp} досвіду</span>` : ""}${b.lostCop ? `<span class="a">втрачено ${moneyTxt(b.lostCop)}</span>` : ""}${b.cleared ? `<span class="a">район зачищено</span>` : ""}</div>`
     : gone ? `<div class="warn">Ворог утік${b.lostCop ? ` з вашими грошима (${moneyTxt(b.lostCop)})` : ""}.${b.origin === "loc" && b.enemies.some(e => e.fled && e.uid) ? " Він досі на цій локації: переможіть його, щоб повернути гроші." : ""}</div>`
-    : `<div class="warn">Ви втратили 10% грошей і отямитеся в найближчому місті.</div>`;
+    : (b.duel ? `<div class="warn">Ви програли поєдинок і втратили ставку, але лишаєтеся на ногах.</div>` : `<div class="warn">Ви втратили 10% грошей і отямитеся в найближчому місті.</div>`);
   openModal(`<div class="mbox wide"><div class="mhead"><h2>Підсумки бою</h2><span class="hint">${esc(S.name)} проти ${b.enemies.map(e => `${e.name} [${e.lvl}]`).join(", ")} · раундів: ${b.round}</span></div>
     <div class="sumrow">${mine}${log}${theirs}</div>
     <div class="sumfoot">${lootH}<button class="btn p big" data-act="sumok">Далі</button></div></div>`, true);

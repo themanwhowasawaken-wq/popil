@@ -51,6 +51,7 @@ function drawDemonBody(e) {
     if (blink > 0.5) { px(-sp - sz / 2, ey + (sz - hh) / 2, 1, 1, "rgba(255,255,255,.85)"); px(sp - sz / 2, ey + (sz - hh) / 2, 1, 1, "rgba(255,255,255,.85)"); } };
   const tri = (a, b, c2, d2, e2, f, col) => { ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(a, b); ctx.lineTo(c2, d2); ctx.lineTo(e2, f); ctx.closePath(); ctx.fill(); };
 
+  if (typeof NEW_SHAPES !== "undefined" && NEW_SHAPES[dsn.shape] && NEW_SHAPES[dsn.shape].full){ NEW_SHAPES[dsn.shape]({w, h, t, R, R2, eye, eyes, px, tri, m, has, dsn, id, reach, e}); return; }
   if (has("glow")) { const g = ctx.createRadialGradient(0, 0, 0, 0, 0, w * 1.3); g.addColorStop(0, R[3]); g.addColorStop(1, "rgba(0,0,0,0)"); ctx.globalAlpha = .4 + .3 * Math.sin((e.glow || 0) * 2); ctx.fillStyle = g; ctx.fillRect(-w * 1.3, -w * 1.3, w * 2.6, w * 2.6); ctx.globalAlpha = 1; }
   if (has("cape")) { const sw = Math.sin(t * 2.3) * w * 0.07; ctx.fillStyle = R2[0]; ctx.beginPath(); ctx.moveTo(-w * 0.22, -h * 0.18); ctx.quadraticCurveTo(-w * 0.56 - sw, h * 0.12, -w * 0.42 - sw, h * 0.48); ctx.lineTo(w * 0.42 + sw, h * 0.48); ctx.quadraticCurveTo(w * 0.56 + sw, h * 0.12, w * 0.22, -h * 0.18); ctx.closePath(); ctx.fill();
     ctx.fillStyle = R2[1]; ctx.beginPath(); ctx.moveTo(-w * 0.1, -h * 0.16); ctx.quadraticCurveTo(-w * 0.2, h * 0.16, -w * 0.12 - sw * 0.5, h * 0.46); ctx.lineTo(w * 0.04, h * 0.46); ctx.quadraticCurveTo(0, h * 0.1, 0, -h * 0.16); ctx.closePath(); ctx.fill(); px(-w * 0.26, -h * 0.2, w * 0.52, h * 0.06, "#7a2f2f"); }
