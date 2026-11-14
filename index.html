@@ -514,6 +514,9 @@ b.r1,.rr.r1{color:#4f8a33}b.r2,.rr.r2{color:#2f6eb8}b.r3,.rr.r3{color:#7b45b0}b.
 .qdet .rr{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ember)}
 /* ринок */
 .market2{display:flex;gap:14px}
+.market2 .bcard{overflow-x:auto}
+.prtab{min-width:0}
+.prtab th,.prtab td{padding:3px 6px;font-size:12.5px;white-space:nowrap}
 .mcol{flex:1;display:flex;flex-direction:column;gap:12px;min-width:0}
 .route{flex-direction:row;align-items:flex-start;gap:12px}.route > div{display:flex;flex-direction:column;gap:3px;font-size:13.5px}
 .gold{color:var(--gold)}
@@ -926,8 +929,6 @@ button.slotm.free{z-index:1}
 .sprart .bd{position:absolute;left:0;top:0;width:100%;height:100%}
 .sprart .msh,.sprart .aur{display:none}
 #mobs .sprart .msh,.fighter .sprart .msh{display:block;position:absolute;border-radius:50%;background:radial-gradient(closest-side,rgba(0,0,0,.42),rgba(0,0,0,0));animation:shb 3.4s ease-in-out var(--d,0s) infinite}
-.sprart img.up{clip-path:inset(0 0 40% 0);transform-origin:50% 58%}
-.sprart img.lo{clip-path:inset(54% 0 0 0)}
 #mobs .sprart:not(.big)[data-flip="0"] img{transform:scaleX(-1)}
 .sprart.big img{animation:none}
 /* ціле тіло */
@@ -980,7 +981,11 @@ button.slotm.free{z-index:1}
 .sprart.big{transition:translate .14s ease-out}
 .sprart.big[data-atk="1"]{translate:-38px 4px}
 .fighter.hit .sprart{animation:aflash .32s ease-out}
-.fighter.dead .sprart .bd,.fighter.dead .sprart img,.fighter.dead .sprart .msh{animation:none!important}
+.fighter.dead .sprart img,.fighter.dead .sprart .msh,.fighter.dead .sprart .tor{animation:none!important}
+.fighter.dead .sprart .bd{animation:mdie .7s cubic-bezier(.5,0,.8,.4) forwards!important}
+.fighter.dead .mo-fly .bd,.fighter.dead .mo-float .bd{animation:mdief .8s ease-in forwards!important}
+@keyframes mdie{0%{rotate:0deg;translate:0 0}40%{rotate:-6deg;translate:0 -4px}100%{rotate:14deg;translate:6px 10px;scale:1 .9;opacity:.75}}
+@keyframes mdief{0%{translate:0 0;rotate:0deg}100%{translate:0 40px;rotate:28deg;opacity:.6}}
 .fighter.dead .sprart .aur{display:none}
 @keyframes aflash{0%{filter:brightness(2.4) saturate(.4)}100%{filter:none}}
 @keyframes shb{0%,100%{scale:1}50%{scale:1.04 1}}
@@ -1102,6 +1107,136 @@ svg.scfx{position:absolute;left:0;top:0;pointer-events:none;overflow:hidden}
 @keyframes preyhop{0%,100%{translate:0 0}50%{translate:0 -8px}}
 .spot.sp-hunt{background:rgba(120,80,40,.85)}
 
+/* ---------- герой у бою: руки й голова рухаються окремо ---------- */
+.hart.hsvg{display:inline-block;line-height:0}
+.hart.hsvg svg{width:100%;height:100%;overflow:visible}
+.fighter.pl .hfig .hsvg{animation:hidle 3.8s ease-in-out infinite;transform-origin:50% 100%}
+.hsvg .harm,.hsvg .larm,.hsvg .hhead{transform-box:view-box}
+.hsvg .harm{transform-origin:80px 136px;animation:harmI 3.8s ease-in-out infinite}
+.hsvg .larm{transform-origin:160px 136px;animation:larmI 3.8s ease-in-out -1.2s infinite}
+.hsvg .hhead{transform-origin:120px 118px;animation:hheadI 5.2s ease-in-out infinite}
+@keyframes harmI{0%,100%{rotate:0deg}50%{rotate:5deg}}
+@keyframes larmI{0%,100%{rotate:0deg}50%{rotate:-3deg}}
+@keyframes hheadI{0%,100%{rotate:0deg}30%{rotate:2.5deg}70%{rotate:-2deg}}
+/* удар: замах назад і рубка вперед */
+.fighter.pl.lunge .hsvg .harm{animation:hswing .56s cubic-bezier(.3,.1,.3,1)}
+.fighter.pl.lunge.heavy .hsvg .harm{animation:hswingH .58s cubic-bezier(.3,.1,.3,1)}
+.fighter.pl.lunge .hsvg .larm{animation:hguard .56s ease-in-out}
+.fighter.pl.lunge .hsvg .hhead{animation:hnod .56s ease-in-out}
+@keyframes hswing{0%{rotate:0deg}30%{rotate:-150deg}55%{rotate:40deg}75%{rotate:25deg}100%{rotate:0deg}}
+@keyframes hswingH{0%{rotate:0deg}35%{rotate:-175deg}60%{rotate:55deg}80%{rotate:35deg}100%{rotate:0deg}}
+@keyframes hguard{0%,100%{rotate:0deg}40%{rotate:-14deg}60%{rotate:-8deg}}
+@keyframes hnod{0%,100%{rotate:0deg}55%{rotate:7deg}}
+/* отримав удар: голова відкидається, щит здригається */
+.fighter.pl.hurt .hsvg .hhead{animation:hhurt .3s ease-out}
+.fighter.pl.hurt .hsvg .larm{animation:hlhurt .3s ease-out}
+@keyframes hhurt{0%{rotate:0deg}40%{rotate:-9deg}100%{rotate:0deg}}
+@keyframes hlhurt{0%{rotate:0deg}40%{rotate:-18deg}100%{rotate:0deg}}
+.fighter.pl.st-poison .hfig .hsvg{filter:drop-shadow(0 0 6px rgba(120,220,80,.7)) hue-rotate(14deg)}
+.fighter.pl.st-bleed .hfig .hsvg{filter:drop-shadow(0 0 5px rgba(220,40,30,.65))}
+.fighter.pl.st-weak .hfig .hsvg{filter:grayscale(.55) brightness(.85)}
+.fighter.pl.st-rage .hfig .hsvg{filter:saturate(1.35) brightness(1.1) drop-shadow(0 0 9px rgba(255,100,30,.8))}
+.fighter.pl.st-iron .hfig .hsvg{filter:grayscale(.5) contrast(1.15) brightness(1.15) drop-shadow(0 0 6px #cfd8e0)}
+@media (prefers-reduced-motion:reduce){.hsvg *{animation:none!important}}
+/* ---------- кінцівки: щупальця хвилею, крила махають ---------- */
+.sprart img.sg,.sprart img.wgl,.sprart img.wgr,.sprart img.wgc{position:absolute}
+.sprart img.wgl{clip-path:inset(0 58% 0 0);transform-origin:40% 46%}
+.sprart img.wgr{clip-path:inset(0 0 0 58%);transform-origin:60% 46%}
+.sprart img.wgc{clip-path:inset(0 26% 0 26%)}
+#mobs .mo-fly img.wgl,.fighter .mo-fly img.wgl{animation:flapL 1.1s ease-in-out var(--d,0s) infinite}
+#mobs .mo-fly img.wgr,.fighter .mo-fly img.wgr{animation:flapR 1.1s ease-in-out var(--d,0s) infinite}
+@keyframes flapL{0%,100%{rotate:0deg;translate:0 0}45%{rotate:7deg;translate:0 calc(-2px * var(--a,1))}}
+@keyframes flapR{0%,100%{rotate:0deg;translate:0 0}45%{rotate:-7deg;translate:0 calc(-2px * var(--a,1))}}
+.chip .chn{opacity:.6;font-style:normal;font-size:11px}
+
+/* ---------- кінцівки v2: змії, щупальця, ноги ---------- */
+.sprart img.up{transform-origin:50% 58%}
+.sprart img.ll,.sprart img.lr{transform-origin:50% 56%}
+.sprart img.lg{transform-origin:50% 52%}
+.sprart img.sgx,.sprart img.sgy,.sprart img.lg,.sprart img.ll,.sprart img.lr{position:absolute}
+/* змії й щупальця: хвиля біжить по тілу */
+#mobs .sprart img.sgx,.fighter .sprart img.sgx{animation:wavx 2.2s ease-in-out calc(var(--d,0s) + var(--pd,0s)) infinite}
+#mobs .sprart img.sgy,.fighter .sprart img.sgy{animation:wavy 2.2s ease-in-out calc(var(--d,0s) + var(--pd,0s)) infinite}
+@keyframes wavx{0%,100%{translate:calc(-6px * var(--a,1) * var(--k,1)) 0}50%{translate:calc(6px * var(--a,1) * var(--k,1)) 0}}
+@keyframes wavy{0%,100%{translate:0 calc(-4px * var(--a,1) * var(--k,1))}50%{translate:0 calc(4px * var(--a,1) * var(--k,1))}}
+#mobs .sprart[data-mv="1"] img.sgx,#mobs .sprart[data-mv="1"] img.sgy{animation-duration:.9s}
+.fighter.atk .sprart img.sgx{animation:wavx .5s ease-in-out calc(var(--pd,0s) * .4) 2}
+/* ноги ходячих: стоїть — переносить вагу, іде — крокує */
+#mobs .sprart img.ll,.fighter .sprart img.ll{animation:legIL 3.4s ease-in-out var(--d,0s) infinite}
+#mobs .sprart img.lr,.fighter .sprart img.lr{animation:legIR 3.4s ease-in-out var(--d,0s) infinite}
+@keyframes legIL{0%,100%{rotate:0deg;translate:0 0}50%{rotate:calc(1.4deg * var(--a,1));translate:0 calc(-.6px * var(--a,1))}}
+@keyframes legIR{0%,100%{rotate:0deg;translate:0 calc(-.6px * var(--a,1))}50%{rotate:calc(-1.4deg * var(--a,1));translate:0 0}}
+#mobs .sprart[data-mv="1"] img.ll{animation:stepL .5s ease-in-out infinite}
+#mobs .sprart[data-mv="1"] img.lr{animation:stepL .5s ease-in-out -.25s infinite}
+#mobs .mo-heavy[data-mv="1"] img.ll{animation:stepH .8s ease-in-out infinite}
+#mobs .mo-heavy[data-mv="1"] img.lr{animation:stepH .8s ease-in-out -.4s infinite}
+@keyframes stepL{0%,100%{rotate:-11deg;translate:-1px 0}25%{rotate:0deg;translate:0 -4px}50%{rotate:11deg;translate:1px 0}75%{rotate:0deg;translate:0 0}}
+@keyframes stepH{0%,100%{rotate:-6deg;translate:0 0}25%{rotate:0deg;translate:0 -5px}50%{rotate:6deg;translate:0 0}75%{rotate:0deg;translate:0 0}}
+.fighter.atk .sprart img.ll{animation:stepL .3s ease-in-out 2}
+.fighter.atk .sprart img.lr{animation:stepL .3s ease-in-out -.15s 2}
+/* лапи павуків і крабів: перебирають по черзі */
+#mobs .sprart img.lg,.fighter .sprart img.lg{animation:legsIdle 3.2s ease-in-out calc(var(--d,0s) + var(--pd,0s)) infinite}
+@keyframes legsIdle{0%,60%,100%{translate:0 0;rotate:0deg}66%{translate:0 calc(-2px * var(--a,1));rotate:3deg}72%{translate:0 0;rotate:0deg}}
+#mobs .sprart[data-mv="1"] img.lg{animation:legsRun .26s linear var(--pd,0s) infinite}
+.fighter.atk .sprart img.lg{animation:legsRun .2s linear var(--pd,0s) 3}
+@keyframes legsRun{0%,100%{translate:0 0;rotate:-6deg}50%{translate:0 -3px;rotate:6deg}}
+/* ноги героя: переступає в спокої, робить крок при ударі й присідає, коли б'ють */
+.hsvg .hlegl,.hsvg .hlegr{transform-box:view-box}
+.hsvg .hlegl{transform-origin:104px 292px;animation:hlegIL 3.8s ease-in-out infinite}
+.hsvg .hlegr{transform-origin:136px 292px;animation:hlegIR 3.8s ease-in-out infinite}
+@keyframes hlegIL{0%,100%{rotate:0deg}50%{rotate:1.2deg}}
+@keyframes hlegIR{0%,100%{rotate:0deg}50%{rotate:-1.2deg}}
+.fighter.pl.lunge .hsvg .hlegl{animation:hstepF .56s ease-in-out}
+.fighter.pl.lunge .hsvg .hlegr{animation:hstepB .56s ease-in-out}
+@keyframes hstepF{0%,100%{rotate:0deg;translate:0 0}30%{rotate:-16deg;translate:0 -6px}55%{rotate:-22deg;translate:0 0}80%{rotate:-8deg}}
+@keyframes hstepB{0%,100%{rotate:0deg}40%{rotate:10deg}60%{rotate:14deg}}
+.fighter.pl.hurt .hsvg .hlegl{animation:hbuckL .34s ease-out}
+.fighter.pl.hurt .hsvg .hlegr{animation:hbuckR .34s ease-out}
+@keyframes hbuckL{0%,100%{rotate:0deg}40%{rotate:6deg}}
+@keyframes hbuckR{0%,100%{rotate:0deg}40%{rotate:-5deg;translate:0 2px}}
+/* ---------- очки характеристик і міцність ---------- */
+.ptfree{margin:2px 0 6px;padding:5px 8px;border-radius:6px;background:rgba(217,164,65,.18);font-size:13px}
+.ptfree b{color:#a8601a}
+.ptbtn{margin-left:6px;width:20px;height:20px;line-height:18px;padding:0;border-radius:50%;border:1px solid #a8601a;background:#d9a441;color:#2a1a08;font-weight:700;cursor:pointer}
+.ptbtn:hover{background:#f0c060}
+.bkv .ptv{font-style:normal;font-size:11px;color:#6a8a3a}
+.ptreset{text-align:right;margin-top:2px;font-size:12px}
+.repbox{margin-top:12px;padding-top:8px;border-top:1px solid rgba(0,0,0,.12)}
+.drow{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(60px,1fr) 78px 96px;gap:8px;align-items:center;padding:3px 0;font-size:13px}
+.drow .dn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dbar{height:7px;border-radius:4px;background:rgba(0,0,0,.25);overflow:hidden}.dbar i{display:block;height:100%}
+.drow .dv{text-align:right;font-size:12px}.drow .dv.br{color:#9a2a1f;font-weight:700}
+[data-tip^="eq:"].broken{filter:grayscale(1) brightness(.6);box-shadow:0 0 0 2px #9a2a1f inset}
+[data-tip^="eq:"].worn{box-shadow:0 0 0 2px #c8742a inset}
+
+/* ---------- тіла v3: тулуб від пояса, голова окремо, примари пливуть ---------- */
+.sprart .tor{position:absolute;inset:0}
+.sprart img.hd{position:absolute;transform-origin:50% 31%}
+#mobs .sprart .tor img.up,.fighter .sprart .tor img.up{animation:none}
+#mobs .sprart .tor,.fighter .sprart .tor{animation:tw 3.4s ease-in-out var(--d,0s) infinite}
+#mobs .mo-heavy .tor,.fighter .mo-heavy .tor{animation:th 4.6s ease-in-out var(--d,0s) infinite}
+#mobs .sprart[data-mv="1"] .tor{animation:twm .5s ease-in-out infinite}
+#mobs .mo-heavy[data-mv="1"] .tor{animation:thm .8s ease-in-out infinite}
+#mobs .sprart img.hd,.fighter .sprart img.hd{animation:hlook 5.6s ease-in-out var(--d,0s) infinite}
+#mobs .mo-heavy img.hd,.fighter .mo-heavy img.hd{animation:hlookH 6.4s ease-in-out var(--d,0s) infinite}
+@keyframes hlook{0%,100%{rotate:0deg;translate:0 0}18%{rotate:calc(2.6deg * var(--a,1))}30%{rotate:calc(2.6deg * var(--a,1))}45%{rotate:0deg}62%{rotate:calc(-2deg * var(--a,1));translate:0 calc(.6px * var(--a,1))}78%{rotate:calc(-2deg * var(--a,1))}90%{rotate:0deg}}
+@keyframes hlookH{0%,100%{rotate:0deg;translate:0 0}40%{rotate:calc(1.6deg * var(--a,1));translate:0 calc(1px * var(--a,1))}70%{rotate:calc(-1.2deg * var(--a,1))}}
+#mobs .sprart[data-mv="1"] img.hd{animation:hbob .5s ease-in-out infinite}
+@keyframes hbob{0%,100%{rotate:-2deg;translate:0 0}50%{rotate:2deg;translate:0 1px}}
+.fighter.atk .sprart img.hd{animation:hthrust .6s ease-out}
+@keyframes hthrust{0%,100%{rotate:0deg;translate:0 0}35%{rotate:-7deg;translate:calc(-3px * var(--a,1)) calc(2px * var(--a,1))}}
+.fighter.hit .sprart img.hd,.fighter.hurt .sprart img.hd{animation:hrecoil .35s ease-out}
+@keyframes hrecoil{0%,100%{rotate:0deg}35%{rotate:8deg;translate:calc(2px * var(--a,1)) 0}}
+.sprart[data-g="roar"] img.hd{animation:hroar 1.2s ease-out!important}
+@keyframes hroar{0%,100%{rotate:0deg}25%{rotate:6deg}45%{rotate:-9deg;translate:0 -2px}75%{rotate:-4deg}}
+/* примари й вогники пливуть хвилею */
+#mobs .mo-float .bd,.fighter .mo-float .bd{filter:url(#mwob)}
+/* крила махають ширше, тіло підскакує на кожному змаху */
+@keyframes flapL{0%,100%{rotate:0deg;translate:0 0}45%{rotate:12deg;translate:0 calc(-3px * var(--a,1))}}
+@keyframes flapR{0%,100%{rotate:0deg;translate:0 0}45%{rotate:-12deg;translate:0 calc(-3px * var(--a,1))}}
+#mobs .mo-fly img.wgc,.fighter .mo-fly img.wgc{animation:flapC 1.1s ease-in-out var(--d,0s) infinite}
+@keyframes flapC{0%,100%{translate:0 0}45%{translate:0 calc(-4px * var(--a,1))}}
+
 </style>
 </head>
 <body>
@@ -1199,6 +1334,7 @@ const IC = {
   door:'<path d="M6 21V5a6 6 0 0 1 12 0v16"/><path d="M4 21h16M14 13v1"/>',
   skull2:'<path d="M5 11a7 7 0 0 1 14 0v3l-2 1v3H7v-3l-2-1z"/>',
   chest:'<path d="M4 10a8 5 0 0 1 16 0v9H4z"/><path d="M4 12h16M11 12v3h2v-3"/>',
+  gamble:'<path d="M12 4a5 5 0 0 1 5 5c0 2-1.5 3-2.5 4-.7.7-.9 1.4-1 2h-3c0-1.2.3-2.3 1.2-3.3C13 10.4 14 9.8 14 9a2 2 0 0 0-4 0H7a5 5 0 0 1 5-5zM10.5 18h3v2.6h-3z"/>',
   trap:'<path d="M3 18h18M5 18l2-6 2 6 2-6 2 6 2-6 2 6 2-6 1 6"/>',
   shrine:'<path d="M12 3v6M9 6h6"/><path d="M6 21v-8h12v8M4 21h16M10 21v-4h4v4"/>',
   star:'<path d="M12 3l2.6 5.6 6 .7-4.5 4.1 1.2 6L12 16.4 6.7 19.4l1.2-6L3.4 9.3l6-.7z"/>',
@@ -2485,7 +2621,7 @@ function renderBattle(){
     <div class="side r"><div class="bb"><b>${tg ? tg.name + " [" + tg.lvl + "]" : ""}</b>${tg ? `<div class="bar hp rev"><span>${Math.max(0, Math.ceil(tg.hp))}/${tg.maxHp}</span><div class="tr"><div class="fl" style="width:${Math.max(0, tg.hp) / tg.maxHp * 100}%"></div></div></div>` : ""}<div class="hint lm">раунд ${B.round}${tg && tg.arch ? " · " + (ARCHL[tg.arch] || "") : ""}${tg && tg.curse ? " · прокляття " + tg.curse : ""}${tg && tg.mark ? " · мітка " + tg.mark : ""}${tg && tg.hex ? " · порча " + tg.hex : ""}${tg && tg.pois ? " · отрута " + tg.pois : ""}</div></div></div></div>`;
   const PX = FORM.ally[0].x, PY = FORM.ally[0].y, PP = FORM.ally[B.petSlot || 3];
   if (B.pet){ const p = B.pet; h += `<div class="fighter petf${p.hp > 0 ? "" : " dead"}" id="f-pet" style="left:${PP.x}px;top:${PP.y}px;z-index:${Math.round(PP.y / 10)};scale:${PP.s}"><span class="sp">${sprite(p.type, 110, 96, 2.1, false)}</span><span class="nm">${p.name} [${p.lvl}]</span><span class="hb"><div style="width:${Math.max(0, p.hp) / p.maxHp * 100}%"></div></span></div>`; }
-  h += `<div class="fighter pl" id="f-p" style="left:${PX}px;top:${PY}px"><span class="hfig">${heroArt(86)}<span class="lv">${S.lvl}</span></span><span class="nm">${esc(S.name)}</span><span class="hb"><div style="width:${S.hp / st.maxHp * 100}%"></div></span></div>`;
+  h += `<div class="fighter pl" id="f-p" style="left:${PX}px;top:${PY}px"><span class="hfig">${heroInline(86)}<span class="lv">${S.lvl}</span></span><span class="nm">${esc(S.name)}</span><span class="hb"><div style="width:${S.hp / st.maxHp * 100}%"></div></span></div>`;
   if (B.phase === "choose"){
     const wd = tg && ownedWard(tg);
     const acts = [["hit","crossed-swords","Удар",""],["strong","sword-brandish","Сильний",sCost() + " ен."],["block","checked-shield","Блок","+15 ен."],["flee","run","Втекти",B.boss ? "25%" : "50%"]];
@@ -3113,7 +3249,7 @@ function craftBody(){
   let body = `<div class="hint it">${P.text}</div><div class="kv"><span>Рівень ремесла</span><b>${p.lv}${p.lv < 10 ? ` · ${p.xp}/${profNeed(p.lv)}` : " (максимум)"}</b></div>`;
   if (P.kind === "gather"){
     const L = id => Object.keys(LOCS).filter(l => LOCS[l].res[k]).map(l => ({l, t:LOCS[l].res[k]}));
-    body += `<div class="sub">Ресурси</div>` + [1,2,3,4,5].map(t => { const it = ITEMS[{herb:"h", mine:"o", fish:"f"}[k] + t], ok = p.lv >= TIER_LV[t];
+    body += `<div class="sub">Ресурси</div>` + [1,2,3,4,5].map(t => { const it = ITEMS[{herb:"h", mine:"o", fish:"f", hunt:"u"}[k] + t], ok = p.lv >= TIER_LV[t];
       return `<div class="shoprow${ok ? "" : " off"}"><span class="ii">${itemArt(it.id, 32, ok ? "" : "off")}</span><span class="tx"><b>${it.name}</b><span>тір ${t} · потрібен ${TIER_LV[t]} рівень · у торбі: ${inv(it.id)}</span></span></div>`; }).join("");
     body += `<div class="sub">Де шукати</div><div class="hint">${L().map(x => `${NODES[x.l].name} (до ${x.t})`).join(", ")}</div><div class="hint">Збирайте, натискаючи на значки трав, руди й риби просто на сцені локації.</div>`;
   } else {
@@ -3728,6 +3864,7 @@ function diffLines(id){
 const BOOK = [["hero","Герой","visored-helm","C"],["bag","Торба","knapsack","B"],["skills","Вміння","spell-book","K"],["quests","Квести","scroll-quill","Q"],["craft","Ремесла","anvil","R"],
   ["map","Мапа","treasure-map","M"],["codex","Бестіарій","crowned-skull","X"],["market","Ринок","two-coins","T"],["ach","Досягнення","trophy","A"],["settings","Налаштування","settings-knobs",""]];
 function bookBadge(k){
+  if (k === "hero") return freePts() > 0 ? freePts() : (brokenCount() ? "!" : "");
   if (k === "skills") return S.lvl >= BRANCH_LVL && !S.branch ? "!" : "";
   if (k === "quests"){ const r = Object.keys(S.quests).filter(qReady).length; return r ? "?" : ""; }
   if (k === "craft"){ const n = RECIPES.filter(canCraft).length; return n || ""; }
@@ -3742,6 +3879,8 @@ function openBook(tab){
   if (tab) UI.book = tab; if (!UI.book) UI.book = "hero";
   let k = UI.book === "bag" ? "hero" : UI.book;
   if (k === "zcodex" && !inZak()) k = UI.book = "codex";
+  if (k !== "zcodex" && !BOOK.some(b => b[0] === k)) k = UI.book = "hero";
+  if (k === "map"){ closeModal(); if (!DG){ UI.view = "map"; camCenter(mePos()); render(); } return; }
   const body = ({hero:winHero, skills:bookSkills, quests:bookQuests, craft:craftBody, codex:() => codexBody(false), zcodex:() => codexBody(true), market:bookMarket, ach:bookAch, settings:bookSettings}[k] || winHero)();
   const who = k === "hero" ? `<span class="who">${esc(S.name)} · ${S.lvl} рівень${S.branch ? " · " + BRANCHES[S.branch].name : ""}</span>` : "";
   hideTip();
@@ -3774,7 +3913,7 @@ function winHero(){
       ${sets ? `<div class="dsets">${sets}</div>` : ""}</section>`;
   const P = S.perks, perks = statsText({hp:P.hp, en:P.en, dmg:P.dmg, crit:P.crit, wil:P.wil, disc:P.disc});
   const stat = `<section class="hstats">${lbl("Характеристики")}
-      ${kvl("Сила", st.str)}${kvl("Спритність", st.agi)}${kvl("Витривалість", st.end)}${kvl("Воля", st.wil)}
+      ${statRows(st)}
       ${lbl("У бою")}${kvl("Урон", st.dmg[0] + "–" + st.dmg[1])}${kvl("Захист", st.def, "−" + Math.round(reduce(st.def) * 100) + "%")}
       ${kvl("Шанс криту", Math.round(5 + st.agi * .5 + st.crit) + "%")}${st.dodge ? kvl("Ухилення", "+" + st.dodge + "%") : ""}${kvl("Сила сувоїв", "+" + Math.round((spellMul() - 1) * 100) + "%")}${kvl("Захист від чар", "−" + Math.round((1 - magicCut()) * 100) + "%")}
       ${lbl("Розвиток")}${kvl("Гілка", S.branch ? `<span style="color:${BRANCHES[S.branch].col}">${BRANCHES[S.branch].name}</span>` : S.lvl >= BRANCH_LVL ? `<button class="lnk" data-book="skills">обрати</button>` : "з " + BRANCH_LVL + " рівня")}
@@ -3791,7 +3930,8 @@ function bagPanel(){
   const sel = UI.bsel && UI.bsel.startsWith("inv:") && inv(UI.bsel.slice(4)) ? UI.bsel.slice(4) : null;
   const cells = ids.map(id => cellIt(id, {size:52, n:inv(id), sel:id === sel, notitle:true, lock:ITEMS[id].lvl > S.lvl, cmp:ITEMS[id].slot ? cmpEquip(id) : 0, data:`data-bsel="inv:${id}" data-drag="inv:${id}" draggable="true" data-tip="inv:${id}"`}));
   const free = Math.max(0, 40 - cells.length); for (let i = 0; i < free; i++) cells.push(`<span class="gcell empty" style="width:52px;height:52px"></span>`);
-  const chips = BAGF.map(([k, l]) => `<button class="chip${k === f ? " on" : ""}" data-bagtab="${k}">${l}</button>`).join("");
+  const cnt = k => Object.keys(S.inv).filter(id => inv(id) > 0 && (k === "all" || ITEMS[id].cat === k)).length;
+  const chips = BAGF.map(([k, l]) => { const n = cnt(k); return n || k === "all" ? `<button class="chip${k === f ? " on" : ""}" data-bagtab="${k}">${l} <em class="chn">${n}</em></button>` : ""; }).join("");
   const belt = S.belt.map((id, i) => `<span class="beltc" data-dz="belt:${i}">${id ? cellIt(id, {size:46, n:inv(id), notitle:true, data:`data-drag="belt:${i}" draggable="true" data-tip="belt:${i}" data-unbelt="${i}" aria-label="${esc(ITEMS[id].name)}: зняти з пояса"`}) : `<span class="gcell empty" style="width:46px;height:46px"></span>`}</span>`).join("");
   let act = `<div class="selbar hint lm">Перетягніть річ на героя, щоб надягти, а зілля на пояс. Подвійний клік робить те саме.</div>`;
   const selId = sel || (UI.bsel && UI.bsel.startsWith("eq:") ? S.equip[UI.bsel.slice(3)] : null);
@@ -3936,7 +4076,7 @@ function bookMarket(){
   return `<div class="market2"><div class="mcol">
       <div class="bcard dk route">${gi("treasure-map", 26, "#d9a441")}<div><b>Торговий шлях дня</b><span>${PCAT[tr.cat]}: ${REGIONS[tr.from]} → ${REGIONS[tr.to]}, ціна <b class="gold">×${tr.k.toFixed(1).replace(".", ",")}</b>.</span><span class="hint lm">Ресурси й трофеї скупники беруть за 50% ціни × множник регіону. Речі завжди за 25%.</span></div></div>
       <div class="bcard">${lbl("Ціни скупників сьогодні · ви в: " + REGIONS[here])}${table}</div>
-      <div class="bcard dk">${lbl("Заточка спорядження")}<span>Кожен рівень заточки: зброя +6% урону, броня +1 захисту і +4 здоров'я. До +10, шанс падає з кожним рівнем, невдача забирає лише гроші.</span>
+      <div class="bcard dk">${lbl("Заточка й ремонт")}<span>Кожен рівень заточки: зброя +6% урону, броня +1 захисту і +4 здоров'я. До +10, шанс падає з кожним рівнем, невдача забирає лише гроші.</span>
         ${smith ? `<button class="btn p" data-forge="1">${gi("anvil", 16, "#fff")} Відкрити кузню</button>` : `<span class="hint lm">Кузні є в Попелястому Шпилі (Зброяр Остап) і в Мукачеві (Коваль Юрко).</span>`}</div>
     </div><div class="mcol">
       <div class="bcard">${lbl("Контракти гільдій · нові через " + contractsTimeLeft())}${cs}</div>
@@ -8166,9 +8306,12 @@ function heroSVG(o, g = {}, w = 240, vb = "0 0 240 440"){
   if (g.cloak) s += `<path d="M68 122Q34 270 40 422L200 422Q206 270 172 122Z" fill="${g.cloak}"/><path d="M120 122L172 122Q206 270 200 422H128Z" fill="#000" opacity=".3"/><path d="M40 422q20 -8 40 0t40 0t40 0t40 0" stroke="#000" stroke-opacity=".3" stroke-width="3" fill="none"/><path d="M86 140Q66 270 70 414" stroke="#fff" stroke-opacity=".08" stroke-width="10" fill="none"/>`;
   // ноги
   const lg = g.legs ? `url(#${id}st)` : "#3a3228";
-  s += `<path d="M92 290L88 398H110L116 290Z" fill="${lg}"/><path d="M124 290L130 398H152L148 290Z" fill="${g.legs ? lg : "#2a241e"}"/>${g.legs ? `<path d="M124 290L130 398H152L148 290Z" fill="#000" opacity=".3"/><path d="M90 340h22M128 340h22" stroke="#2a2e32" stroke-width="2.5"/>` : ""}`;
+  const legL = `<path d="M92 290L88 398H110L116 290Z" fill="${lg}"/>${g.legs ? `<path d="M90 340h22" stroke="#2a2e32" stroke-width="2.5"/>` : ""}`;
+  const legR = `<path d="M124 290L130 398H152L148 290Z" fill="${g.legs ? lg : "#2a241e"}"/>${g.legs ? `<path d="M124 290L130 398H152L148 290Z" fill="#000" opacity=".3"/><path d="M128 340h22" stroke="#2a2e32" stroke-width="2.5"/>` : ""}`;
   const bt = g.boots === "metal" ? [`url(#${id}st)`, "#6a727a"] : g.boots === "leather" ? ["#5a3e26", "#3e2a1a"] : ["#7a6a52", "#5a4c3a"];
-  s += `<path d="M86 384H112V418H80Q80 402 86 384Z" fill="${bt[0]}"/><path d="M128 384H154Q160 402 160 418H128Z" fill="${bt[1]}"/><path d="M80 418H112M128 418H160" stroke="#1e140c" stroke-width="3"/><path d="M86 386h26M128 386h26" stroke="#000" stroke-opacity=".35" stroke-width="3"/>`;
+  const bootL = `<path d="M86 384H112V418H80Q80 402 86 384Z" fill="${bt[0]}"/><path d="M80 418H112" stroke="#1e140c" stroke-width="3"/><path d="M86 386h26" stroke="#000" stroke-opacity=".35" stroke-width="3"/>`;
+  const bootR = `<path d="M128 384H154Q160 402 160 418H128Z" fill="${bt[1]}"/><path d="M128 418H160" stroke="#1e140c" stroke-width="3"/><path d="M128 386h26" stroke="#000" stroke-opacity=".35" stroke-width="3"/>`;
+  s += `<g class="hlegl">${legL}${bootL}</g><g class="hlegr">${legR}${bootR}</g>`;
   // тулуб
   s += fem ? `<path d="M84 128Q120 118 156 128L166 318Q120 330 74 318Z" fill="${tun}"/>` : `<path d="M76 128Q120 116 164 128L170 304Q120 314 70 304Z" fill="${tun}"/>`;
   if (g.armor === "chain" || g.armor === "plate") s += `<path d="M76 128Q120 116 164 128L170 304Q120 314 70 304Z" fill="url(#${id}ch)"/>`;
@@ -8179,16 +8322,19 @@ function heroSVG(o, g = {}, w = 240, vb = "0 0 240 440"){
   s += `<path d="M96 134H144L150 312Q120 320 90 312Z" fill="none" stroke="${o.m}" stroke-width="2" stroke-opacity=".8"/>`;
   if (g.armor === "plate") s += `<path d="M64 142Q64 116 98 114L100 150Q80 156 64 142Z" fill="url(#${id}st)" stroke="#2a2e32" stroke-width="2"/><path d="M176 142Q176 116 142 114L140 150Q160 156 176 142Z" fill="url(#${id}st)" stroke="#2a2e32" stroke-width="2"/>`;
   s += `<rect x="72" y="238" width="96" height="11" fill="${g.belt ? "#3a2412" : "#5a4632"}"/>${g.belt ? `<rect x="113" y="235" width="14" height="17" rx="2" fill="none" stroke="#d9a441" stroke-width="3"/><circle cx="96" cy="243.5" r="2" fill="#d9a441"/><circle cx="144" cy="243.5" r="2" fill="#d9a441"/>` : ""}`;
-  // права рука і зброя
+  // права рука і зброя (окрема група, щоб махати нею в бою)
+  s += `<g class="harm">`;
   s += `<path d="M78 132Q60 150 62 232L78 234Q80 172 92 150Z" fill="${tun}"/><path d="M78 132Q60 150 62 232L70 233Q70 170 84 140Z" fill="#fff" opacity=".1"/>`;
   if (g.weap === "sword") s += `<path d="M69 244L65 384" stroke="url(#${id}st)" stroke-width="8" stroke-linecap="round"/><path d="M71 246L68 380" stroke="#fff" stroke-opacity=".6" stroke-width="1.5"/><path d="M54 240L86 242" stroke="#b08a3a" stroke-width="6" stroke-linecap="round"/><path d="M70 238V222" stroke="#4a3220" stroke-width="6"/><circle cx="70" cy="219" r="4.5" fill="#d9a441"/>`;
   if (g.weap === "axe") s += `<path d="M70 210L66 392" stroke="#5a3a1e" stroke-width="7" stroke-linecap="round"/><path d="M64 360Q40 352 34 336Q52 340 66 334Z" fill="url(#${id}st)" stroke="#1e1a16" stroke-width="2"/><path d="M68 356Q92 364 100 388Q80 380 66 376Z" fill="url(#${id}st)" stroke="#1e1a16" stroke-width="2"/>`;
   if (g.weap === "mace") s += `<path d="M70 226L67 372" stroke="#5a3a1e" stroke-width="7" stroke-linecap="round"/><circle cx="67" cy="378" r="14" fill="url(#${id}st)" stroke="#1e1a16" stroke-width="2"/><path d="M67 360v-6M67 396v6M49 378h-6M85 378h6M55 366l-4 -4M79 366l4 -4M55 390l-4 4M79 390l4 4" stroke="#4a525a" stroke-width="4" stroke-linecap="round"/>`;
   if (g.weap === "staff") s += `<path d="M70 120L66 410" stroke="#6a4a26" stroke-width="7" stroke-linecap="round"/><circle cx="70" cy="114" r="9" fill="#ffd27a" opacity=".9"/><circle cx="70" cy="114" r="18" fill="#ffd27a" opacity=".25"/>`;
   s += g.gloves ? `<circle cx="70" cy="238" r="9" fill="#4a3220"/><path d="M62 232h16" stroke="#2a1a0e" stroke-width="3"/>` : `<circle cx="70" cy="238" r="8" fill="${skin}"/>`;
+  s += `</g>`;
   // плечі плаща
   if (g.cloak) s += `<path d="M64 140Q66 118 96 116Q90 128 92 148Q78 150 64 140Z" fill="${g.cloak}"/><path d="M176 140Q174 118 144 116Q150 128 148 148Q162 150 176 140Z" fill="${g.cloak}"/><path d="M176 140Q174 118 144 116Q150 128 148 148Q162 150 176 140Z" fill="#000" opacity=".25"/>`;
   // шия, голова
+  s += `<g class="hhead">`;
   s += `<path d="M110 98H130V124H110Z" fill="${skin}"/><path d="M120 98H130V124H120Z" fill="#000" opacity=".18"/>`;
   const great = g.helm === "great";
   if (!great && (o.hs === "long" || o.hs === "tied")) s += `<path d="M94 70Q90 110 98 132L110 128L104 76ZM146 70Q150 110 142 132L130 128L136 76Z" fill="${hc}"/>`;
@@ -8206,11 +8352,13 @@ function heroSVG(o, g = {}, w = 240, vb = "0 0 240 440"){
   if (g.helm === "cap") s += `<path d="M94 70Q94 42 120 42Q146 42 146 70Q120 62 94 70Z" fill="#6e4826" stroke="#2a180a" stroke-width="2"/>`;
   if (g.helm === "hat") s += `<ellipse cx="120" cy="58" rx="40" ry="8" fill="#2a2218"/><path d="M100 58Q100 30 120 30Q140 30 140 58Z" fill="#3a2e20"/><path d="M100 52H140" stroke="#9a2a22" stroke-width="5"/><path d="M138 48q14 -20 6 -34" stroke="#c8b08a" stroke-width="3" fill="none"/>`;
   if (g.helm === "crown") s += `<path d="M98 56L100 38L110 48L120 34L130 48L140 38L142 56Z" fill="#e8b84a" stroke="#6a4a10" stroke-width="2"/>`;
+  s += `</g>`;
   s += `<circle cx="120" cy="132" r="5" fill="#d9a441"/>`;
+  s += `<g class="larm">`;
   // щит із гербом — лише коли є щит
   if (g.shield) s += `<g transform="translate(140 152) scale(.82)">${crestSVG(o, 96).replace(/^<svg[^>]*>/, "").replace(/<\/svg>$/, "")}</g>`;
   else s += `<path d="M162 132Q180 150 178 232L162 234Q160 172 148 150Z" fill="${tun}"/>${g.gloves ? `<circle cx="170" cy="238" r="9" fill="#4a3220"/>` : `<circle cx="170" cy="238" r="8" fill="${skin}"/>`}${g.dagger ? `<path d="M171 246L173 296" stroke="url(#${id}st)" stroke-width="5" stroke-linecap="round"/><path d="M162 245h18" stroke="#8a6a2a" stroke-width="4"/>` : ""}`;
-  return s + `</svg>`;
+  return s + `</g></svg>`;
 }
 function heroLook(st = S){ if (st && st.look) return Object.assign({}, LOOK0, st.look); const c = typeof CRESTS !== "undefined" ? CRESTS[(st && st.crest) || 0] || CRESTS[0] : null; return Object.assign({}, LOOK0, c ? {f1:c[0], f2:c[1]} : {}); }
 function heroArt(w = 170, st = S){
@@ -8218,9 +8366,10 @@ function heroArt(w = 170, st = S){
   return `<img class="hart" data-art="${key}" src="${ras(key, heroSVG(o, g), 360, 660)}" width="${w}" height="${h}" alt="" aria-hidden="true" draggable="false">`;
 }
 
-return {itemArt, itemSVG, heroArt, heroSVG, crestSVG, heroLook, gearLook, SHIELDS, DIVS, CHARGES, TINC, METAL, LOOK0, ras};
+function heroInline(w = 170, st = S){ const o = heroLook(st), g = gearLook(st && st.equip); return `<span class="hart hsvg" style="width:${w}px;height:${Math.round(w * 440 / 240)}px">${heroSVG(o, g, w)}</span>`; }
+return {heroInline, itemArt, itemSVG, heroArt, heroSVG, crestSVG, heroLook, gearLook, SHIELDS, DIVS, CHARGES, TINC, METAL, LOOK0, ras};
 })();
-const itemArt = ART.itemArt, heroArt = ART.heroArt;
+const itemArt = ART.itemArt, heroArt = ART.heroArt, heroInline = ART.heroInline;
 
 /* ============ мальовані вороги: готові картинки замість фігурок (151 спрайт) ============ */
 // k — ширина в бою як частка 130 px, ar — висота/ширина, foot — де земля (частка висоти), lift — на скільки px моб ширяє
@@ -11055,7 +11204,28 @@ const AURA_N = {ice:6, fire:7, mist:4, dead:5, drip:4, magic:6};
     const W = g("width"), H = g("height"), L = g("left"), T = g("top"), cx = L + W / 2, fy = T + H * ((MOB_ART[type].foot) || 1) - H * .03;
     const dl = -((hash32(type + Math.random()) % 4000) / 1000).toFixed(2), R = Math.random;
     const split = mo === "walk" || mo === "heavy";
-    const body = split ? img.replace("<img ", '<img class="lo" ') + img.replace("<img ", '<img class="up" ') : img;
+    let body = img;
+    const band = (cls, clip, vars) => img.replace("<img ", `<img class="${cls}" `).replace('style="', `style="clip-path:inset(${clip});${vars}`);
+    const lyX = t => /leech/.test(t), tentDown = t => /^kraken$/.test(t);
+    if (split){
+      // торс + ліва й права половини ніг: ноги ступають по черзі
+      // тулуб у власній обгортці гнеться від пояса; голова поверх нього ще й озирається; ноги ступають окремо
+      const waist = Math.round(T + H * .6);
+      body = band("ll", "54% 49% 0 0", "") + band("lr", "54% 0 0 49%", "") +
+        `<span class="tor" style="transform-origin:${Math.round(cx)}px ${waist}px">${band("up", "29% 0 40% 0", "")}${band("hd", "0 0 68% 0", "")}</span>`;
+    } else if (mo === "slith"){
+      const N = 7, lie = lyX(type), down = tentDown(type); body = "";
+      for (let i = 0; i < N; i++){
+        const a = i / N * 100, b = (i + 1) / N * 100;
+        const clip = lie ? `0 ${Math.max(0, 100 - b - 1.5).toFixed(1)}% 0 ${Math.max(0, a - 1.5).toFixed(1)}%` : `${Math.max(0, a - 1.5).toFixed(1)}% 0 ${Math.max(0, 100 - b - 1.5).toFixed(1)}% 0`;
+        // сила хвилі: у змії найбільше хитається голова (верх), у кракена — кінці щупалець (низ), у п'явки — обидва кінці
+        const t = i / (N - 1), k = lie ? .35 + .65 * Math.abs(t - .5) * 2 : down ? Math.pow(t, 1.3) : Math.pow(1 - t, 1.4);
+        body += band(lie ? "sgy" : "sgx", clip, `--k:${k.toFixed(2)};--pd:${(-i * .2).toFixed(2)}s;`);
+      }
+    } else if (mo === "spider" || mo === "crab"){
+      body = band("up", "0 0 42% 0", "");
+      for (let i = 0; i < 4; i++) body += band("lg", `52% ${Math.max(0, 100 - (i + 1) * 25 - 1.5)}% 0 ${Math.max(0, i * 25 - 1.5)}%`, `--pd:${i % 2 ? "-.5" : "0"}s;`);
+    } else if (mo === "fly") body = img.replace("<img ", '<img class="wgl" ') + img.replace("<img ", '<img class="wgr" ') + img.replace("<img ", '<img class="wgc" ');
     let sh = "";
     if (mo !== "float" && mo !== "swarm") sh = `<div class="msh" style="left:${Math.round(cx - W * .34)}px;top:${Math.round(fy - W * .07)}px;width:${Math.round(W * .68)}px;height:${Math.round(W * .14)}px"></div>`;
     const au = auraOf(type); let ar = "";
@@ -11074,6 +11244,10 @@ setInterval(() => {
   const loc = [...document.querySelectorAll('#mobs .sprart:not([data-mv="1"])')]; if (loc.length && Math.random() < .8) gesture(loc[Math.floor(Math.random() * loc.length)]);
   if (typeof B !== "undefined" && B && B.phase === "choose"){ const bt = [...document.querySelectorAll(".fighter:not(.dead):not(.pl) .sprart.big")]; if (bt.length && Math.random() < .45) gesture(bt[Math.floor(Math.random() * bt.length)]); }
 }, 2200);
+// фільтр «хвиля» для примар: тіло легко пливе й дрижить
+(function(){ const add = () => { if (document.getElementById("mwobsvg")) return; const d = document.createElement("div"); d.id = "mwobsvg"; d.style.cssText = "position:absolute;width:0;height:0;overflow:hidden";
+  d.innerHTML = `<svg width="0" height="0"><filter id="mwob" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".012 .035" numOctaves="2" seed="3" result="n"><animate attributeName="baseFrequency" dur="7s" values=".012 .035;.02 .05;.012 .035" repeatCount="indefinite"/></feTurbulence><feDisplacementMap in="SourceGraphic" in2="n" scale="9" xChannelSelector="R" yChannelSelector="G"/></filter></svg>`;
+  document.body.appendChild(d); }; if (document.body) add(); else document.addEventListener("DOMContentLoaded", add); })();
 
 /* ============ живі локації: вогонь, дим, вода, птахи, метелики, світлячки ============ */
 // Сцена — готова картинка; поверх неї кладемо прозорий шар SVG з анімованими дрібницями.
@@ -11467,8 +11641,7 @@ document.addEventListener("click", e => {
   else if (t.dataset.arbuy){ const row = AR_SHOP.find(x => x[0] === t.dataset.arbuy), a = arS(); if (!row || a.glory < row[2]) return; a.glory -= row[2]; give(row[0], row[1]); msg(`Арена: ${ITEMS[row[0]].name} за ${row[2]} слави.`, "good"); save(); openArena("shop"); }
 });
 
-/* ============ риболовля з підсічкою і мисливство ============ */
-// Риба: закидаєш, чекаєш, коли поплавок смикне, і встигаєш підсікти. Рано — злякав, пізно — зірвалася.
+/* ============ мисливство ============ */
 // Полювання: на локаціях є звірині сліди; звір вискакує й біжить — влучи в нього, поки не втік.
 // Свіжування: з убитих звірів мисливець знімає шкури.
 PROFS.hunt = {name:"Мисливець", kind:"gather", icon:"hunt", text:"Вистежує звірів на локаціях і знімає шкури з убитих звірів. Шкури йдуть на продаж і начертателю, дичина — алхіміку."};
@@ -11478,17 +11651,17 @@ if (S && S.prof && !S.prof.hunt) S.prof.hunt = {lv:1, xp:0};
 Object.assign(ITEMS, {
   u1:{name:"Дрібна шкурка", res:"hunt", t:1, price:9}, u2:{name:"Тонке хутро", res:"hunt", t:2, price:18}, u3:{name:"Груба шкура", res:"hunt", t:3, price:30},
   u4:{name:"Цупке хутро", res:"hunt", t:4, price:48}, u5:{name:"Шкура місячного оленя", res:"hunt", t:5, price:95},
-  game_meat:{name:"Дичина", use:{hp:90, en:20}, price:20, cat:"use"}, moon_horn:{name:"Місячний ріг", price:420}, gold_fish:{name:"Золота рибка", price:520},
+  game_meat:{name:"Дичина", use:{hp:90, en:20}, price:20, cat:"use"}, moon_horn:{name:"Місячний ріг", price:420},
 });
-for (const k of ["u1", "u2", "u3", "u4", "u5", "game_meat", "moon_horn", "gold_fish"]) prepItem(k, ITEMS[k]);
-Object.assign(ITEM_IC, {u1:"animal-hide", u2:"animal-hide", u3:"animal-hide", u4:"animal-hide", u5:"animal-hide", game_meat:"fish-cooked", moon_horn:"bestial-fangs", gold_fish:"fish-scales"});
+for (const k of ["u1", "u2", "u3", "u4", "u5", "game_meat", "moon_horn"]) prepItem(k, ITEMS[k]);
+Object.assign(ITEM_IC, {u1:"animal-hide", u2:"animal-hide", u3:"animal-hide", u4:"animal-hide", u5:"animal-hide", game_meat:"fish-cooked", moon_horn:"bestial-fangs"});
 RECIPES.push({id:"r_hm", prof:"alch", lv:3, in:{game_meat:2, h2:1}, out:"potion_l"}, {id:"r_hs", prof:"scribe", lv:4, in:{u2:1, f2:1}, out:"scroll_shield"}, {id:"r_hf", prof:"scribe", lv:6, in:{u4:1, h3:1}, out:"scroll_fire"});
 // сліди звірів на диких локаціях
 const HUNT_BIO = new Set(["forest", "meadow", "steppe", "ice", "snow", "polonyna", "vineyard", "coast", "swamp"]);
 for (const [id, L] of Object.entries(LOCS)){ const N = NODES[id], c = SCENE[id] || {}; if (!N || N.kind === "city" || N.kind === "town" || !HUNT_BIO.has(c.b) || L.res.hunt) continue;
   const m = L.mobs || []; const lv = m.length ? m.reduce((a, x) => a + (x[2] || 1), 0) / m.length : 3; L.res.hunt = clamp(Math.ceil(lv / 2), 1, 5); }
 
-/* ---------- міні-гра: риба ---------- */
+/* ---------- міні-гра: спільне ---------- */
 let MG = null;
 function mgEl(){ let el = document.getElementById("mg"); const v = document.getElementById("view"); if (!v) return null; if (!el){ el = document.createElement("div"); el.id = "mg"; v.appendChild(el); } return el; }
 function mgEnd(){ if (MG && MG.tm) clearInterval(MG.tm); MG = null; UI.gathering = null; const el = document.getElementById("mg"); if (el) el.remove(); }
@@ -11498,24 +11671,6 @@ function gatherReward(sp, type, item, n, extra, ok, xpk = 1){
   profXp(type, Math.round((ok ? 6 : 2) * sp.t * (gap <= 1 ? 1 : gap <= 3 ? .5 : .2) * xpk) + 1);
   sp.ready = false; sp.respawn = performance.now() + 50000; save(); renderLoc(); renderBelt();
 }
-function startFish(sp){
-  const win = Math.max(520, 1000 - sp.t * 80), bite = performance.now() + 1400 + Math.random() * 2800;
-  MG = {kind:"fish", sp, phase:"wait", bite, win};
-  const el = mgEl(); if (!el) return;
-  el.className = "mg mg-fish"; el.style.left = sp.x + "px"; el.style.top = sp.y + "px";
-  el.innerHTML = `<div class="bob"><i></i></div><div class="rip"></div><div class="mgt">Чекайте клювання… Клацніть, коли поплавок пірне</div>`;
-  MG.tm = setInterval(() => { if (!MG) return; const t = performance.now();
-    if (MG.phase === "wait" && t >= MG.bite){ MG.phase = "bite"; MG.bt = t; el.classList.add("bite"); el.querySelector(".mgt").textContent = "КЛЮЄ! Тисніть!"; SND.play("miss"); }
-    else if (MG.phase === "bite" && t - MG.bt > MG.win){ msg("Рибак: риба зірвалася з гачка.", "warn"); const s = MG.sp; mgEnd(); gatherReward(s, "fish", null, 0, "", false); } }, 40);
-}
-function hookFish(){
-  if (!MG || MG.kind !== "fish") return; const sp = MG.sp;
-  if (MG.phase === "wait"){ mgEnd(); msg("Рибак: зарано підсікли, риба злякалася.", "warn"); gatherReward(sp, "fish", null, 0, "", false); return; }
-  const rt = performance.now() - MG.bt, perfect = rt < 330, n = 1 + (perfect ? 1 : 0); mgEnd();
-  let extra = perfect ? " (ідеальна підсічка)" : ""; if (perfect && Math.random() < .03 + sp.t * .01){ give("gold_fish", 1, true); extra += ", Золота рибка!"; }
-  SND.play("coin"); gatherReward(sp, "fish", "f" + sp.t, n, extra, true, perfect ? 1.3 : 1);
-}
-
 /* ---------- міні-гра: полювання ---------- */
 const PREY = [null,
   {n:"кролик", svg:'<svg viewBox="0 0 40 30" width="40" height="30"><ellipse cx="20" cy="20" rx="12" ry="7" fill="#9a8a6a"/><circle cx="31" cy="15" r="5" fill="#9a8a6a"/><path d="M31 11l-2-9M33 11l1-9" stroke="#9a8a6a" stroke-width="3" stroke-linecap="round"/><circle cx="8" cy="18" r="3" fill="#e8e0d0"/><circle cx="33" cy="14" r="1" fill="#000"/></svg>', w:44},
@@ -11538,14 +11693,13 @@ function shootPrey(){
 }
 { const sg0 = startGather; startGather = function(spotId){
     if (T || B || UI.gathering || MG) return; const rt = locRT(S.loc), sp = rt.spots.find(s => s.id === spotId); if (!sp || !sp.ready) return sg0(spotId);
-    if (sp.type !== "fish" && sp.type !== "hunt") return sg0(spotId);
+    if (sp.type !== "hunt") return sg0(spotId);
     const P = S.prof[sp.type], req = TIER_LV[sp.t];
     if (P.lv < req){ msg(`${resName(sp.type, sp.t)}: потрібен ${PROFS[sp.type].name.toLowerCase()} ${req} рівня (у вас ${P.lv}).`, "warn"); return; }
-    UI.gathering = {spot:spotId, t:0, dur:1e9, mg:true}; if (sp.type === "fish") startFish(sp); else startHunt(sp); }; }
+    UI.gathering = {spot:spotId, t:0, dur:1e9, mg:true}; startHunt(sp); }; }
 // ігровий цикл не має завершувати міні-гру сам
 { const tg0 = tickGather; tickGather = function(dt){ if (UI.gathering && UI.gathering.mg){ if (T || B || UI.view !== "loc"){ mgEnd(); } return; } return tg0(dt); }; }
-document.addEventListener("pointerdown", e => { if (!MG) return; if (MG.kind === "fish"){ if (e.target.closest("#view")){ e.preventDefault(); hookFish(); } } else if (MG.kind === "hunt" && e.target.closest("[data-prey]")){ e.preventDefault(); e.stopPropagation(); shootPrey(); } }, true);
-document.addEventListener("keydown", e => { if (MG && MG.kind === "fish" && (e.code === "Space" || e.key === " ")){ e.preventDefault(); hookFish(); } }, true);
+document.addEventListener("pointerdown", e => { if (MG && MG.kind === "hunt" && e.target.closest("[data-prey]")){ e.preventDefault(); e.stopPropagation(); shootPrey(); } }, true);
 // після рендеру локації міні-гра лишається на місці
 { const rl0 = renderLoc; renderLoc = function(){ const o = rl0.apply(this, arguments); if (MG){ const v = document.getElementById("view"), el = document.getElementById("mg"); if (v && !el && MG.el) v.appendChild(MG.el); } const el2 = document.getElementById("mg"); if (MG && el2) MG.el = el2; return o; }; }
 
@@ -11557,6 +11711,255 @@ const BEAST2 = /^(ice_wolf|mammoth|steppe_wolf|tarpan|wolf_rider|giant_crab|sand
         const t = clamp(Math.ceil(e.lvl / 2), 1, 4); if (P.lv < TIER_LV[t] || Math.random() > .35) continue;
         give("u" + t, 1, true); profXp("hunt", 3 * t); msg(`Мисливець: ${ITEMS["u" + t].name} (${e.name}).`, "good"); } }
     return out; }; }
+
+/* ============ правки: вміння, скрол списків, заточка, звуки ============ */
+
+/* ---------- вміння: у вікні видно й пасивні вміння, і прийоми з кола бою ---------- */
+{ const bs0 = bookSkills; bookSkills = function(){
+    let h = bs0(); if (!S.branch) return h;
+    const Bd = BRANCHES[S.branch];
+    const rows = Object.entries(SKILLS).filter(([, k]) => k.br === S.branch).sort((a, b) => a[1].lvl - b[1].lvl).map(([id, k]) => { const on = S.lvl >= k.lvl;
+      const cost = k.cost.en ? k.cost.en + " енергії" : k.cost.mp + " мани";
+      return `<div class="trow${on ? " on" : ""}" style="--c:${Bd.col}"><span class="tic">${gi(k.icon, 34, on ? Bd.col : "#6b6152")}</span><span class="tt"><b>${k.name} <em class="act">у колі: «${k.short}»</em></b><i>${k.text}${k.free ? " Не забирає хід (до 2 таких дій за хід)." : ""}</i></span>
+        <span class="tr"><b>${on ? cost : "закрито"}</b><i>${on ? "вже в колі бою" : "відкриється на " + k.lvl + " рівні"}</i></span></div>`; }).join("");
+    const block = `${lbl("Прийоми гілки в бою")}<p class="hint lm" style="margin:0 0 6px">Ці кнопки з'являються в колі навколо героя, коли ви досягаєте потрібного рівня. Окрім них у колі є базові дії й Оберіг, якщо в торбі лежить те, чого боїться ваша ціль.</p><div class="tlist">${rows}</div>`;
+    return h.replace('<div class="bswitch">', block + '<div class="bswitch">');
+  }; }
+
+/* ---------- скрол: після дії (зварити, заточити, купити) список лишається там, де був ---------- */
+{ const om0 = openModal; openModal = function(html, locked){
+    const m = document.getElementById("modal"), keep = [];
+    let title = "";
+    if (m && m.classList.contains("on")){ const t = m.querySelector("h2"); title = t ? t.textContent : "";
+      const all = m.querySelectorAll("*"); all.forEach((el, i) => { if (el.scrollTop > 0 || el.scrollLeft > 0) keep.push([el.className + "|" + el.tagName, [...m.querySelectorAll(el.tagName)].indexOf(el), el.scrollTop, el.scrollLeft]); });
+      if (m.scrollTop > 0) keep.push(["#modal", 0, m.scrollTop, 0]); }
+    const r = om0.apply(this, arguments);
+    if (keep.length && m){ const t2 = m.querySelector("h2"); if (t2 && t2.textContent === title){
+      for (const [key, idx, st, sl] of keep){ let el = null; if (key === "#modal") el = m; else { const [cls, tag] = key.split("|"); const cand = [...m.querySelectorAll(tag)]; el = cand[idx]; if (!el || el.className !== cls) el = cand.find(x => x.className === cls); }
+        if (el){ el.scrollTop = st; el.scrollLeft = sl; } } } }
+    return r; }; }
+
+/* ---------- заточка: точиться саме вдягнена річ, а не всі однакові ---------- */
+// Заточена річ стає окремою («Меч +2»), щоб інші такі самі мечі в торбі лишалися звичайними.
+const hsh2 = s => { let h = 7; for (const ch of s) h = (h * 31 + ch.charCodeAt(0)) >>> 0; return h; };
+function cloneItem(base){
+  const want = hsh2(base) % 8; let n = 1, id;
+  do { id = base + "~" + (Date.now() % 1e6).toString(36) + n++; } while (ITEMS[id] || hsh2(id) % 8 !== want);
+  makeClone(id, base); S.clones = S.clones || {}; S.clones[id] = base; return id;
+}
+function makeClone(id, base){ if (ITEMS[id] || !ITEMS[base]) return; ITEMS[id] = Object.assign({}, ITEMS[base], {id, base}); if (ITEM_IC[base]) ITEM_IC[id] = ITEM_IC[base]; else ITEM_IC[id] = itemIc(base); }
+function restoreClones(){ if (!S) return; for (const [id, base] of Object.entries(S.clones || {})) makeClone(id, base);
+  // старі збереження: заточка була записана на весь вид речі — переносимо її на вдягнену річ
+  for (const [slot] of SLOTS){ const id = S.equip[slot]; if (!id || ITEMS[id].base) continue; const n = S.sharp[id]; if (!n) continue; const c = cloneItem(id); S.sharp[c] = n; delete S.sharp[id]; S.equip[slot] = c; }
+  for (const id of Object.keys(S.sharp)) if (!ITEMS[id] || !ITEMS[id].base) delete S.sharp[id]; }
+{ const sh0 = sharpen; sharpen = function(slot){ const id = S.equip[slot]; if (id && ITEMS[id] && !ITEMS[id].base && S.cop >= sharpCost(id) && sharpOf(id) < SHARP_MAX){ const c = cloneItem(id); S.equip[slot] = c; } return sh0(slot); }; }
+{ const ea0 = enterAs; enterAs = function(){ const r = ea0.apply(this, arguments); try { restoreClones(); save(); } catch (e){ console.warn(e); } return r; }; }
+try { restoreClones(); } catch (e) {}
+
+/* ---------- звуки: природа окремо від бою; звуки бою за замовчуванням вимкнені ---------- */
+const SFX_FIGHT = new Set(["hit", "crit", "miss", "hurt", "block", "heal", "spell", "fire", "bolt", "die", "win", "lose", "lvl", "coin", "click", "flee", "summon", "shriek", "gallop"]);
+{ const p0 = SND.play; SND.play = function(k, a){ if (SFX_FIGHT.has(k) && !(S && S.opt && S.opt.sfx)) return; return p0(k, a); }; }
+{ const bset0 = bookSettings; bookSettings = function(){ const h = bset0(), o = S.opt;
+    const tg = `<label class="opt"><span><b>Звуки бою й дій</b><i>удари, перемога, монети, кліки</i></span><input type="checkbox" data-opt="sfx" ${o.sfx ? "checked" : ""}></label>`;
+    return h.replace('<div class="ogrid">', '<div class="ogrid">' + tg); }; }
+
+/* ============ нові підземелля трьох країв + кімната-спокуса ============ */
+Object.assign(DUNGEONS, {
+  ic_dg:{name:"Тронні глибини", node:"ic_king", lvl:10, rooms:6, pool:["gob_digger", "gob_sapper", "gob_shaman", "wolf_rider", "troglodyte"], boss:"gob_king", scene:"icedg",
+    text:"Під тронною норою гобліни прокопалися до старої крижаної печери. Там Король нір ховає найкраще з украденого."},
+  cs_dg:{name:"Трюм Флотилії", node:"cs_fleet", lvl:10, rooms:6, pool:["coast_drowned", "ghost_pirate", "kraken_tentacle", "siren"], boss:"flotilla_captain", scene:"holddg",
+    text:"Найбільший із мертвих кораблів ліг на мілину. У його трюмі досі стоїть вода, а між бочками ходить команда, що не знає про свою смерть."},
+  sd_dg:{name:"Глибини Піраміди", node:"sd_sphinx", lvl:10, rooms:7, pool:["mummy", "scarab_swarm", "jackal_priest", "ghoul"], boss:"lich_king", scene:"tombdg",
+    text:"Під пірамідою сходи ведуть нижче за будь-яку гробницю. На стінах написано імена царів, яких викреслили з усіх літописів."},
+});
+LOCS.ic_king.buildings = (LOCS.ic_king.buildings || []).concat([["Вхід у Тронні глибини", "dungeon:ic_dg"]]);
+LOCS.cs_fleet.buildings = (LOCS.cs_fleet.buildings || []).concat([["Трюм Флотилії", "dungeon:cs_dg"]]);
+LOCS.sd_sphinx.buildings = (LOCS.sd_sphinx.buildings || []).concat([["Сходи під піраміду", "dungeon:sd_dg"]]);
+
+Object.assign(DG_COL, {icedg:["#3a4a5c", "#2a3644"], holddg:["#3a3228", "#241e18"], tombdg:["#4a3e28", "#302818"]});
+Object.assign(DG_DECOR, {
+  icedg(r){ let s = ""; for (let i = 0; i < 8; i++){ const x = 40 + r() * 820, y = 240 + r() * 240, h = 20 + r() * 40;
+      s += `<path d="M${x} ${y}l${6 + r() * 6} ${-h}l${6 + r() * 6} ${h}z" fill="#9ac8e0" opacity=".5"/>`; }
+    for (let i = 0; i < 4; i++){ const x = 80 + r() * 740; s += `<path d="M${x} 230l8 ${26 + r() * 30}l8 ${-(26 + r() * 30)}z" fill="#bcd8e8" opacity=".55"/>`; }
+    for (let i = 0; i < 3; i++){ const x = 120 + r() * 660, y = 400 + r() * 90; s += `<ellipse cx="${x}" cy="${y}" rx="${26 + r() * 20}" ry="7" fill="#ffd86f" opacity=".2"/><circle cx="${x - 8}" cy="${y - 4}" r="4" fill="#ffd86f" opacity=".5"/><circle cx="${x + 10}" cy="${y - 3}" r="3" fill="#e8b84a" opacity=".5"/>`; }
+    return s; },
+  holddg(r){ let s = `<rect x="0" y="430" width="900" height="98" fill="#1a2a30" opacity=".75"/><path d="M0 430q150 8 300 0t300 0t300 0" stroke="#3a5a60" stroke-width="3" fill="none" opacity=".6"/>`;
+    for (let i = 0; i < 7; i++){ const x = 60 + i * 130 + r() * 40; s += `<path d="M${x} 0v220" stroke="#4a3a28" stroke-width="${14 + r() * 8}" opacity=".8"/>`; }
+    for (let i = 0; i < 5; i++){ const x = 70 + r() * 760, y = 300 + r() * 110; s += `<path d="M${x - 14} ${y}v-26a14 14 0 0 1 28 0v26z" fill="#3e3226"/><path d="M${x - 14} ${y - 10}h28M${x - 14} ${y - 20}h28" stroke="#241c12" stroke-width="2"/>`; }
+    return s; },
+  tombdg(r){ let s = ""; for (let i = 0; i < 6; i++){ const x = 90 + i * 140; s += `<rect x="${x}" y="60" width="10" height="160" fill="#6a583a" opacity=".6"/><path d="M${x - 6} 60h22v-10h-22z" fill="#6a583a" opacity=".6"/>`; }
+    for (let i = 0; i < 12; i++){ const x = 50 + r() * 800, y = 70 + r() * 120; s += `<text x="${x}" y="${y}" font-size="${10 + r() * 8}" fill="#c8a868" opacity=".35" font-family="serif">${pick(["𓂀", "𓆣", "𓃭", "𓅓", "𓊽", "☥"])}</text>`; }
+    for (let i = 0; i < 3; i++){ const x = 120 + r() * 660, y = 380 + r() * 100; s += `<path d="M${x - 30} ${y}v-18l10 -10h40l10 10v18z" fill="#8a7448"/><circle cx="${x}" cy="${y - 20}" r="5" fill="#5a4a28"/>`; }
+    return s; },
+});
+
+/* ---------- кімната-спокуса: дивна знахідка ---------- */
+ROOM.gamble = ["Дивна знахідка", "gamble"];
+{ const gd0 = genDoors; genDoors = function(){ gd0(); if (!DG || !DG.doors || DG.doors.length === 1) return;
+    for (const d of DG.doors) if (d.type === "trap" && Math.random() < .5) d.type = "gamble"; }; }
+{ const cd0 = chooseDoor; chooseDoor = function(i){ const d = DG && DG.doors[i];
+    if (!d || d.type !== "gamble" || (DG.cur && !DG.cur.done)) return cd0(i);
+    DG.cur = {type:"gamble", done:false}; render(); }; }
+function dgGamble(take){
+  if (!DG || !DG.cur || DG.cur.type !== "gamble" || DG.cur.done) return;
+  const Dn = DUNGEONS[DG.id];
+  if (!take){ DG.cur.text = "Ви обійшли знахідку десятою дорогою. Цілішими будете."; DG.cur.done = true; nextRoom(true); render(); return; }
+  const roll = Math.random();
+  if (roll < .40){ const cop = ri(Dn.lvl * 30, Dn.lvl * 70) * (1 + .1 * (dTier() - 1)); earn("loot", Math.round(cop)); const it = pick(["elix_str", "elix_skin", "potion_xe", "scroll_fire", "scroll_shield"]); give(it, 1, true);
+    DG.cur.text = `Пощастило: ${moneyTxt(Math.round(cop))} і ${ITEMS[it].name}.`; msg(DG.cur.text, "good"); DG.cur.done = true; nextRoom(true); }
+  else if (roll < .65){ const gem = pick(["gem_ruby1", "gem_topaz1", "gem_onyx1", "gem_emer1"]); give(gem, 1, true); DG.cur.text = `Між кістками блищить ${ITEMS[gem].name}.`; msg(DG.cur.text, "good"); DG.cur.done = true; nextRoom(true); }
+  else if (roll < .85){ const st = stats(), dmg = Math.round(st.maxHp * .18); S.hp = Math.max(1, S.hp - dmg); DG.cur.text = `Прокляття! Темний подих забирає ${dmg} здоров'я.`; msg(DG.cur.text, "warn"); DG.cur.done = true; nextRoom(true); }
+  else { msg("Знахідка ворухнулась — то була засідка!", "warn"); DG.cur.type = "elite"; startBattle([{type:pick(Dn.pool), lvl:Dn.lvl, tier:dTier(), elite:true}], null, "dungeon", Dn.node); return; }
+  save(); render();
+}
+{ const rd0 = renderDungeon; renderDungeon = function(){ rd0();
+    const c = DG && DG.cur; if (!c || c.done || c.type !== "gamble") return;
+    const v = $("#view"); if (!v) return;
+    v.insertAdjacentHTML("beforeend", `<div class="card dcard"><b>Дивна знахідка</b><p>У ніші лежить щось, накрите зотлілою тканиною. Поруч кістки тих, хто був тут до вас.</p>
+      <button class="btn p" data-act="dgTake">Підняти тканину</button> <button class="btn dk" data-act="dgLeave">Пройти повз</button></div>`);
+  }; }
+document.addEventListener("click", e => { const t = e.target.closest && e.target.closest("[data-act='dgTake'],[data-act='dgLeave']"); if (!t || !isLive()) return; dgGamble(t.dataset.act === "dgTake"); });
+
+/* ---------- квести до нових підземель ---------- */
+Object.assign(QUESTS, {
+  ic_q7:{name:"Скарбниця Короля", giver:"ratmir", req:"ic_q6", text:"Король нір мертвий, але його нори — ні. Унизу, в крижаній печері, лежить усе, що гобліни крали в нас роками. Спустися в Тронні глибини й пройди їх до кінця.", goal:{dungeon:"ic_dg", n:1}, reward:{cop:2600, xp:700, item:"box"}},
+  ic_q8:{name:"Господар глибин", giver:"ratmir", req:"ic_q7", text:"Кажуть, у глибинах уже новий король — гобліни швидко знаходять, кого садити на золото. Проходь Тронні глибини ще двічі, щоб вони не підняли голови.", goal:{dungeon:"ic_dg", n:2}, reward:{cop:3200, xp:900, perk:{hp:25}}, perkText:"+25 здоров'я"},
+  cs_q7:{name:"Команда, що не померла", giver:"sydir", req:"cs_q6", text:"Найбільший корабель Флотилії лежить на мілині, і в його трюмі досі несуть вахту. Спустися в трюм і відправ команду на спочинок.", goal:{dungeon:"cs_dg", n:1}, reward:{cop:2600, xp:700, item:"box"}},
+  cs_q8:{name:"Вахта без кінця", giver:"sydir", req:"cs_q7", text:"Море повертає їх назад: скільки не клади, а вахта стає знову. Пройди трюм ще двічі, і, може, корабель нарешті спорожніє.", goal:{dungeon:"cs_dg", n:2}, reward:{cop:3200, xp:900, perk:{wil:3}}, perkText:"+3 волі"},
+  sd_q7:{name:"Викреслені імена", giver:"yusuf", req:"sd_q6", text:"Під пірамідою є сходи, що ведуть глибше за гробниці. Там поховані царі, чиї імена стерли з літописів. Спустися в Глибини Піраміди й дізнайся чому.", goal:{dungeon:"sd_dg", n:1}, reward:{cop:2600, xp:700, item:"box"}},
+  sd_q8:{name:"Пил і вічність", giver:"yusuf", req:"sd_q7", text:"Ліч не вмирає, поки стоїть його піраміда. Але щоразу, як ти проходиш глибини, він підводиться все повільніше. Пройди їх ще двічі.", goal:{dungeon:"sd_dg", n:2}, reward:{cop:3200, xp:900, perk:{dmg:4}}, perkText:"+4% шкоди"},
+});
+NPCS.ratmir.quests.push("ic_q7", "ic_q8");
+NPCS.sydir.quests.push("cs_q7", "cs_q8");
+NPCS.yusuf.quests.push("sd_q7", "sd_q8");
+ACH.push({id:"nw4", icon:"dungeon-gate", name:"Глибинник", text:"Пройти Тронні глибини, Трюм Флотилії і Глибини Піраміди", val:() => ["ic_dg", "cs_dg", "sd_dg"].filter(d => S.dung[d]).length, n:3, rew:{hp:25, def:2}});
+
+/* ============ особливі прийоми знакових мобів ============ */
+Object.assign(ABIL_INFO, {
+  icearmor:["Крижаний панцир", "Перші 3 раунди лід приймає половину шкоди на себе."],
+  tide:["Хвиля", "Кожен третій раунд змиває вас: −15 енергії і зриває блок."],
+  sandstorm:["Піщаний вихор", "Кожен третій раунд засипає очі: ваш наступний удар із шансом 50% мимо."],
+  bonecall:["Підіймає кістки", "Раз за бій, поранений, підіймає двох кістяків собі на поміч."],
+});
+// роздача: лід — панцир, море — хвиля, піски — вихор, нежить Марки й Ліч — кістки
+for (const [k, add] of [["jotun", "icearmor"], ["frost_giant", "icearmor"], ["ice_drake", "icearmor"],
+  ["kraken", "tide"], ["leviathan", "tide"], ["sea_serpent", "tide"],
+  ["sand_worm", "sandstorm"], ["dust_devil", "sandstorm"], ["sphinx", "sandstorm"],
+  ["lich_king", "bonecall"], ["bone_dragon", "bonecall"]]){ ABIL[k] = ABIL[k] || []; if (!ABIL[k].includes(add)) ABIL[k].push(add); }
+
+{ const st0 = abilStart; abilStart = function(){ st0.apply(this, arguments);
+    for (const e of B.enemies) if (hasA(e, "icearmor")){ e.iceArm = 3; blog(`${e.name} обростає крижаним панциром!`, "warn"); } }; }
+{ const em0 = elemMul; elemMul = function(tg, el){ let m = em0(tg, el); if (tg && tg.iceArm > 0) m *= .5; return m; }; }
+{ const re0 = abilRoundEnd; abilRoundEnd = function(){ re0.apply(this, arguments); if (!B) return;
+    for (const e of B.enemies){ if (e.hp <= 0) continue;
+      if (e.iceArm > 0 && --e.iceArm === 0) blog(`Крижаний панцир ${e.name} тане.`);
+      if (hasA(e, "tide") && B.round % 3 === 0){ S.en = Math.max(0, S.en - 15); B.block = false; fx(document.getElementById("f-p"), "-15 ен. хвиля", "#7ac8e0"); blog(`${e.name} здіймає хвилю: блок зірвано, −15 енергії.`, "warn"); }
+      if (hasA(e, "sandstorm") && B.round % 3 === 0){ B.blind = 1; blog(`${e.name} здіймає піщаний вихор: пісок в очах!`, "warn"); }
+      if (hasA(e, "bonecall") && !e.boneUsed && e.hp < e.maxHp * .5){ e.boneUsed = true;
+        for (let k = 0; k < 2; k++){ const c = mkEnemy("kurgan_dead", Math.max(1, e.lvl - 3), {}, null); c.hp = c.maxHp = Math.round(c.maxHp * .4); c.xp = Math.round(c.xp * .25); c.drop = []; c.name = "Піднятий кістяк"; B.enemies.push(c); }
+        blog(`${e.name} підіймає кістки з-під землі!`, "warn"); render(); } } }; }
+
+/* ============ механіки Кристалу: очки характеристик, міцність і ремонт ============ */
+
+/* ---------- очки характеристик ---------- */
+// Частина росту йде сама (як було), а 3 очки за кожен рівень гравець роздає сам: сила, спритність, витривалість, воля.
+const PTS_PER_LVL = 3, PT_NAMES = {str:"Сила", agi:"Спритність", end:"Витривалість", wil:"Воля"};
+const PT_HINT = {str:"урон", agi:"ухилення й крит", end:"+4 здоров'я", wil:"чари й опір"};
+{ const b0 = base; base = function(){ const L = S.lvl, a = S.pts || {};
+    return {str:3 + (L - 1) + (a.str || 0), agi:3 + Math.floor((L - 1) / 2) + (a.agi || 0), end:3 + (L - 1) + (a.end || 0), wil:2 + Math.floor((L - 1) / 3) + (a.wil || 0)}; }; }
+const ptsSpent = () => Object.values(S.pts || {}).reduce((x, y) => x + y, 0);
+const freePts = () => S ? Math.max(0, (S.lvl - 1) * PTS_PER_LVL - ptsSpent()) : 0;
+const resetCost = () => 200 * S.lvl;
+function statRows(st){
+  const f = freePts(), a = S.pts || {};
+  const row = (k, v) => `<div class="bkv"><span>${PT_NAMES[k]}${a[k] ? ` <i class="ptv">+${a[k]}</i>` : ""}</span><b>${v}${f ? ` <button class="ptbtn" data-pt="${k}" title="${PT_HINT[k]}">+</button>` : ""}</b></div>`;
+  return (f ? `<div class="ptfree">Вільних очок: <b>${f}</b> <span class="hint lm">натисніть «+» біля характеристики</span></div>` : "") +
+    row("str", st.str) + row("agi", st.agi) + row("end", st.end) + row("wil", st.wil) +
+    (ptsSpent() ? `<div class="ptreset"><button class="lnk" data-ptreset="1">Скинути розподіл за ${moneyTxt(resetCost())}</button></div>` : "");
+}
+document.addEventListener("click", e => {
+  const t = e.target.closest && e.target.closest("[data-pt],[data-ptreset]"); if (!t || !isLive() || B) return;
+  if (t.dataset.pt){ if (freePts() <= 0) return; S.pts = S.pts || {}; S.pts[t.dataset.pt] = (S.pts[t.dataset.pt] || 0) + 1; }
+  else { if (S.cop < resetCost()){ msg(`Скидання коштує ${moneyTxt(resetCost())}.`, "warn"); return; } spend("shop", resetCost()); S.pts = {}; msg("Розподіл очок скинуто. Роздайте їх наново.", "good"); }
+  S.hp = Math.min(S.hp, stats().maxHp); save(); renderTop(); openBook("hero");
+});
+
+/* ---------- міцність речей ---------- */
+// Кожен бій забирає 1 міцності з усього вдягненого, смерть — ще десяту частину. Зламана річ не дає нічого, доки її не полагодить коваль.
+SMITHS.push("brane", "luka", "timish", "gnat");
+const durMax = id => { const it = ITEMS[id]; return 40 + 6 * (it.lvl || 1) + (it.rare ? 20 : 0); };
+const durOf = id => { S.dur = S.dur || {}; return S.dur[id] == null ? durMax(id) : S.dur[id]; };
+const isBroken = id => id && ITEMS[id] && ITEMS[id].slot && durOf(id) <= 0;
+const brokenCount = () => S ? SLOTS.filter(([s]) => isBroken(S.equip[s])).length : 0;
+const repCost = id => { const m = durMax(id), d = durOf(id); return d >= m ? 0 : Math.max(5, Math.round((ITEMS[id].price || 40) * .25 * (m - d) / m)); };
+function wear(n, why){
+  S.dur = S.dur || {}; const low = [];
+  for (const [s] of SLOTS){ const id = S.equip[s]; if (!id) continue; const m = durMax(id), was = durOf(id);
+    const d = Math.max(0, was - (why === "death" ? Math.ceil(m * .1) : n)); S.dur[id] = d;
+    if (d === 0 && was > 0) msg(`${ITEMS[id].name} зламано! Зламана річ нічого не дає. Полагодьте її в коваля.`, "warn");
+    else if (d <= m * .15 && was > m * .15) low.push(ITEMS[id].name); }
+  if (low.length) msg(`Майже зламано: ${low.join(", ")}. Час до коваля.`, "warn");
+}
+{ const st0 = stats; stats = function(){ if (!S || !S.equip) return st0();
+    const off = []; for (const [s] of SLOTS) if (isBroken(S.equip[s])){ off.push([s, S.equip[s]]); S.equip[s] = null; }
+    try { return st0(); } finally { for (const [s, id] of off) S.equip[s] = id; } }; }
+{ const eb0 = endBattle; endBattle = function(res){ const b = B, out = eb0.apply(this, arguments);
+    if (b && !b.arena && !b.duel){ if (res === "lose") wear(0, "death"); else if (res === "win") wear(1); } return out; }; }
+function repair(slot){ const id = S.equip[slot]; if (!id) return; const c = repCost(id); if (!c) return; if (S.cop < c){ msg(`Ремонт коштує ${moneyTxt(c)}.`, "warn"); return; }
+  spend("sharp", c); S.dur[id] = durMax(id); msg(`${ITEMS[id].name}: полагоджено за ${moneyTxt(c)}.`, "good"); }
+function repairAll(){ const ids = SLOTS.map(([s]) => s).filter(s => S.equip[s] && repCost(S.equip[s])); const total = ids.reduce((a, s) => a + repCost(S.equip[s]), 0);
+  if (!total) return; if (S.cop < total){ msg(`Ремонт усього коштує ${moneyTxt(total)}.`, "warn"); return; } for (const s of ids) repair(s); }
+// кузня: ремонт поруч із заточкою
+{ const of0 = openForge; openForge = function(){ of0(); const m = document.querySelector("#modal .mbox"); if (!m) return; const h2 = m.querySelector("h2"); if (h2) h2.textContent = "Кузня: заточка й ремонт";
+    const rows = SLOTS.filter(([s]) => S.equip[s]).map(([s, l]) => { const id = S.equip[s], d = durOf(id), M = durMax(id), c = repCost(id), pct = d / M;
+      return `<div class="drow"><span class="dn">${esc(ITEMS[id].name)}</span><span class="dbar"><i style="width:${pct * 100}%;background:${pct <= 0 ? "#9a2a1f" : pct < .25 ? "#c8742a" : "#5a8a3a"}"></i></span><span class="dv${pct <= 0 ? " br" : ""}">${d <= 0 ? "зламано" : d + " / " + M}</span>${c ? `<button class="btn sm" data-repair="${s}" ${S.cop >= c ? "" : "disabled"}>${moneyTxt(c)}</button>` : `<span class="hint lm">ціла</span>`}</div>`; }).join("");
+    const total = SLOTS.reduce((a, [s]) => a + (S.equip[s] ? repCost(S.equip[s]) : 0), 0);
+    m.insertAdjacentHTML("beforeend", `<div class="repbox">${lbl("Ремонт")}<p class="hint">Кожен бій стирає спорядження, смерть — ще більше. Зламана річ не дає жодних характеристик.</p>${rows || `<span class="hint">Нічого не вдягнено.</span>`}${total ? `<div class="acts"><button class="btn p" data-repall="1" ${S.cop >= total ? "" : "disabled"}>Полагодити все за ${moneyTxt(total)}</button></div>` : ""}</div>`); }; }
+document.addEventListener("click", e => { const t = e.target.closest && e.target.closest("[data-repair],[data-repall]"); if (!t || !isLive()) return;
+  if (t.dataset.repair) repair(t.dataset.repair); else repairAll(); save(); renderTop(); openForge(); });
+// міцність у підказці й позначка на ляльці героя
+{ const th0 = tipHTML; tipHTML = function(src){ let h = th0(src); const id = tipItem(src); if (h && id && ITEMS[id] && ITEMS[id].slot){ const d = durOf(id), M = durMax(id);
+      h += `<span class="tl" style="color:${d <= 0 ? "#ff8a7a" : d < M * .25 ? "#ffb060" : "inherit"}">Міцність: ${d <= 0 ? "зламано" : d + " / " + M}</span>`; } return h; }; }
+{ const ob0 = openBook; openBook = function(){ const r = ob0.apply(this, arguments);
+    for (const [s] of SLOTS){ const id = S.equip[s]; if (!id) continue; const el = document.querySelector(`#modal [data-tip="eq:${s}"]`); if (!el) continue;
+      const d = durOf(id), M = durMax(id); el.classList.toggle("broken", d <= 0); el.classList.toggle("worn", d > 0 && d < M * .25); }
+    return r; }; }
+// у вікні NPC-коваля — кнопка ремонту
+{ const ex0 = npcExtraActs; npcExtraActs = function(id){ let h = ex0(id); if (SMITHS.includes(id) && !h.includes("data-forge")) h += `<button class="btn" data-forge="1">${gi("anvil", 16)} Кузня: заточка й ремонт</button>`; return h; }; }
+
+/* ---------- нові прийоми мобів: регенерація і гниль ---------- */
+Object.assign(ABIL_INFO, {
+  regen:["Відростає", "Кожен раунд загоює 6% здоров'я. Бийте швидко або палiть вогнем."],
+  rot:["Гниль", "Поки він живий, зілля лікують вас удвічі слабше."],
+});
+for (const k of ["troll", "bg_hydra", "bg_hydra_mother", "treant", "fungus_giant", "lisovyk", "bg_willow"]) { ABIL[k] = ABIL[k] || []; if (!ABIL[k].includes("regen")) ABIL[k].push("regen"); }
+for (const k of ["mummy", "ghoul", "zombie", "bg_drowned", "coast_drowned", "kurgan_dead", "fungus_giant", "mk_swarm"]) { ABIL[k] = ABIL[k] || []; if (!ABIL[k].includes("rot")) ABIL[k].push("rot"); }
+{ const re0 = abilRoundEnd; abilRoundEnd = function(){ re0.apply(this, arguments); if (!B) return;
+    for (const e of B.enemies) if (e.hp > 0 && hasA(e, "regen") && e.hp < e.maxHp && !(e.burn > 0)){ const h = Math.round(e.maxHp * .06); e.hp = Math.min(e.maxHp, e.hp + h); fx(document.getElementById("f-e" + B.enemies.indexOf(e)), "+" + h, "#7fd04a"); } }; }
+{ const ui0 = useItem; useItem = function(id, inBattle){ const before = S.hp, r = ui0.apply(this, arguments);
+    if (B && S.hp > before && B.enemies.some(e => e.hp > 0 && hasA(e, "rot"))){ S.hp = before + Math.round((S.hp - before) / 2); blog("Гниль ворога: зілля діє вдвічі слабше.", "warn"); renderTop(); }
+    return r; }; }
+
+/* ---------- підземелля Дикого Поля ---------- */
+DUNGEONS.wd_dg = {name:"Нутро Вогняної гори", node:"wd_gora", lvl:10, rooms:7, pool:["kurgan_dead", "babai", "steppe_witch", "centaur", "stone_baba"], boss:"gorynych", scene:"firedg",
+  text:"Під Вогняною горою лабіринт печер, де жар не згасає навіть узимку. Звідси Горинич вилітає в степ, і сюди повертається спати на кістках."};
+LOCS.wd_gora.buildings = (LOCS.wd_gora.buildings || []).concat([["Пролом у гору", "dungeon:wd_dg"]]);
+DG_COL.firedg = ["#4a2a1e", "#2a1610"];
+DG_DECOR.firedg = r => { let s = `<rect x="0" y="440" width="900" height="88" fill="#ff5a1a" opacity=".12"/>`;
+  for (let i = 0; i < 6; i++){ const x = 60 + r() * 780, y = 300 + r() * 180; s += `<path d="M${x - 30} ${y}q30 -8 60 0" stroke="#ff7a2a" stroke-width="3" fill="none" opacity=".6"/><ellipse cx="${x}" cy="${y}" rx="34" ry="6" fill="#ff8a2a" opacity=".18"/>`; }
+  for (let i = 0; i < 5; i++){ const x = 60 + r() * 780; s += `<path d="M${x} 220l${10 + r() * 10} ${-60 - r() * 60}l${10 + r() * 10} ${60 + r() * 60}z" fill="#1a0e0a" opacity=".8"/>`; }
+  return s; };
+Object.assign(QUESTS, {
+  wd_q7:{name:"Лігво Горинича", giver:"pylyp", req:"wd_q6", text:"Горинича вбито, але гора досі дихає жаром. Кажуть, у її нутрі він лишив кладку. Пройди Нутро Вогняної гори до самого лігва.", goal:{dungeon:"wd_dg", n:1}, reward:{cop:2600, xp:700, item:"box"}},
+  wd_q8:{name:"Жар, що не гасне", giver:"pylyp", req:"wd_q7", text:"З кладки вилупився новий змій, і гора знову ожила. Пройди її ще двічі, поки він не встав на крило.", goal:{dungeon:"wd_dg", n:2}, reward:{cop:3200, xp:900, perk:{hp:20, crit:2}}, perkText:"+20 здоров'я, +2% криту"},
+});
+NPCS.pylyp.quests.push("wd_q7", "wd_q8");
+{ const a = ACH.find(x => x.id === "nw4"); if (a){ a.text = "Пройти чотири глибини нових країв: Тронні глибини, Нутро Вогняної гори, Трюм Флотилії і Глибини Піраміди"; a.val = () => ["ic_dg", "wd_dg", "cs_dg", "sd_dg"].filter(d => S.dung[d]).length; a.n = 4; } }
+// при вході: здоров'я не більше за максимум, і одноразова підказка про нові очки
+{ const ea1 = enterAs; enterAs = function(){ const r = ea1.apply(this, arguments);
+    try { const st = stats(); S.hp = Math.min(S.hp, st.maxHp); S.en = Math.min(S.en, st.maxEn);
+      if (!S.ptsIntro && S.lvl > 1){ S.ptsIntro = true; msg(`Нове, як у Кристалі: за кожен рівень ви отримуєте ${PTS_PER_LVL} очки характеристик. Відкрийте вікно «Герой» і роздайте ${freePts()} вільних очок. А ще речі тепер зношуються в боях: лагодьте їх у ковалів.`, "quest"); }
+      save(); renderTop(); } catch (e){ console.warn(e); } return r; }; }
 
 /* ============ старт ============ */
 initDrag();
