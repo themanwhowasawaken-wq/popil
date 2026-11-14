@@ -2038,6 +2038,9 @@ function migrate(s){
   }
   for (const k of Object.keys(f)) if (s[k] === undefined) s[k] = f[k];
   s.lvl = Math.min(MAXLVL, s.lvl || 1); if (s.lvl >= MAXLVL) s.xp = 0;
+  // заточені копії речей («меч~xxx») відновлюємо ДО перевірки, інакше вони викидаються як невідомі
+  if (typeof makeClone === "function"){ const ids = new Set([...Object.keys(s.clones || {}), ...Object.values(s.equip || {}), ...Object.keys(s.inv || {}), ...(s.belt || [])]);
+    for (const id of ids) if (id && typeof id === "string" && id.includes("~") && !ITEMS[id]){ const b0 = (s.clones && s.clones[id]) || id.split("~")[0]; if (ITEMS[b0]) makeClone(id, b0); } }
   s.equip = Object.assign(EQUIP0(), s.equip); for (const k of Object.keys(s.equip)) if (s.equip[k] && !ITEMS[s.equip[k]]) s.equip[k] = null;
   for (const k of Object.keys(s.inv)) if (!ITEMS[k] || !(s.inv[k] > 0)) delete s.inv[k];
   for (const k of Object.keys(s.quests)) if (!QUESTS[k]) delete s.quests[k];
@@ -11651,9 +11654,9 @@ if (S && S.prof && !S.prof.hunt) S.prof.hunt = {lv:1, xp:0};
 Object.assign(ITEMS, {
   u1:{name:"Дрібна шкурка", res:"hunt", t:1, price:9}, u2:{name:"Тонке хутро", res:"hunt", t:2, price:18}, u3:{name:"Груба шкура", res:"hunt", t:3, price:30},
   u4:{name:"Цупке хутро", res:"hunt", t:4, price:48}, u5:{name:"Шкура місячного оленя", res:"hunt", t:5, price:95},
-  game_meat:{name:"Дичина", use:{hp:90, en:20}, price:20, cat:"use"}, moon_horn:{name:"Місячний ріг", price:420},
+  game_meat:{name:"Дичина", use:{hp:90, en:20}, price:20, cat:"use"}, moon_horn:{name:"Місячний ріг", price:420}, gold_fish:{name:"Золота рибка", price:520},
 });
-for (const k of ["u1", "u2", "u3", "u4", "u5", "game_meat", "moon_horn"]) prepItem(k, ITEMS[k]);
+for (const k of ["u1", "u2", "u3", "u4", "u5", "game_meat", "moon_horn", "gold_fish"]) prepItem(k, ITEMS[k]);
 Object.assign(ITEM_IC, {u1:"animal-hide", u2:"animal-hide", u3:"animal-hide", u4:"animal-hide", u5:"animal-hide", game_meat:"fish-cooked", moon_horn:"bestial-fangs"});
 RECIPES.push({id:"r_hm", prof:"alch", lv:3, in:{game_meat:2, h2:1}, out:"potion_l"}, {id:"r_hs", prof:"scribe", lv:4, in:{u2:1, f2:1}, out:"scroll_shield"}, {id:"r_hf", prof:"scribe", lv:6, in:{u4:1, h3:1}, out:"scroll_fire"});
 // сліди звірів на диких локаціях
@@ -11762,6 +11765,13 @@ const SFX_FIGHT = new Set(["hit", "crit", "miss", "hurt", "block", "heal", "spel
 { const bset0 = bookSettings; bookSettings = function(){ const h = bset0(), o = S.opt;
     const tg = `<label class="opt"><span><b>Звуки бою й дій</b><i>удари, перемога, монети, кліки</i></span><input type="checkbox" data-opt="sfx" ${o.sfx ? "checked" : ""}></label>`;
     return h.replace('<div class="ogrid">', '<div class="ogrid">' + tg); }; }
+// повернення речей, які зникли через помилку із заточеними копіями (листопад 2026): разово
+{ const ea2 = enterAs; enterAs = function(){ const r = ea2.apply(this, arguments);
+    try { if (!S.cloneFix2){ S.cloneFix2 = true; const back = [];
+        for (const [id, base] of Object.entries(S.clones || {})){ if (!ITEMS[id] && ITEMS[base]) makeClone(id, base); if (!ITEMS[id]) continue;
+          const have = Object.values(S.equip).includes(id) || inv(id) > 0; if (!have){ S.inv[id] = 1; back.push(ITEMS[id].name + (sharpOf(id) ? " +" + sharpOf(id) : "")); } }
+        if (back.length) msg(`Повернуто речі, які зникли через помилку з заточкою: ${back.join(", ")}. Вони в торбі, вдягніть їх знову.`, "good");
+        save(); } } catch (e){ console.warn(e); } return r; }; }
 
 /* ============ нові підземелля трьох країв + кімната-спокуса ============ */
 Object.assign(DUNGEONS, {
