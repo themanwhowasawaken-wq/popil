@@ -2039,7 +2039,7 @@ function migrate(s){
   for (const k of Object.keys(f)) if (s[k] === undefined) s[k] = f[k];
   s.lvl = Math.min(MAXLVL, s.lvl || 1); if (s.lvl >= MAXLVL) s.xp = 0;
   // заточені копії речей («меч~xxx») відновлюємо ДО перевірки, інакше вони викидаються як невідомі
-  if (typeof makeClone === "function"){ const ids = new Set([...Object.keys(s.clones || {}), ...Object.values(s.equip || {}), ...Object.keys(s.inv || {}), ...(s.belt || [])]);
+  if (typeof makeClone === "function"){ const ids = new Set([...Object.keys(s.clones || {}), ...Object.keys(s.sharp || {}), ...Object.keys(s.dur || {}), ...Object.values(s.equip || {}), ...Object.keys(s.inv || {}), ...(s.belt || [])]);
     for (const id of ids) if (id && typeof id === "string" && id.includes("~") && !ITEMS[id]){ const b0 = (s.clones && s.clones[id]) || id.split("~")[0]; if (ITEMS[b0]) makeClone(id, b0); } }
   s.equip = Object.assign(EQUIP0(), s.equip); for (const k of Object.keys(s.equip)) if (s.equip[k] && !ITEMS[s.equip[k]]) s.equip[k] = null;
   for (const k of Object.keys(s.inv)) if (!ITEMS[k] || !(s.inv[k] > 0)) delete s.inv[k];
@@ -11752,6 +11752,7 @@ function cloneItem(base){
 }
 function makeClone(id, base){ if (ITEMS[id] || !ITEMS[base]) return; ITEMS[id] = Object.assign({}, ITEMS[base], {id, base}); if (ITEM_IC[base]) ITEM_IC[id] = ITEM_IC[base]; else ITEM_IC[id] = itemIc(base); }
 function restoreClones(){ if (!S) return; for (const [id, base] of Object.entries(S.clones || {})) makeClone(id, base);
+  for (const id of [...Object.keys(S.sharp || {}), ...Object.keys(S.dur || {})]) if (id.includes("~") && !ITEMS[id] && ITEMS[id.split("~")[0]]){ makeClone(id, id.split("~")[0]); S.clones = S.clones || {}; S.clones[id] = id.split("~")[0]; }
   // старі збереження: заточка була записана на весь вид речі — переносимо її на вдягнену річ
   for (const [slot] of SLOTS){ const id = S.equip[slot]; if (!id || ITEMS[id].base) continue; const n = S.sharp[id]; if (!n) continue; const c = cloneItem(id); S.sharp[c] = n; delete S.sharp[id]; S.equip[slot] = c; }
   for (const id of Object.keys(S.sharp)) if (!ITEMS[id] || !ITEMS[id].base) delete S.sharp[id]; }
@@ -11771,6 +11772,19 @@ const SFX_FIGHT = new Set(["hit", "crit", "miss", "hurt", "block", "heal", "spel
         for (const [id, base] of Object.entries(S.clones || {})){ if (!ITEMS[id] && ITEMS[base]) makeClone(id, base); if (!ITEMS[id]) continue;
           const have = Object.values(S.equip).includes(id) || inv(id) > 0; if (!have){ S.inv[id] = 1; back.push(ITEMS[id].name + (sharpOf(id) ? " +" + sharpOf(id) : "")); } }
         if (back.length) msg(`Повернуто речі, які зникли через помилку з заточкою: ${back.join(", ")}. Вони в торбі, вдягніть їх знову.`, "good");
+        save(); } } catch (e){ console.warn(e); } return r; }; }
+// друге, ширше повернення: будь-яка вдягана річ, про яку лишився слід (заточка, міцність, копія), але якої немає ні на герої, ні в торбі
+{ const ea3 = enterAs; enterAs = function(){ const r = ea3.apply(this, arguments);
+    try { if (!S.cloneFix3){ S.cloneFix3 = true; const back = [], seen = new Set();
+        const cand = new Set([...Object.keys(S.clones || {}), ...Object.keys(S.dur || {}), ...Object.keys(S.sharp || {})]);
+        for (const id of cand){ if (id.includes("~") && !ITEMS[id]){ const b0 = (S.clones && S.clones[id]) || id.split("~")[0]; if (ITEMS[b0]) makeClone(id, b0); }
+          const it = ITEMS[id]; if (!it || !it.slot) continue;
+          const base = it.base || id; if (seen.has(base + ":" + id)) continue; seen.add(base + ":" + id);
+          const have = Object.values(S.equip).includes(id) || inv(id) > 0; if (have) continue;
+          // звичайну (не заточену) річ повертаємо, лише якщо такої самої немає ніде
+          if (!it.base && (Object.values(S.equip).some(x => x && (ITEMS[x] || {}).base === id) || Object.keys(S.inv).some(x => (ITEMS[x] || {}).base === id))) continue;
+          S.inv[id] = 1; back.push(it.name + (sharpOf(id) ? " +" + sharpOf(id) : "")); }
+        msg(back.length ? `Повернуто зниклі речі: ${back.join(", ")}. Вони в торбі, вдягніть їх знову.` : "Перевірка зниклих речей: слідів зниклих речей у цьому збереженні не знайдено.", back.length ? "good" : "warn");
         save(); } } catch (e){ console.warn(e); } return r; }; }
 
 /* ============ нові підземелля трьох країв + кімната-спокуса ============ */
