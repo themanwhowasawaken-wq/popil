@@ -1238,7 +1238,7 @@ svg.scfx{position:absolute;left:0;top:0;pointer-events:none;overflow:hidden}
 @keyframes flapC{0%,100%{translate:0 0}45%{translate:0 calc(-4px * var(--a,1))}}
 /* ---------- мультиплеєр ---------- */
 .cl .pn{border:0;background:none;padding:0;font:inherit;font-weight:700;color:#7a4a1a;cursor:pointer}
-.cl .pn.me{color:#3a6a2a}.cl .pn:hover{text-decoration:underline}
+.cl .pn.mine{color:#3a6a2a}.cl .pn:hover{text-decoration:underline}
 .cl .pl{font-style:normal;opacity:.6;font-size:.9em}
 #rlist .pn{border:0;background:none;padding:0;font:inherit;color:inherit;cursor:pointer;text-align:left}
 #rlist .pn:hover{text-decoration:underline}
@@ -1257,6 +1257,15 @@ svg.scfx{position:absolute;left:0;top:0;pointer-events:none;overflow:hidden}
 .mksold{padding:8px 10px;border-radius:6px;background:rgba(90,140,60,.15);margin-bottom:8px;display:flex;align-items:center;gap:10px}
 .mksold b{flex:1}
 .fighter.atk .pvph .hsvg .harm{animation:hswing .56s cubic-bezier(.3,.1,.3,1)}
+/* ---------- друзі, група, обмін ---------- */
+#socbtn{margin-right:auto;margin-left:10px;padding:2px 10px;font-size:12px}
+.sbadge{display:inline-block;min-width:16px;padding:0 4px;border-radius:8px;background:#b8401a;color:#fff;font-size:11px;line-height:16px;text-align:center}
+.dotx{width:9px;height:9px;border-radius:50%;background:#8a8270;flex:none}.dotx.on{background:#4caf3a;box-shadow:0 0 6px #4caf3a}
+.cl.party .m{color:#2a5a8a}
+.node.frm{pointer-events:none;z-index:6}
+.node.frm .frb{position:absolute;left:calc(14px + var(--i) * 4px);top:calc(-46px - var(--i) * 6px);width:26px;height:48px}
+.node.frm .frl{position:absolute;left:calc(40px + var(--i) * 4px);top:calc(-30px - var(--i) * 6px);white-space:nowrap;font:700 11px "PT Sans",sans-serif;color:#fff;background:rgba(30,80,40,.85);padding:1px 6px;border-radius:8px}
+.node.frm.party .frl{background:rgba(30,60,120,.88)}
 
 </style>
 </head>
@@ -12119,7 +12128,7 @@ async function netChatPoll(){ if (!NET.on || !READY) return;
     if (!Array.isArray(rows)) return; const first = NET.chatFirst; NET.chatFirst = false;
     for (const m of rows.slice(first ? -12 : 0)){ const ch = m.ch === "world" ? "world" : m.ch === "trade" ? "trade" : m.ch === netChan(S.loc) ? "loc" : null; if (!ch) continue;
       const mine = m.nick.toLowerCase() === S.name.toLowerCase();
-      msg(`<button class="pn${mine ? " me" : ""}" data-pn="${esc(m.nick)}">${esc(m.nick)}</button> <i class="pl">[${m.lvl}]</i>: ${esc(m.text)}`, ch === "trade" ? "trade" : "", ch); }
+      msg(`<button class="pn${mine ? " mine" : ""}" data-pn="${esc(m.nick)}">${esc(m.nick)}</button> <i class="pl">[${m.lvl}]</i>: ${esc(m.text)}`, ch === "trade" ? "trade" : "", ch); }
     for (const m of rows) NET.chatId = Math.max(NET.chatId, m.id);
   } catch (e) {} }
 setInterval(netChatPoll, 3500);
@@ -12262,6 +12271,153 @@ async function netMarketWatch(){ if (!NET.on) return; try { const r = await rpc(
 // екран входу: підказка про світ
 { const rl1 = renderLogin; renderLogin = function(){ rl1(); const f = document.querySelector("#login .lg-foot"); if (f) f.textContent = "Герої живуть у світі: зберігаються на сервері, з ними можна зайти з будь-якого пристрою. Старого героя з цього пристрою переносить у світ перший вхід із паролем.";
     const h = document.querySelector("#login .lg-side .lg-card h3"); if (h) h.textContent = "Останні герої на цьому пристрої"; }; }
+
+/* ============ друзі, група, обмін на одній локації ============ */
+NET.soc = {friends:[], requests:[], party:null, invites:[], trades:[], mytrades:[]};
+const SOC = {tab:"friends", q:"", found:null, seenReq:new Set(), seenInv:new Set(), seenTr:new Set(), settling:new Set()};
+const inTown = () => !T && !DG && NODES[S.loc] && (NODES[S.loc].kind === "city" || NODES[S.loc].kind === "town");
+const partyIds = () => NET.soc.party ? NET.soc.party.members.map(m => m.nick.toLowerCase()) : [];
+
+async function socPoll(){ if (!NET.on || !READY) return;
+  try { const r = await rpc("social", {p_token:NET.tok}); if (!r.ok){ if (r.err === "session") netLost(); return; }
+    const hadParty = !!(NET.soc.party); NET.soc = r;
+    for (const n of r.requests) if (!SOC.seenReq.has(n)){ SOC.seenReq.add(n); msg(`${esc(n)} хоче додати вас у друзі. <button class="lnk" data-soc="friends">Відкрити друзів</button>`, "quest"); }
+    for (const i of r.invites) if (!SOC.seenInv.has(i.party)){ SOC.seenInv.add(i.party); msg(`${esc(i.from)} кличе вас у групу. <button class="lnk" data-pjoin="${i.party}">Прийняти</button> <button class="lnk" data-pdecl="${i.party}">Відмовити</button>`, "quest"); }
+    for (const t of r.trades) if (!SOC.seenTr.has(t.id)){ SOC.seenTr.add(t.id); msg(`${esc(t.from)} пропонує обмін: ${trItems(t.items)}${t.price ? " за " + moneyTxt(t.price) : " у подарунок"}. <button class="lnk" data-tracc="${t.id}">Прийняти</button> <button class="lnk" data-trdec="${t.id}">Відмовити</button>`, "trade"); }
+    for (const t of r.mytrades) if (t.status !== "open" && !SOC.settling.has(t.id)) trSettle(t.id, false);
+    if (NET.soc.party && !hadParty) TABCH_ONLINE();
+    if (!NET.soc.party && hadParty) TABCH_ONLINE();
+    if (UI.view === "map") socMapMarks();
+    if (document.querySelector("#modal .socbox")) openSocial(SOC.tab, true);
+  } catch (e) {} }
+setInterval(socPoll, 12000);
+{ const ns0 = netStart; netStart = function(){ ns0(); if (NET.on) setTimeout(socPoll, 800); }; }
+
+/* ---------- вкладки чату: всесвітній і група ---------- */
+{ const tc0 = TABCH_ONLINE; TABCH_ONLINE = function(){ tc0(); if (!NET.on) return; delete TABCH["Світ"];
+    const o = {"Локація":["loc"], "Всесвітній":["world"], "Торгівля":["trade"]}; if (NET.soc && NET.soc.party) o["Група"] = ["party"]; o["Лог бою"] = ["fight"];
+    for (const k of Object.keys(TABCH)) delete TABCH[k]; Object.assign(TABCH, o); if (!TABCH[UI.tab]) UI.tab = "Локація"; }; }
+{ const cp0 = netChatPoll; netChatPoll = async function(){ if (!NET.on || !READY) return;
+    const pc = NET.soc && NET.soc.party ? "party:" + NET.soc.party.id : null;
+    try { const chs = [netChan(S.loc), "world", "trade"].concat(pc ? [pc] : []); const rows = await rpc("chat_get", {p_channels:chs, p_since:NET.chatId});
+      if (!Array.isArray(rows)) return; const first = NET.chatFirst; NET.chatFirst = false;
+      for (const m of rows.slice(first ? -12 : 0)){ const ch = m.ch === "world" ? "world" : m.ch === "trade" ? "trade" : m.ch === pc ? "party" : m.ch === netChan(S.loc) ? "loc" : null; if (!ch) continue;
+        const mine = m.nick.toLowerCase() === S.name.toLowerCase();
+        msg(`<button class="pn${mine ? " mine" : ""}" data-pn="${esc(m.nick)}">${esc(m.nick)}</button> <i class="pl">[${m.lvl}]</i>: ${esc(m.text)}`, ch === "trade" ? "trade" : ch === "party" ? "party" : "", ch); }
+      for (const m of rows) NET.chatId = Math.max(NET.chatId, m.id);
+    } catch (e) {} }; }
+{ const ns1 = netSay; netSay = async function(text){
+    if (UI.tab === "Всесвітній" || UI.tab === "Група"){ const ch = UI.tab === "Група" ? (NET.soc.party ? "party:" + NET.soc.party.id : null) : "world"; if (!ch) return msg("Ви не в групі.", "warn", "party");
+      try { const r = await rpc("chat_send", {p_token:NET.tok, p_channel:ch, p_text:text}); if (!r.ok) msg(esc(r.err === "empty" ? "Порожнє повідомлення." : r.err), "warn", UI.tab === "Група" ? "party" : "world"); netChatPoll(); } catch (e){ msg("Немає зв'язку зі світом.", "warn"); } return; }
+    return ns1(text); }; }
+{ const rc1 = renderChat; renderChat = function(){ rc1.apply(this, arguments); if (!NET.on) return;
+    const ci = document.getElementById("cinp"); if (ci) ci.placeholder = UI.tab === "Всесвітній" ? "Написати всьому світу" : UI.tab === "Група" ? "Написати групі" : ci.placeholder;
+    const rc = document.getElementById("rcount"); if (rc && !document.getElementById("socbtn")){ const n = (NET.soc.requests || []).length + (NET.soc.invites || []).length;
+      rc.insertAdjacentHTML("beforebegin", `<button id="socbtn" class="btn sm" data-soc="friends">Друзі${n ? ` <b class="sbadge">${n}</b>` : ""}</button>`); } }; }
+
+/* ---------- вікно «Друзі й група» ---------- */
+const locName = id => id === "road" ? "у дорозі" : id === "dungeon" ? "у підземеллі" : NODES[id] ? NODES[id].name : "десь у світі";
+function openSocial(tab, keep){ if (!NET.on) return msg("Друзі й група працюють лише у світі: увійдіть із паролем.", "warn");
+  SOC.tab = tab || SOC.tab; const s = NET.soc, tb = (k, l, n) => `<button class="btn${SOC.tab === k ? " p" : ""}" data-soc="${k}">${l}${n ? ` <b class="sbadge">${n}</b>` : ""}</button>`;
+  const row = (p, acts) => `<div class="mkr"><span class="dotx ${p.online ? "on" : ""}"></span><span class="mkn"><b>${esc(p.nick)}</b><i>${p.lvl} рівень · ${p.online ? locName(p.loc) : "не в грі"}</i></span>${acts}</div>`;
+  let body = "";
+  if (SOC.tab === "friends"){
+    body = (s.requests.length ? `${lbl("Заявки в друзі")}<div class="mkl">${s.requests.map(n => `<div class="mkr"><span class="mkn"><b>${esc(n)}</b><i>хоче дружити</i></span><button class="btn p sm" data-fadd="${esc(n)}">Прийняти</button><button class="btn sm" data-frem="${esc(n)}">Відхилити</button></div>`).join("")}</div>` : "") +
+      `${lbl("Друзі")}<div class="mkl">${s.friends.length ? s.friends.map(p => row(p, `${p.online && p.loc in NODES && !(NODES[p.loc].ug) === !(NODES[S.loc] && NODES[S.loc].ug) && p.loc !== S.loc ? `<button class="btn sm" data-goto="${p.loc}">Іти до</button>` : ""}${p.online ? `<button class="btn sm" data-pinv="${esc(p.nick)}">У групу</button>` : ""}<button class="btn sm" data-pn="${esc(p.nick)}" data-close="1">Написати</button><button class="lnk" data-frem="${esc(p.nick)}">прибрати</button>`)).join("") : `<p class="hint">Поки нікого. Знайдіть гравців у вкладці «Пошук».</p>`}</div>`;
+  } else if (SOC.tab === "party"){
+    const P = s.party;
+    body = P ? `<p class="hint">Ватажок: <b>${esc(P.leader)}</b>. Кожен член групи на вашій локації дає +10% досвіду з боїв. Члени групи видно на карті.</p><div class="mkl">${P.members.map(p => row(p, p.nick.toLowerCase() === S.name.toLowerCase() ? `<span class="hint">ви</span>` : `${p.online && p.loc !== S.loc && NODES[p.loc] ? `<button class="btn sm" data-goto="${p.loc}">Іти до</button>` : ""}`)).join("")}</div><div class="acts"><button class="btn" data-pleave="1">Вийти з групи</button></div>`
+      : `<p class="hint">Ви не в групі. Запросіть друга (до 5 гравців), і з'явиться вкладка чату «Група».</p>`;
+    if (s.invites.length) body += `${lbl("Запрошення")}<div class="mkl">${s.invites.map(i => `<div class="mkr"><span class="mkn"><b>${esc(i.from)}</b><i>кличе в групу</i></span><button class="btn p sm" data-pjoin="${i.party}">Прийняти</button><button class="btn sm" data-pdecl="${i.party}">Відмовити</button></div>`).join("")}</div>`;
+  } else {
+    body = `<div class="mkf"><input id="socq" placeholder="Нік гравця (від 2 літер)" value="${esc(SOC.q)}"><button class="btn" data-socfind="1">Знайти</button></div><div class="mkl">${SOC.found === null ? "" : SOC.found.length ? SOC.found.filter(p => p.nick.toLowerCase() !== S.name.toLowerCase()).map(p => row(p, `<button class="btn p sm" data-fadd="${esc(p.nick)}">У друзі</button>${p.online ? `<button class="btn sm" data-pinv="${esc(p.nick)}">У групу</button>` : ""}`)).join("") : `<p class="hint">Нікого не знайдено.</p>`}</div>`;
+  }
+  const html = `<div class="mbox socbox" style="width:620px">${mhead("Друзі й група")}<div class="acts" style="margin:0 0 10px">${tb("friends", "Друзі", s.requests.length)}${tb("party", "Група", s.invites.length)}${tb("search", "Пошук")}</div>${body}</div>`;
+  if (keep){ const m = document.querySelector("#modal .socbox"); if (m){ const q = document.getElementById("socq"), qv = q && q.value; m.outerHTML = html; const q2 = document.getElementById("socq"); if (q2 && qv != null) q2.value = qv; return; } }
+  openModal(html);
+}
+async function socAct(fn, args, okMsg){ try { const r = await rpc(fn, Object.assign({p_token:NET.tok}, args)); if (!r.ok){ msg(esc(r.err || "Не вдалося."), "warn"); return null; } if (okMsg) msg(okMsg, "good"); await socPoll(); return r; } catch (e){ msg("Немає зв'язку зі світом.", "warn"); return null; } }
+document.addEventListener("click", async e => {
+  const t = e.target.closest && e.target.closest("[data-soc],[data-socfind],[data-fadd],[data-frem],[data-pinv],[data-pjoin],[data-pdecl],[data-pleave],[data-goto],[data-trade],[data-tracc],[data-trdec],[data-trsend],[data-trcan]"); if (!t || !isLive()) return;
+  const d = t.dataset;
+  if (d.soc) return openSocial(d.soc);
+  if (d.socfind){ SOC.q = ($("#socq") || {}).value || ""; try { SOC.found = await rpc("player_search", {p_q:SOC.q}); } catch (err){ SOC.found = []; } return openSocial("search"); }
+  if (d.fadd){ const r = await socAct("friend_add", {p_nick:d.fadd}); if (r) msg(r.state === "friends" ? `Ви тепер друзі з ${esc(d.fadd)}.` : r.state === "sent" ? `Заявку надіслано: ${esc(d.fadd)}.` : `${esc(d.fadd)} уже у ваших друзях або заявка вже є.`, "good"); return; }
+  if (d.frem){ await socAct("friend_remove", {p_nick:d.frem}); return; }
+  if (d.pinv){ await socAct("party_invite", {p_nick:d.pinv}, `Запрошення в групу надіслано: ${esc(d.pinv)}.`); return; }
+  if (d.pjoin){ const r = await socAct("party_join", {p_party:+d.pjoin, p_accept:true}, "Ви в групі! Відкрилась вкладка чату «Група»."); if (r){ TABCH_ONLINE(); renderChat(); } return; }
+  if (d.pdecl){ await socAct("party_join", {p_party:+d.pdecl, p_accept:false}); return; }
+  if (d.pleave){ await socAct("party_leave", {}, "Ви вийшли з групи."); TABCH_ONLINE(); renderChat(); return; }
+  if (d.goto){ closeModal(); if (!B && !T && !DG && d.goto !== S.loc && NODES[d.goto]) startTravel(d.goto); return; }
+  if (d.trade) return openTrade(d.trade);
+  if (d.trsend) return trSend(d.trsend);
+  if (d.tracc || d.trdec) return trAnswer(+(d.tracc || d.trdec), !!d.tracc, t);
+  if (d.trcan) return trSettle(+d.trcan, true);
+});
+// меню гравця: друзі, група, обмін
+{ const op0 = openPlayer; openPlayer = function(nick){ op0(nick); const a = document.querySelector("#modal .acts"); if (!a) return; const fr = NET.soc.friends.some(f => f.nick === nick), inP = partyIds().includes(nick.toLowerCase());
+    a.insertAdjacentHTML("beforeend", `${fr ? "" : `<button class="btn" data-fadd="${esc(nick)}">У друзі</button>`}${inP ? "" : `<button class="btn" data-pinv="${esc(nick)}">У групу</button>`}<button class="btn" data-trade="${esc(nick)}">Обмін</button>`); }; }
+
+/* ---------- обмін: лише поруч ---------- */
+const TR = {to:null, pick:{}};
+const trItems = items => (items || []).map(x => esc(mkName(x.meta && x.meta.base || x.id, x.meta)) + (x.n > 1 ? " ×" + x.n : "")).join(", ");
+function openTrade(nick){
+  if (!NET.here.some(p => p.nick === nick)) return msg(`${esc(nick)} не на вашій локації. Обмінюватись можна лише поруч.`, "warn");
+  TR.to = nick; TR.pick = {};
+  const ids = Object.keys(S.inv).filter(sellable);
+  openModal(`<div class="mbox" style="width:620px">${mhead("Обмін з " + esc(nick))}<p class="hint">Позначте, що віддаєте, і ціну (0 — подарунок). Речі лежать у пропозиції, поки ${esc(nick)} не відповість (до 10 хвилин). Якщо ви розійдетеся, обмін не відбудеться і речі повернуться.</p>
+    <div class="mkl">${ids.length ? ids.map(id => `<div class="mkr"><span class="pic">${itemArt(ITEMS[id].base || id, 36)}</span><span class="mkn"><b>${esc(mkName(id, {sharp:sharpOf(id)}))}</b><i>у торбі: ${inv(id)}</i></span><input class="mkqty" id="trn-${id}" type="number" min="0" max="${inv(id)}" value="0" title="Скільки віддати"></div>`).join("") : `<p class="hint">У торбі нема що віддати.</p>`}</div>
+    <div class="mkf" style="margin-top:8px"><span style="align-self:center">Ціна за все, мідь:</span><input id="trp" type="number" min="0" value="0" style="max-width:140px"><button class="btn p" data-trsend="${esc(nick)}">Запропонувати</button></div></div>`);
+}
+async function trSend(nick){
+  const items = []; for (const id of Object.keys(S.inv).filter(sellable)){ const n = clamp(Math.floor(+(($("#trn-" + id) || {}).value || 0)), 0, inv(id)); if (!n) continue;
+    items.push({id:ITEMS[id].base || id, n, meta:ITEMS[id].base ? {base:ITEMS[id].base, sharp:sharpOf(id), dur:durOf(id)} : (ITEMS[id].slot ? {dur:durOf(id)} : null), local:id}); }
+  if (!items.length) return msg("Позначте хоча б одну річ.", "warn");
+  const price = Math.max(0, Math.floor(+(($("#trp") || {}).value || 0)));
+  for (const x of items) take(x.local, x.n); save();
+  const send = items.map(({local, ...x}) => x);
+  let r; try { r = await rpc("trade_offer", {p_token:NET.tok, p_nick:nick, p_items:send, p_price:price}); } catch (e){ r = {ok:false, err:"Немає зв'язку зі світом."}; }
+  if (!r.ok){ for (const x of items) give(x.local, x.n, true); save(); return msg(esc(r.err), "warn"); }
+  closeModal(); msg(`Пропозицію надіслано ${esc(nick)}: ${trItems(send)}${price ? " за " + moneyTxt(price) : " у подарунок"}. <button class="lnk" data-trcan="${r.id}">Скасувати</button>`, "trade"); netSave(true);
+}
+async function trAnswer(id, ok, btn){
+  const t = (NET.soc.trades || []).find(x => x.id === id); if (!t) return msg("Пропозиції вже немає.", "warn");
+  if (ok && S.cop < t.price) return msg("Не вистачає грошей на цей обмін.", "warn");
+  if (btn) btn.disabled = true;
+  let r; try { r = await rpc("trade_answer", {p_token:NET.tok, p_id:id, p_accept:ok}); } catch (e){ return msg("Немає зв'язку зі світом.", "warn"); }
+  if (!r.ok) return msg(esc(r.err), "warn");
+  if (ok){ if (r.price) spend("shop", r.price); for (const x of r.items) mkGive(x.id, x.n, x.meta); msg(`Обмін з ${esc(r.from)}: отримано ${trItems(r.items)}${r.price ? ", сплачено " + moneyTxt(r.price) : ""}.`, "good"); save(); netSave(true); renderTop(); }
+  else msg("Обмін відхилено.");
+  NET.soc.trades = NET.soc.trades.filter(x => x.id !== id);
+}
+async function trSettle(id, cancel){ if (SOC.settling.has(id) && !cancel) return; SOC.settling.add(id);
+  try { const r = await rpc("trade_settle", {p_token:NET.tok, p_id:id, p_cancel:!!cancel}); if (!r.ok){ if (r.err === "wait") SOC.settling.delete(id); else if (cancel) msg(esc(r.err), "warn"); return; }
+    if (r.cop){ earn("sale", r.cop); msg(`${esc(r.to)} прийняв обмін: ви отримали ${moneyTxt(r.cop)}.`, "good"); }
+    else if (r.cop === 0 && r.back && !r.back.length && r.to) msg(`${esc(r.to)} прийняв ваш подарунок.`, "good");
+    if (r.back && r.back.length){ for (const x of r.back) mkGive(x.id, x.n, x.meta); msg(`${r.declined ? "Обмін відхилено" : "Обмін скасовано"}: речі повернулись у торбу (${trItems(r.back)}).`); }
+    save(); netSave(true); renderTop(); } catch (e){ SOC.settling.delete(id); } }
+
+/* ---------- ринок гравців лише в містах ---------- */
+{ const opm = openPMarket; openPMarket = function(tab){ if (NET.on && !inTown()) return msg("Ринок гравців працює лише в містах і на заставах. Дійдіть до найближчого міста.", "warn"); return opm(tab); }; }
+
+/* ---------- група: +10% досвіду за кожного члена групи поруч ---------- */
+{ const eb0 = endBattle; endBattle = function(res){ const b = B; let k = 0;
+    if (res === "win" && b && NET.on && NET.soc.party && !b.arena && !b.duel){ const pi = partyIds(); k = NET.here.filter(p => pi.includes(p.nick.toLowerCase())).length; }
+    const xp0 = S.xp, lv0 = S.lvl, out = eb0.apply(this, arguments);
+    if (k && S.lvl < MAXLVL){ const got = (S.lvl === lv0 ? S.xp - xp0 : 0); const add = Math.round(got * .1 * k); if (add > 0){ gainXp(add); msg(`Бонус групи: +${add} досвіду (${k} поруч).`, "good"); } }
+    return out; }; }
+
+/* ---------- друзі й група на карті світу ---------- */
+function socMapMarks(){ const ov = document.getElementById("mapov"); if (!ov) return; ov.querySelectorAll(".frm").forEach(e => e.remove()); if (!NET.on) return;
+  const pi = partyIds(), seen = new Set(), list = [];
+  for (const p of (NET.soc.party ? NET.soc.party.members : [])) if (p.online && p.nick.toLowerCase() !== S.name.toLowerCase()){ seen.add(p.nick); list.push([p, true]); }
+  for (const p of NET.soc.friends) if (p.online && !seen.has(p.nick)) list.push([p, false]);
+  const per = {};
+  for (const [p, party] of list){ const n = NODES[p.loc]; if (!n) continue; if (!!n.ug !== !!(typeof ugView === "function" && ugView())) continue;
+    const i = per[p.loc] = (per[p.loc] || 0) + 1;
+    ov.insertAdjacentHTML("beforeend", `<div class="node frm${party ? " party" : ""}" data-x="${n.x}" data-y="${n.y}" style="--i:${i}"><span class="frb">${heroArt(26, {crest:0})}</span><span class="frl">${esc(p.nick)}</span></div>`); }
+  placeMap(); }
+{ const rm0 = renderMap; renderMap = function(){ const o = rm0.apply(this, arguments); try { socMapMarks(); } catch (e) {} return o; }; }
 
 /* ============ старт ============ */
 initDrag();
