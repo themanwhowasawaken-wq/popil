@@ -561,10 +561,10 @@ b.r1,.rr.r1{color:#4f8a33}b.r2,.rr.r2{color:#2f6eb8}b.r3,.rr.r3{color:#7b45b0}b.
 .ract.ult{border-color:#e0a24a;background:radial-gradient(circle at 50% 35%,#4a3420,#1e1610)}
 .ract svg.gi{color:inherit}
 /* ---- етап 2: особливості мобів, присяга, правила краю ---- */
-.fxl{display:flex;flex-direction:column;gap:3px;margin:6px 0 4px}
-.fxl span{font-size:12px;line-height:1.35;color:#e9c98a;padding-left:14px;position:relative}
-.fxl span::before{content:"";position:absolute;left:3px;top:6px;width:6px;height:6px;border-radius:50%;background:#d9a441}
-.cxinfo .fxl span{color:#7a4a14}.cxinfo .fxl span::before{background:#b07a2a}
+.mfxl{display:flex;flex-direction:column;gap:3px;margin:6px 0 4px}
+.mfxl span{font-size:12px;line-height:1.35;color:#e9c98a;padding-left:14px;position:relative}
+.mfxl span::before{content:"";position:absolute;left:3px;top:6px;width:6px;height:6px;border-radius:50%;background:#d9a441}
+.cxinfo .mfxl span{color:#7a4a14}.cxinfo .mfxl span::before{background:#b07a2a}
 .oath{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
 .oath .side{border-radius:10px;padding:12px;border:1px solid rgba(0,0,0,.12)}
 .oath .side.dawn{background:#f3ead2}.oath .side.night{background:#2c2734;color:#e9e1f2}
@@ -1266,6 +1266,30 @@ svg.scfx{position:absolute;left:0;top:0;pointer-events:none;overflow:hidden}
 .node.frm .frb{position:absolute;left:calc(14px + var(--i) * 4px);top:calc(-46px - var(--i) * 6px);width:26px;height:48px}
 .node.frm .frl{position:absolute;left:calc(40px + var(--i) * 4px);top:calc(-30px - var(--i) * 6px);white-space:nowrap;font:700 11px "PT Sans",sans-serif;color:#fff;background:rgba(30,80,40,.85);padding:1px 6px;border-radius:8px}
 .node.frm.party .frl{background:rgba(30,60,120,.88)}
+/* ---------- Підзем'я ---------- */
+.mapwrap.ugmap{background:#0d0b0a}
+.ugfx .ugsp{position:absolute;width:4px;height:4px;border-radius:50%;opacity:0;box-shadow:0 0 8px 2px currentColor;animation:ugsp 9s ease-in-out infinite}
+@keyframes ugsp{0%{opacity:0;transform:translate(0,0)}25%{opacity:.85}75%{opacity:.6}100%{opacity:0;transform:translate(30px,-70px)}}
+.npc .sprnpc,.nfig.sprnpc{filter:drop-shadow(0 3px 3px rgba(0,0,0,.45))}
+/* верхнє меню: 11 кнопок + гроші вміщаються в 1280 */
+.rb{width:66px}
+#top .who{width:236px}
+#top .money{flex:none;gap:8px}
+#top{gap:10px}
+.rb{width:65px}.rb:last-child{width:74px}.rb .rl{letter-spacing:-.15px}
+.prwrap{max-height:250px;overflow-y:auto;margin-top:4px;padding-right:4px}
+.prt2{width:100%;table-layout:fixed}.prt2 th:first-child,.prt2 td:first-child{width:38%;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prt2 thead th{position:sticky;top:0;background:#efe4cc;z-index:1}
+.prt2 tr.here td{background:rgba(201,162,74,.22);font-weight:700}.prt2 td i{font-style:normal;font-size:10px;color:var(--bronze);font-weight:400}
+/* ---------- підземелля 2.0 ---------- */
+.dgg{display:flex;gap:16px;align-items:flex-start;margin:6px 0 4px}
+.dggb{flex:none;width:150px;display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
+.dggb .ic{width:96px;height:96px;display:flex;align-items:flex-end;justify-content:center}.dggb b{font-family:var(--serif);font-size:16px}.dggb i{font-size:11px;color:var(--bronze);font-style:normal}
+.dggi{flex:1;min-width:0}.dggi .kv em.bad,.dggi b.bad{color:#b8401a;font-style:normal;font-size:12px}
+.dgtiers{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 6px}
+.dcard .acts{display:flex;gap:8px;justify-content:center;margin:0}
+.dgshop{display:flex;flex-direction:column;gap:6px;width:100%}.dgshop .btn{width:100%}
+.dgmods .regrule{margin:6px 0}.regrule.good{border-color:#5a8a4a;background:rgba(90,138,74,.1)}
 
 </style>
 </head>
@@ -2148,7 +2172,7 @@ function take(id, n = 1){ S.inv[id] = inv(id) - n; if (S.inv[id] <= 0) delete S.
 
 /* ---- повідомлення ---- */
 function msg(text, kind = "", ch = "loc"){ MSG.push({t:now(), text, kind, ch}); if (MSG.length > 150) MSG.shift(); if (typeof renderChat === "function") renderChat(); }
-const TABCH = {"Локація":["loc"], "Торгівля":["trade"], "Група":[], "Лог бою":["fight"], "Клан":[]};
+const TABCH = {"Локація":["loc"], "Торгівля":["trade"], "Лог бою":["fight"]};
 
 /* ============ художник пейзажів ============ */
 const SCN_CACHE = {};
@@ -2372,6 +2396,9 @@ function locRT(id){
 }
 function freeSpot(locId, others, minD = 100){
   const L = LOCS[locId], c = SCENE[locId] || {}, avoid = L.npcs.map(n => [n[1], n[2]]).concat(others.map(o => [o.x, o.y]));
+  // не ставимо ресурси під кнопки переходів і під табличку з назвою
+  const ex = (typeof neighbors === "function" ? neighbors(locId) : []).filter(nb => NODES[nb]).map(nb => { const a = dirTo(locId, nb), cx = Math.cos(a), ey = 290 + Math.sin(a) * 210; return cx < -.35 ? [110, ey] : cx > .35 ? [790, ey] : [450 + cx * 400, Math.sin(a) < 0 ? 90 : 495]; });
+  avoid.push(...ex, [450, 100]);
   let x, y, tries = 0;
   do { x = rnd(240, 830); y = rnd(150, 480); tries++; }
   while (tries < 40 && (avoid.some(([ax, ay]) => Math.hypot(ax - x, ay - y) < minD) || (c.river && x > 545 && x < 735) || (c.lake && Math.hypot((x - 540) / 320, (y - 250) / 135) < 1.05) || (c.sea && x + (y - 230) > 790)));
@@ -2572,7 +2599,7 @@ function mobFxText(st){
   if (st.side){ const o = ORDERS[st.side]; t.push(o.name + ". " + (!S.order ? "Поки ви без присяги, сам не нападає." : S.order === st.side ? "Ваш брат по ордену." : "Ворог вашого ордену: нападає першим.")); }
   return t;
 }
-function fxHTML(st){ const t = mobFxText(st); return t.length ? `<div class="fxl">${t.map(x => `<span>${x}</span>`).join("")}</div>` : ""; }
+function fxHTML(st){ const t = mobFxText(st); return t.length ? `<div class="mfxl">${t.map(x => `<span>${x}</span>`).join("")}</div>` : ""; }
 function wardHTML(st){ if (!st.wards.length) return ""; return `<div><span class="lbl">Боїться</span><div class="wards">${st.wards.map(w => { const it = WARD_ITEMS[w], own = it && inv(it[0]) > 0; return `<span class="${own ? "own" : ""}" title="${it ? (own ? "Є в торбі" : "Продає знахарка Параска в Ужгороді") : "Не предмет"}">${w}</span>`; }).join("")}</div></div>`; }
 function renderMobCard(){
   const box = $("#mobcard"); if (!box) return;
@@ -2748,6 +2775,13 @@ async function act(a, itemId){
     if (id === "bolt"){ const d = Math.round(spellPow() * rnd(90, 115) / 100 * dmgTakenMul(tg) * myDmgMul() * elemMul(tg, "bolt")); tg.heavy = true; hitEnemy(tg, d, "блискавка", "#9fd8ff"); B.log.push([B.round, `${S.name}: блискавка → ${tg.name}`, "−" + d, "hit"]); blog(`Блискавка б'є ${tg.name}: −${d}.`); }
     if (id === "fireball"){ const d = Math.round(spellPow() * 1.35 * dmgTakenMul(tg) * myDmgMul() * elemMul(tg, "fire")); tg.heavy = true; tg.burn = 3; hitEnemy(tg, d, "вогонь", "#ffb24a"); B.log.push([B.round, `${S.name}: вогняна куля → ${tg.name}`, "−" + d, "hit"]);
       for (const e of B.enemies) if (e !== tg && alive(e)){ const d2 = Math.round(d * .5 * elemMul(e, "fire") / elemMul(tg, "fire")); e.burn = 3; hitEnemy(e, d2, "опік", "#ffb24a"); } blog(`Вогняна куля: −${d} ${tg.name}, сусідів обпікає наполовину.`); }
+    if (id === "whirl"){ blog("Вихор: ви б'єте всіх, хто поруч.", "good"); for (const e of B.enemies) if (alive(e)) strike(e, "volley", me); }
+    if (id === "stunblow"){ const d0 = strike(tg, "strong", me); if (d0 && alive(tg)){ if (!tg.boss || Math.random() < .4){ tg.stun = 1; blog(`${tg.name} оглушений і пропустить хід.`, "good"); } else blog(`${tg.name} встояв на ногах.`); } }
+    if (id === "dshot"){ strike(tg, "hit", me); if (alive(tg)){ await bsleep(250); strike(tg, "hit", me); } }
+    if (id === "chain"){ const d = Math.round(spellPow() * .95 * rnd(90, 115) / 100 * dmgTakenMul(tg) * myDmgMul() * elemMul(tg, "bolt")); tg.heavy = true; hitEnemy(tg, d, "блискавка", "#9fd8ff"); B.log.push([B.round, `${S.name}: ланцюгова блискавка → ${tg.name}`, "−" + d, "hit"]);
+      let n = 0; for (const e of B.enemies) if (e !== tg && alive(e) && n < 3){ n++; const d2 = Math.round(d * .6 * elemMul(e, "bolt") / elemMul(tg, "bolt")); e.heavy = true; hitEnemy(e, d2, "розряд", "#9fd8ff"); } blog(`Ланцюгова блискавка: −${d} ${tg.name}${n ? `, перескакує ще на ${n}` : ""}.`); }
+    if (id === "drain"){ const d = Math.round(spellPow() * 1.05 * dmgTakenMul(tg) * myDmgMul()); tg.heavy = true; hitEnemy(tg, d, "висмоктано", "#c88aff"); const hv = Math.round(d * .5); S.hp = Math.min(st.maxHp, S.hp + hv); fx(pEl(), "+" + hv, "#8fd18a");
+      B.log.push([B.round, `${S.name}: висмоктати життя → ${tg.name}`, `−${d}, +${hv}`, "hit"]); blog(`Ви висмоктуєте з ${tg.name} ${d} життя й забираєте собі ${hv}.`, "good"); }
     if (id === "mend"){
       if (B.allyTg === "pet" && B.pet && B.pet.hp > 0){ const ph = Math.round(B.pet.maxHp * .4 + st.wil * 5), p0 = B.pet.hp; B.pet.hp = Math.min(B.pet.maxHp, B.pet.hp + ph); const got = Math.round(B.pet.hp - p0); fx(document.getElementById("f-pet"), "+" + got, "#8fd18a");
         B.log.push([B.round, `${S.name}: зцілення → ${B.pet.name}`, "+" + got, "heal"]); blog(`Зцілення: ${B.pet.name} +${got} здоров'я.`, "good"); }
@@ -4100,8 +4134,10 @@ function bookQuests(){
 }
 function bookMarket(){
   const here = NODES[S.loc].r, regs = Object.keys(REG_PRICE), tr = tradeRoute();
-  const table = `<table class="prtab"><thead><tr><th>Товар</th>${regs.map(r => `<th class="${r === here ? "here" : ""}">${REGIONS[r]}</th>`).join("")}</tr></thead><tbody>${Object.entries(PCAT).map(([c, n]) => { const vals = regs.map(r => priceMul(r, c)), mx = Math.max(...vals), mn = Math.min(...vals);
-    return `<tr><td>${n}</td>${regs.map((r, i) => `<td class="${r === here ? "here" : ""} ${vals[i] === mx ? "hi" : vals[i] === mn ? "lo" : ""}">×${vals[i].toFixed(2).replace(".", ",")}</td>`).join("")}</tr>`; }).join("")}</tbody></table>`;
+  // таблиця «край × товар»: краї рядками, щоб усі вміщалися; поточний край зверху
+  const cats = Object.entries(PCAT), ext = cats.map(([c]) => { const v = regs.map(r => priceMul(r, c)); return [Math.max(...v), Math.min(...v)]; });
+  const order = [here, ...regs.filter(r => r !== here)];
+  const table = `<div class="prwrap"><table class="prtab prt2"><thead><tr><th>Край</th>${cats.map(([, n]) => `<th>${n}</th>`).join("")}</tr></thead><tbody>${order.map(r => `<tr class="${r === here ? "here" : ""}"><td>${REGIONS[r]}${r === here ? " <i>ви тут</i>" : ""}</td>${cats.map(([c], k) => { const v = priceMul(r, c); return `<td class="${v === ext[k][0] ? "hi" : v === ext[k][1] ? "lo" : ""}">×${v.toFixed(2).replace(".", ",")}</td>`; }).join("")}</tr>`).join("")}</tbody></table></div>`;
   const cs = contracts().map(c => { const rd = cReady(c), prog = c.kind === "kill" ? `${Math.min(c.prog, c.n)}/${c.n}` : `${Math.min(inv(c.item), c.n)}/${c.n}`;
     return `<div class="ctr${c.done ? " done" : rd ? " ready" : ""}"><div><b>${c.text}</b><span>${c.done ? "здано" : prog} · ${c.where}</span><span class="rw">${moneyTxt(c.cop)}${S.lvl < MAXLVL ? " · " + c.xp + " досвіду" : ""}</span></div>${c.done ? gi("check-mark", 22, "#7fb65f") : `<button class="btn sm ${rd ? "p" : "dk"}" data-ctdone="${c.id}" ${rd && isSafe(S.loc) && !T && !DG ? "" : "disabled"}>${rd ? (isSafe(S.loc) ? "Здати" : "Здати в місті") : "У процесі"}</button>`}</div>`; }).join("");
   const E = S.econ, hrs = Math.max(1 / 60, E.sec / 3600), tin = sumv(E.in), tout = sumv(E.out);
@@ -12122,7 +12158,7 @@ function netPlaceOthers(){ const v = document.getElementById("view"); if (!v) re
 { const rl0 = renderLoc; renderLoc = function(){ const o = rl0.apply(this, arguments); try { netPlaceOthers(); } catch (e) {} return o; }; }
 
 /* ---------- чат ---------- */
-function TABCH_ONLINE(){ for (const k of Object.keys(TABCH)) delete TABCH[k]; Object.assign(TABCH, NET.on ? {"Локація":["loc"], "Світ":["world"], "Торгівля":["trade"], "Лог бою":["fight"]} : {"Локація":["loc"], "Торгівля":["trade"], "Група":[], "Лог бою":["fight"], "Клан":[]}); if (!TABCH[UI.tab]) UI.tab = "Локація"; }
+function TABCH_ONLINE(){ for (const k of Object.keys(TABCH)) delete TABCH[k]; Object.assign(TABCH, NET.on ? {"Локація":["loc"], "Світ":["world"], "Торгівля":["trade"], "Лог бою":["fight"]} : {"Локація":["loc"], "Торгівля":["trade"], "Лог бою":["fight"]}); if (!TABCH[UI.tab]) UI.tab = "Локація"; }
 async function netChatPoll(){ if (!NET.on || !READY) return;
   try { const chs = [netChan(S.loc), "world", "trade"]; const rows = await rpc("chat_get", {p_channels:chs, p_since:NET.chatId});
     if (!Array.isArray(rows)) return; const first = NET.chatFirst; NET.chatFirst = false;
@@ -12289,6 +12325,7 @@ async function socPoll(){ if (!NET.on || !READY) return;
     if (!NET.soc.party && hadParty) TABCH_ONLINE();
     if (UI.view === "map") socMapMarks();
     if (document.querySelector("#modal .socbox")) openSocial(SOC.tab, true);
+    renderTop(); const sb = document.getElementById("socbtn"); if (sb) sb.remove(); renderChat();
   } catch (e) {} }
 setInterval(socPoll, 12000);
 { const ns0 = netStart; netStart = function(){ ns0(); if (NET.on) setTimeout(socPoll, 800); }; }
@@ -12312,39 +12349,45 @@ setInterval(socPoll, 12000);
     return ns1(text); }; }
 { const rc1 = renderChat; renderChat = function(){ rc1.apply(this, arguments); if (!NET.on) return;
     const ci = document.getElementById("cinp"); if (ci) ci.placeholder = UI.tab === "Всесвітній" ? "Написати всьому світу" : UI.tab === "Група" ? "Написати групі" : ci.placeholder;
-    const rc = document.getElementById("rcount"); if (rc && !document.getElementById("socbtn")){ const n = (NET.soc.requests || []).length + (NET.soc.invites || []).length;
+    const rc = document.getElementById("rcount"); if (rc && !document.getElementById("socbtn")){ const n = (NET.soc.requests || []).length;
       rc.insertAdjacentHTML("beforebegin", `<button id="socbtn" class="btn sm" data-soc="friends">Друзі${n ? ` <b class="sbadge">${n}</b>` : ""}</button>`); } }; }
 
 /* ---------- вікно «Друзі й група» ---------- */
 const locName = id => id === "road" ? "у дорозі" : id === "dungeon" ? "у підземеллі" : NODES[id] ? NODES[id].name : "десь у світі";
-function openSocial(tab, keep){ if (!NET.on) return msg("Друзі й група працюють лише у світі: увійдіть із паролем.", "warn");
-  SOC.tab = tab || SOC.tab; const s = NET.soc, tb = (k, l, n) => `<button class="btn${SOC.tab === k ? " p" : ""}" data-soc="${k}">${l}${n ? ` <b class="sbadge">${n}</b>` : ""}</button>`;
+function openSocial(tab, keep){ if (!NET.on) return msg(tab === "party" ? "Група працює лише у світі: вийдіть і увійдіть із паролем." : "Друзі працюють лише у світі: вийдіть і увійдіть із паролем.", "warn");
+  SOC.tab = tab || SOC.tab; const isP = SOC.tab === "party"; const s = NET.soc, tb = (k, l, n) => `<button class="btn${SOC.tab === k ? " p" : ""}" data-soc="${k}">${l}${n ? ` <b class="sbadge">${n}</b>` : ""}</button>`;
   const row = (p, acts) => `<div class="mkr"><span class="dotx ${p.online ? "on" : ""}"></span><span class="mkn"><b>${esc(p.nick)}</b><i>${p.lvl} рівень · ${p.online ? locName(p.loc) : "не в грі"}</i></span>${acts}</div>`;
   let body = "";
   if (SOC.tab === "friends"){
     body = (s.requests.length ? `${lbl("Заявки в друзі")}<div class="mkl">${s.requests.map(n => `<div class="mkr"><span class="mkn"><b>${esc(n)}</b><i>хоче дружити</i></span><button class="btn p sm" data-fadd="${esc(n)}">Прийняти</button><button class="btn sm" data-frem="${esc(n)}">Відхилити</button></div>`).join("")}</div>` : "") +
-      `${lbl("Друзі")}<div class="mkl">${s.friends.length ? s.friends.map(p => row(p, `${p.online && p.loc in NODES && !(NODES[p.loc].ug) === !(NODES[S.loc] && NODES[S.loc].ug) && p.loc !== S.loc ? `<button class="btn sm" data-goto="${p.loc}">Іти до</button>` : ""}${p.online ? `<button class="btn sm" data-pinv="${esc(p.nick)}">У групу</button>` : ""}<button class="btn sm" data-pn="${esc(p.nick)}" data-close="1">Написати</button><button class="lnk" data-frem="${esc(p.nick)}">прибрати</button>`)).join("") : `<p class="hint">Поки нікого. Знайдіть гравців у вкладці «Пошук».</p>`}</div>`;
+      `${lbl("Друзі")}<div class="mkl">${s.friends.length ? s.friends.map(p => row(p, `${p.online && p.loc in NODES && !(NODES[p.loc].ug) === !(NODES[S.loc] && NODES[S.loc].ug) && p.loc !== S.loc ? `<button class="btn sm" data-goto="${p.loc}">Іти до</button>` : ""}${p.online && !partyIds().includes(p.nick.toLowerCase()) && !(s.party && s.party.members.length >= 5) ? `<button class="btn sm" data-pinv="${esc(p.nick)}">У групу</button>` : ""}<button class="btn sm" data-pn="${esc(p.nick)}" data-close="1">Написати</button><button class="lnk" data-frem="${esc(p.nick)}">прибрати</button>`)).join("") : `<p class="hint">Поки нікого. Знайдіть гравців у вкладці «Пошук».</p>`}</div>`;
   } else if (SOC.tab === "party"){
     const P = s.party;
-    body = P ? `<p class="hint">Ватажок: <b>${esc(P.leader)}</b>. Кожен член групи на вашій локації дає +10% досвіду з боїв. Члени групи видно на карті.</p><div class="mkl">${P.members.map(p => row(p, p.nick.toLowerCase() === S.name.toLowerCase() ? `<span class="hint">ви</span>` : `${p.online && p.loc !== S.loc && NODES[p.loc] ? `<button class="btn sm" data-goto="${p.loc}">Іти до</button>` : ""}`)).join("")}</div><div class="acts"><button class="btn" data-pleave="1">Вийти з групи</button></div>`
-      : `<p class="hint">Ви не в групі. Запросіть друга (до 5 гравців), і з'явиться вкладка чату «Група».</p>`;
+    const inP = n => P && P.members.some(m => m.nick.toLowerCase() === n.toLowerCase()), full = P && P.members.length >= 5;
+    body = P ? `<p class="hint">Ватажок: <b>${esc(P.leader)}</b> · у групі ${P.members.length} з 5. Кожен член групи на вашій локації дає +10% досвіду з боїв. Група бачить одне одного на карті й має свою вкладку чату.</p><div class="mkl">${P.members.map(p => row(p, p.nick.toLowerCase() === S.name.toLowerCase() ? `<span class="hint">ви</span>` : `${p.online && p.loc !== S.loc && NODES[p.loc] && !!NODES[p.loc].ug === !!(NODES[S.loc] && NODES[S.loc].ug) ? `<button class="btn sm" data-goto="${p.loc}">Іти до</button>` : ""}<button class="btn sm" data-pn="${esc(p.nick)}">Меню</button>`)).join("")}</div>`
+      : `<p class="hint">Ви не в групі. Запросіть друзів (до 5 гравців): разом на одній локації ви отримуєте більше досвіду, бачите одне одного на карті й маєте свою вкладку чату.</p>`;
+    const cand = s.friends.filter(f => f.online && !inP(f.nick));
+    if (!full) body += `${lbl("Запросити")}<div class="mkl">${cand.length ? cand.map(p => row(p, `<button class="btn p sm" data-pinv="${esc(p.nick)}">Запросити</button>`)).join("") : `<p class="hint">Немає друзів у грі. Запросіть гравця за ніком:</p>`}</div><div class="mkf"><input id="pinvq" placeholder="Нік гравця"><button class="btn" data-pinvq="1">Запросити</button></div>`;
+    if (P) body += `<div class="acts"><button class="btn" data-pleave="1">Вийти з групи</button></div>`;
     if (s.invites.length) body += `${lbl("Запрошення")}<div class="mkl">${s.invites.map(i => `<div class="mkr"><span class="mkn"><b>${esc(i.from)}</b><i>кличе в групу</i></span><button class="btn p sm" data-pjoin="${i.party}">Прийняти</button><button class="btn sm" data-pdecl="${i.party}">Відмовити</button></div>`).join("")}</div>`;
   } else {
     body = `<div class="mkf"><input id="socq" placeholder="Нік гравця (від 2 літер)" value="${esc(SOC.q)}"><button class="btn" data-socfind="1">Знайти</button></div><div class="mkl">${SOC.found === null ? "" : SOC.found.length ? SOC.found.filter(p => p.nick.toLowerCase() !== S.name.toLowerCase()).map(p => row(p, `<button class="btn p sm" data-fadd="${esc(p.nick)}">У друзі</button>${p.online ? `<button class="btn sm" data-pinv="${esc(p.nick)}">У групу</button>` : ""}`)).join("") : `<p class="hint">Нікого не знайдено.</p>`}</div>`;
   }
-  const html = `<div class="mbox socbox" style="width:620px">${mhead("Друзі й група")}<div class="acts" style="margin:0 0 10px">${tb("friends", "Друзі", s.requests.length)}${tb("party", "Група", s.invites.length)}${tb("search", "Пошук")}</div>${body}</div>`;
+  const html = isP ? `<div class="mbox socbox" style="width:640px">${mhead("Група")}${body}</div>`
+    : `<div class="mbox socbox" style="width:640px">${mhead("Друзі")}<div class="acts" style="margin:0 0 10px">${tb("friends", "Друзі", s.requests.length)}${tb("search", "Пошук")}</div>${body}</div>`;
   if (keep){ const m = document.querySelector("#modal .socbox"); if (m){ const q = document.getElementById("socq"), qv = q && q.value; m.outerHTML = html; const q2 = document.getElementById("socq"); if (q2 && qv != null) q2.value = qv; return; } }
   openModal(html);
 }
 async function socAct(fn, args, okMsg){ try { const r = await rpc(fn, Object.assign({p_token:NET.tok}, args)); if (!r.ok){ msg(esc(r.err || "Не вдалося."), "warn"); return null; } if (okMsg) msg(okMsg, "good"); await socPoll(); return r; } catch (e){ msg("Немає зв'язку зі світом.", "warn"); return null; } }
 document.addEventListener("click", async e => {
-  const t = e.target.closest && e.target.closest("[data-soc],[data-socfind],[data-fadd],[data-frem],[data-pinv],[data-pjoin],[data-pdecl],[data-pleave],[data-goto],[data-trade],[data-tracc],[data-trdec],[data-trsend],[data-trcan]"); if (!t || !isLive()) return;
+  const t = e.target.closest && e.target.closest("[data-soc],[data-socfind],[data-fadd],[data-frem],[data-pinv],[data-pjoin],[data-pdecl],[data-pleave],[data-pinvq],[data-goto],[data-trade],[data-tracc],[data-trdec],[data-trsend],[data-trcan]"); if (!t || !isLive()) return;
   const d = t.dataset;
   if (d.soc) return openSocial(d.soc);
   if (d.socfind){ SOC.q = ($("#socq") || {}).value || ""; try { SOC.found = await rpc("player_search", {p_q:SOC.q}); } catch (err){ SOC.found = []; } return openSocial("search"); }
   if (d.fadd){ const r = await socAct("friend_add", {p_nick:d.fadd}); if (r) msg(r.state === "friends" ? `Ви тепер друзі з ${esc(d.fadd)}.` : r.state === "sent" ? `Заявку надіслано: ${esc(d.fadd)}.` : `${esc(d.fadd)} уже у ваших друзях або заявка вже є.`, "good"); return; }
   if (d.frem){ await socAct("friend_remove", {p_nick:d.frem}); return; }
   if (d.pinv){ await socAct("party_invite", {p_nick:d.pinv}, `Запрошення в групу надіслано: ${esc(d.pinv)}.`); return; }
+  if (d.pinvq){ const n = (($("#pinvq") || {}).value || "").trim(); if (n.length < 2) return msg("Вкажіть нік гравця.", "warn"); await socAct("party_invite", {p_nick:n}, `Запрошення в групу надіслано: ${esc(n)}.`); return; }
   if (d.pjoin){ const r = await socAct("party_join", {p_party:+d.pjoin, p_accept:true}, "Ви в групі! Відкрилась вкладка чату «Група»."); if (r){ TABCH_ONLINE(); renderChat(); } return; }
   if (d.pdecl){ await socAct("party_join", {p_party:+d.pdecl, p_accept:false}); return; }
   if (d.pleave){ await socAct("party_leave", {}, "Ви вийшли з групи."); TABCH_ONLINE(); renderChat(); return; }
@@ -12418,6 +12461,813 @@ function socMapMarks(){ const ov = document.getElementById("mapov"); if (!ov) re
     ov.insertAdjacentHTML("beforeend", `<div class="node frm${party ? " party" : ""}" data-x="${n.x}" data-y="${n.y}" style="--i:${i}"><span class="frb">${heroArt(26, {crest:0})}</span><span class="frl">${esc(p.nick)}</span></div>`); }
   placeMap(); }
 { const rm0 = renderMap; renderMap = function(){ const o = rm0.apply(this, arguments); try { socMapMarks(); } catch (e) {} return o; }; }
+
+/* ---------- кнопка «Група» в меню зверху ---------- */
+BOOK.splice(BOOK.findIndex(b => b[0] === "ach"), 0, ["party", "Група", "crossed-swords", "G"]);
+{ const bb0 = bookBadge; bookBadge = function(k){ if (k === "party") return NET.on && NET.soc && NET.soc.invites && NET.soc.invites.length ? NET.soc.invites.length : ""; return bb0(k); }; }
+document.addEventListener("click", e => { const t = e.target.closest && e.target.closest('[data-book="party"]'); if (!t || !isLive()) return; e.stopPropagation(); e.preventDefault(); if (B) return; openSocial("party"); }, true);
+document.addEventListener("keydown", e => { if (!isLive() || B || e.ctrlKey || e.metaKey || e.altKey) return; const tg = e.target; if (tg && (tg.tagName === "INPUT" || tg.tagName === "TEXTAREA")) return; if (e.key === "g" || e.key === "G" || e.key === "п" || e.key === "П"){ e.preventDefault(); if (modalOpen() && document.querySelector("#modal .socbox")) closeModal(); else openSocial("party"); } });
+
+/* ============ Підзем'я: мальовані спрайти (23) ============ */
+Object.assign(MOB_ART, {
+  abyss_worm:{src:"art/abyss_worm.webp?v=1950c8d1",k:1.028,ar:0.9918,foot:1,lift:0},
+  blind_one:{src:"art/blind_one.webp?v=c75a4a18",k:0.685,ar:1.3570,foot:1,lift:0},
+  cave_spider:{src:"art/cave_spider.webp?v=67930243",k:0.826,ar:0.6528,foot:1,lift:0},
+  crystal_golem:{src:"art/crystal_golem.webp?v=98ddcbdd",k:0.493,ar:1.8851,foot:1,lift:0},
+  cursed_tree:{src:"art/cursed_tree.webp?v=254e41fd",k:0.790,ar:1.4429,foot:1,lift:0},
+  deep_lord:{src:"art/deep_lord.webp?v=4c696144",k:1.129,ar:1.0705,foot:1,lift:0},
+  drow_assassin:{src:"art/drow_assassin.webp?v=f88769fe",k:0.951,ar:0.9777,foot:1,lift:0},
+  drow_knight:{src:"art/drow_knight.webp?v=96a62073",k:0.530,ar:1.7542,foot:1,lift:0},
+  dryad:{src:"art/dryad.webp?v=ac1899ad",k:0.529,ar:1.7579,foot:1,lift:0},
+  elf_artisan:{src:"art/elf_artisan.webp?v=d1239ffd",k:0.607,ar:1.5315,foot:1,lift:0},
+  elf_guard:{src:"art/elf_guard.webp?v=eca8792a",k:0.884,ar:1.0518,foot:1,lift:0},
+  forest_witch:{src:"art/forest_witch.webp?v=d7c55569",k:0.633,ar:1.4700,foot:1,lift:0},
+  high_priestess:{src:"art/high_priestess.webp?v=ec118c63",k:0.654,ar:1.4222,foot:1,lift:0},
+  library_keeper:{src:"art/library_keeper.webp?v=abd30e09",k:0.692,ar:1.4737,foot:1,lift:14},
+  miner_spirit:{src:"art/miner_spirit.webp?v=63239251",k:0.716,ar:1.2144,foot:1,lift:11},
+  oak_father:{src:"art/oak_father.webp?v=0eecf79c",k:0.981,ar:1.4129,foot:1,lift:0},
+  old_smith:{src:"art/old_smith.webp?v=ff5d9416",k:0.465,ar:2.0000,foot:1,lift:0},
+  shadow_spider:{src:"art/shadow_spider.webp?v=44b20dff",k:0.826,ar:0.6296,foot:1,lift:0},
+  shroom_spirit:{src:"art/shroom_spirit.webp?v=48daf417",k:0.444,ar:1.2849,foot:1,lift:0},
+  spider_priestess:{src:"art/spider_priestess.webp?v=0aec2ad8",k:0.581,ar:1.6016,foot:1,lift:0},
+  spider_queen:{src:"art/spider_queen.webp?v=012da55a",k:1.114,ar:0.6213,foot:1,lift:0},
+  spider_steed:{src:"art/spider_steed.webp?v=2c18d533",k:0.855,ar:0.6213,foot:1,lift:0},
+  wild_elf:{src:"art/wild_elf.webp?v=fca1e0c0",k:0.769,ar:1.2097,foot:1,lift:0},
+});
+
+/* ===================================================================
+   ПІДЗЕМ'Я: окрема підземна карта під усім світом (рівень 11–13)
+   Глибини (рудокопи, кристали, Безодня), Нижні Сади (ельфи),
+   Царство дроу (павуки й Чорне Місто)
+   Вхід: Копальня гоблінів (Крижані Пустки) і Печера ламії (Піски)
+   =================================================================== */
+Object.assign(REGIONS, {ug_deep:"Глибини", ug_elf:"Нижні Сади", ug_drow:"Царство дроу"});
+const UG_REG = new Set(["ug_deep", "ug_elf", "ug_drow"]);
+
+/* ---------- вузли підземної карти (своя карта, ті самі розміри світу) ---------- */
+Object.assign(NODES, {
+  // Глибини
+  ug_shaft:{ug:1, r:"ug_deep", name:"Дно гоблінської шахти", x:2620, y:520, kind:"danger", lv:"11"},
+  ug_camp:{ug:1, r:"ug_deep", name:"Табір рудокопів", x:3180, y:780, kind:"town", lv:"табір"},
+  ug_glow:{ug:1, r:"ug_deep", name:"Грибний грот", x:3760, y:560, kind:"hunt", lv:"11"},
+  ug_lake:{ug:1, r:"ug_deep", name:"Тихе озеро", x:2480, y:1160, kind:"hunt", lv:"11"},
+  ug_crystal:{ug:1, r:"ug_deep", name:"Кришталеві печери", x:4300, y:900, kind:"danger", lv:"12"},
+  ug_worm:{ug:1, r:"ug_deep", name:"Нори хробака", x:3800, y:1330, kind:"danger", lv:"12"},
+  ug_abyss:{ug:1, r:"ug_deep", name:"Край Безодні", x:4520, y:1620, kind:"danger", lv:"13"},
+  // Нижні Сади
+  ug_town:{ug:1, r:"ug_elf", name:"Срібне Світло", x:1500, y:1260, kind:"town", lv:"місто ельфів"},
+  ug_garden:{ug:1, r:"ug_elf", name:"Нижні Сади", x:1980, y:900, kind:"hunt", lv:"11"},
+  ug_watch:{ug:1, r:"ug_elf", name:"Мовчазна Варта", x:960, y:880, kind:"hunt", lv:"12"},
+  ug_grove:{ug:1, r:"ug_elf", name:"Прокляті гаї", x:880, y:1680, kind:"danger", lv:"12"},
+  ug_oak:{ug:1, r:"ug_elf", name:"Серце Діброви", x:1380, y:2100, kind:"danger", lv:"13"},
+  // Царство дроу
+  ug_bridge:{ug:1, r:"ug_drow", name:"Павутинний міст", x:2300, y:1720, kind:"danger", lv:"12"},
+  ug_outpost:{ug:1, r:"ug_drow", name:"Застава дроу", x:2820, y:2060, kind:"danger", lv:"12"},
+  ug_nest:{ug:1, r:"ug_drow", name:"Гнізда", x:2140, y:2420, kind:"danger", lv:"13"},
+  ug_temple:{ug:1, r:"ug_drow", name:"Храм Павучихи", x:3380, y:2380, kind:"danger", lv:"13"},
+  ug_city:{ug:1, r:"ug_drow", name:"Чорне Місто", x:2880, y:2740, kind:"danger", lv:"13"},
+  ug_ruins:{ug:1, r:"ug_drow", name:"Гномові руїни", x:3620, y:1880, kind:"hunt", lv:"12"},
+});
+const UG_IDS = new Set(Object.keys(NODES).filter(k => NODES[k].ug));
+const isUG = id => UG_IDS.has(id);
+
+ROADS.push(...[
+  ["ug_shaft","ug_camp",0,-30,"Рейки рудокопів"],["ug_shaft","ug_lake",1,40,"Мокрий схил"],["ug_camp","ug_glow",0,30],["ug_camp","ug_worm",1,-40],
+  ["ug_glow","ug_crystal",1,-30],["ug_crystal","ug_worm",1,40],["ug_worm","ug_abyss",1,-30],["ug_crystal","ug_abyss",1,40,"Сходи в Безодню"],
+  ["ug_lake","ug_garden",0,-40,"Світлий брід"],["ug_garden","ug_town",0,30],["ug_town","ug_watch",0,-30],["ug_watch","ug_grove",1,60],
+  ["ug_town","ug_grove",1,-30],["ug_grove","ug_oak",1,-40],["ug_town","ug_oak",1,50,"Корінна стежка"],
+  ["ug_lake","ug_bridge",1,40,"Павутиння над прірвою"],["ug_bridge","ug_outpost",1,-30],["ug_bridge","ug_nest",1,40],["ug_outpost","ug_temple",1,30],
+  ["ug_outpost","ug_city",1,-30],["ug_nest","ug_city",1,30],["ug_temple","ug_ruins",1,-40],["ug_ruins","ug_worm",1,30],["ug_ruins","ug_camp",0,-60,"Старий гномів тракт"],
+].map(mkRoad));
+
+/* ---------- вороги ---------- */
+Object.assign(MOBS, {
+  // Глибини
+  shroom_spirit:{name:"Грибовик", arch:"caster", pack:true, lore:"Ходячий гриб із рожевим капелюхом. Там, де він ступає, з каменю вилазять нові гриби, а повітря гіркне від спор.", p:{hp:.9, dmg:1}, ward:["Вогонь","Сіль"], drop:[["glow_cap",.6],["deep_ore",.1]], design:D("blob","#e86aa8","#8a8a8a","#ffffff",[],{size:.9})},
+  miner_spirit:{name:"Дух рудокопа", arch:"wisp", lore:"Рудокоп, якого завалило ще за дідів. Досі шукає вихід і гасить лампи тим, хто знайшов його раніше.", p:{hp:.95, dmg:1.1, agi:2}, ward:["Срібло","Молитва","Сіль"], drop:[["miner_lamp",.5],["deep_ore",.2]], design:D("wisp","#a8c0a0","#5a6a58","#ffffff",[],{size:1.1})},
+  blind_one:{name:"Сліпий", arch:"chaser", aggro:true, lore:"Сірий людиноподібний мешканець глибин. Очей не має, зате чує, як б'ється твоє серце, і йде на цей звук.", p:{hp:1.15, dmg:1.15, agi:2}, ward:["Вогонь","Дзвін"], drop:[["blind_claw",.6],["deep_ore",.15]], design:D("humanoid","#8a8a88","#4a4a48","#2a2a2a",[],{size:1.15})},
+  crystal_golem:{name:"Кришталевий голем", arch:"bruiser", lore:"Голем, що виріс із кришталевої жили. Бити його мечем, як рубати скло: дзвенить, а шкоди мало. Булава розколює краще.", p:{hp:1.7, dmg:1.15, def:1.35, agi:-3}, ward:["Залізо"], drop:[["crystal_shard",.7],["deep_ore",.25]], design:D("giant","#4a8aa8","#2a4a5a","#bfffff",[],{size:1.4})},
+  abyss_worm:{name:"Безодній хробак", arch:"bruiser", aggro:true, lore:"Хробак із пащею, повною зубів по колу. Вигризає ходи в скелі й ковтає все, що в них потрапляє.", p:{hp:1.6, dmg:1.2, agi:-1}, ward:["Вогонь"], drop:[["worm_hide",.6],["deep_ore",.2]], design:D("serpent","#5a3a7a","#2a1a3a","#ffd86f",[],{size:1.5})},
+  deep_lord:{name:"Владар Глибин", arch:"bruiser", boss:true, cleave:true, lore:"Демон, що спить під усім світом. Гобліни копали надто глибоко й розбудили його. Тепер жар із Безодні піднімається до самих шахт.", p:{hp:1.35, dmg:1.15}, ward:["Освячена вода","Срібло"], drop:[["deep_crown",.45],["deep_ore",1],["crystal_shard",.5]], design:D("knight","#8a3a1a","#2a1008","#ffcf3a",["horns"],{size:1.6})},
+  // Нижні Сади
+  wild_elf:{name:"Дикий ельф", arch:"kiter", aggro:true, lore:"Ельф, що пішов із Срібного Світла в гаї й здичавів. Стріляє з темряви й зникає, ще поки стріла летить.", p:{hp:.95, dmg:1.15, agi:4}, ward:["Залізо"], drop:[["elf_arrow",.6],["silver_leaf",.15]], design:D("humanoid","#3a4a2a","#1a2414","#aaff66",["hood"],{prop:"bow", size:1})},
+  elf_guard:{name:"Зачарований вартовий", arch:"shielded", lore:"Вартовий Срібного Світла, якого відьма зачарувала прямо на посту. Досі стоїть на варті, тільки тепер не пускає своїх.", p:{hp:1.4, dmg:1.1, def:1.3}, ward:["Срібло","Молитва"], drop:[["silver_leaf",.5],["elf_arrow",.2]], design:D("knight","#8aa898","#3a5a4a","#aaff66",[],{prop:"spear", size:1.15})},
+  dryad:{name:"Дріада", arch:"caster", mend:true, lore:"Дух дерева в людській подобі. Лікує інших, поки ти б'єш її, і співає так, що в руках слабне зброя.", p:{hp:1, dmg:1}, ward:["Вогонь","Залізо"], drop:[["elf_sap",.6],["silver_leaf",.1]], design:D("robed","#5a4a2a","#2a3a1a","#ffb04a",[],{size:1})},
+  forest_witch:{name:"Лісова відьма", arch:"caster", lore:"Відьма, що прокляла Нижні Сади. Зачаровує вартових, гноїть коріння й насилає морок на тих, хто заходить у гай.", p:{hp:1.05, dmg:1.2}, ward:["Срібло","Полин","Освячена вода"], drop:[["witch_moss",.6],["elf_sap",.2]], design:D("robed","#3a4a3a","#1a2418","#aaff66",["hood"],{prop:"staff", size:1.1})},
+  cursed_tree:{name:"Проклятий дуб", arch:"bruiser", lore:"Дуб, у якого відьма вклала злобу. Ходить на корінні, хапає гілками й заростає знову, якщо його не палити.", p:{hp:1.75, dmg:1.1, def:1.2, agi:-3}, ward:["Вогонь"], drop:[["cursed_bark",.6],["elf_sap",.25]], design:D("giant","#2a2018","#120e0a","#ff3a2a",[],{size:1.5})},
+  oak_father:{name:"Дубовий Батько", arch:"summoner", boss:true, summon:"cursed_tree", lore:"Найстаріше дерево під землею. Ельфи молилися йому тисячу років, поки відьма не вклала в його серце гниль. Тепер з його коріння лізуть прокляті дуби.", p:{hp:1.45, dmg:1.05, def:1.2}, ward:["Вогонь","Освячена вода"], drop:[["oak_staff",.45],["cursed_bark",1],["elf_sap",.6]], design:D("giant","#4a3a24","#1a2a10","#ffd86f",[],{size:1.8})},
+  // Царство дроу
+  cave_spider:{name:"Печерний павук", arch:"chaser", pack:true, aggro:true, venom:true, lore:"Сірий павук завбільшки з собаку. Ходить зграями й обплутує здобич, поки та ще жива.", p:{hp:.95, dmg:1.05, agi:3}, ward:["Вогонь"], drop:[["spider_silk",.6],["spider_eye",.15]], design:D("spider","#7a7a7a","#3a3a3a","#ff4a4a",[],{size:1.1})},
+  spider_steed:{name:"Павук-верховик", arch:"chaser", aggro:true, venom:true, lore:"Великий павук із сідлом на спині. Дроу їздять на таких, а коли вершника вбито, павук полює сам.", p:{hp:1.3, dmg:1.15, agi:2}, ward:["Вогонь"], drop:[["spider_silk",.5],["spider_eye",.25]], design:D("spider","#3a2a4a","#1a1024","#c86aff",[],{size:1.4})},
+  shadow_spider:{name:"Тіньовий павук", arch:"ceiling", venom:true, lore:"Павук, якого не видно, поки він не спуститься тобі на плечі. Половина його тіла тінь, і меч часто проходить крізь неї.", p:{hp:1.1, dmg:1.2, agi:3}, ward:["Вогонь","Срібло"], drop:[["spider_silk",.4],["shadow_silk",.3]], design:D("spider","#1a1424","#0a0810","#b86aff",[],{size:1.35})},
+  drow_assassin:{name:"Дроу-вбивця", arch:"thief", aggro:true, lore:"Тіньовий вбивця Чорного Міста. Ти почуєш його тільки тоді, коли кинджал уже вийде з-під ребер.", p:{hp:1, dmg:1.25, agi:5}, ward:["Срібло","Дзвін"], drop:[["drow_coin",.6],["drow_poison",.25]], design:D("humanoid","#2a2034","#140e1a","#bf6fff",["hood"],{prop:"dagger", size:1})},
+  drow_knight:{name:"Лицар дроу", arch:"shielded", lore:"Лицар у чорних обладунках із щитом, на якому розплющене око Павучихи. Б'ється холодно й не поспішає.", p:{hp:1.45, dmg:1.15, def:1.35}, ward:["Срібло","Молитва"], drop:[["drow_coin",.5],["shadow_silk",.15]], design:D("knight","#3a3448","#1a1624","#bf6fff",[],{prop:"sword", size:1.15})},
+  spider_priestess:{name:"Жриця Павучихи", arch:"summoner", summon:"cave_spider", mend:true, lore:"Жриця з вогнем у долонях. Молиться Павучисі, і з темряви сповзаються павуки на її голос.", p:{hp:1.05, dmg:1.15}, ward:["Освячена вода","Срібло","Хрест"], drop:[["drow_poison",.5],["spider_eye",.3]], design:D("robed","#2a2034","#140e1a","#ff7ad0",[],{prop:"staff", size:1.05})},
+  spider_queen:{name:"Павуча Королева", arch:"summoner", boss:true, summon:"cave_spider", venom:true, lore:"Мати всіх павуків Підзем'я. Сидить у серці Чорного Міста, а дроу приносять їй жертви, щоб вона не голодувала.", p:{hp:1.4, dmg:1.15, agi:2}, ward:["Вогонь","Освячена вода"], drop:[["queen_fang",.45],["spider_eye",1],["shadow_silk",.6]], design:D("spider","#2a1a34","#0a0610","#ff4a6a",[],{size:1.9})},
+});
+for (const [id, m] of Object.entries(MOBS)) if (!m.id) prepMob(id, m);
+
+Object.assign(ABIL_INFO, {
+  darkness:["Морок", "Кожен третій раунд огортає темрявою: ваш наступний удар з шансом 50% мимо."],
+  spores:["Спори", "Кожен третій раунд пускає спори: ви отруєні на 3 раунди."],
+});
+Object.assign(ABIL, {
+  shroom_spirit:["spores","split"], miner_spirit:["phase","fear","darkness"], blind_one:["ambush","bleed"], crystal_golem:["thorns","spellward"],
+  abyss_worm:["ambush","drag","regen"], deep_lord:["burn","sunder","enrage","darkness"],
+  wild_elf:["pierce","ambush"], elf_guard:["stunhit","sunder"], dryad:["heal_low","weaken"], forest_witch:["weaken","blind","rot"],
+  cursed_tree:["regen","thorns"], oak_father:["regen","stunhit","thorns","enrage"],
+  cave_spider:["web"], spider_steed:["charge","web"], shadow_spider:["ambush","phase"], drow_assassin:["ambush","bleed","darkness"],
+  drow_knight:["sunder","darkness"], spider_priestess:["weaken","darkness"], spider_queen:["web","multihit","enrage","darkness"],
+});
+{ const re0 = abilRoundEnd; abilRoundEnd = function(){ re0.apply(this, arguments); if (!B) return;
+    for (const e of B.enemies){ if (e.hp <= 0) continue;
+      if (hasA(e, "darkness") && B.round % 3 === 0 && !B.blind){ B.blind = 1; blog(`${e.name} огортає все мороком: ви майже нічого не бачите.`, "warn"); }
+      if (hasA(e, "spores") && B.round % 3 === 0){ B.poison = Math.max(B.poison || 0, 3); B.poisonDmg = Math.max(B.poisonDmg || 0, Math.round(e.lvl * 1.5)); fx(document.getElementById("f-p"), "спори", "#e86aa8"); blog(`${e.name} пускає хмару спор: ви отруєні.`, "warn"); } } }; }
+// дерева хитаються на місці, хробак повзе
+{ const mo0 = motionOf; motionOf = function(type){ if (type === "cursed_tree" || type === "oak_father") return "stone"; return mo0(type); }; }
+
+/* ---------- предмети ---------- */
+Object.assign(ITEMS, {
+  // Глибини: кузня Кузьми
+  deep_pick:{name:"Бойове кайло рудокопа", slot:"weapon", dmg:[34,44], str:3, price:8200, lvl:10, sock:1},
+  crystal_mace:{name:"Кришталева булава", slot:"weapon", dmg:[34,45], str:2, crit:2, blunt:true, price:8400, lvl:10, sock:1},
+  miner_helm:{name:"Шолом із лампою", slot:"helmet", def:7, hp:28, wil:1, price:4700, lvl:10, sock:1},
+  ore_plate:{name:"Панцир із глибинної руди", slot:"armor", def:11, hp:48, price:6600, lvl:10, sock:1},
+  ore_legs:{name:"Наголінники рудокопа", slot:"legs", def:6, hp:24, str:1, price:4200, lvl:10},
+  crystal_ring:{name:"Кришталевий перстень", slot:"ring", hp:26, wil:2, crit:2, price:4300, lvl:10},
+  deep_crown:{name:"Корона Владаря Глибин", slot:"helmet", def:8, hp:44, str:3, crit:3, price:11000, lvl:10, sock:2, rare:true, unique:true},
+  // Нижні Сади: майстриня Лірель
+  elf_blade:{name:"Ельфійський клинок", slot:"weapon", dmg:[33,42], agi:3, crit:2, price:8000, lvl:10, sock:1},
+  elf_staff:{name:"Посох зі срібного дуба", slot:"weapon", dmg:[29,39], wil:5, price:8000, lvl:10, sock:1},
+  elf_helm:{name:"Шолом Срібного Світла", slot:"helmet", def:6, hp:26, agi:2, price:4500, lvl:10, sock:1},
+  elf_mail:{name:"Листяна кольчуга", slot:"armor", def:10, hp:40, agi:2, price:6400, lvl:10, sock:1},
+  elf_boots:{name:"Безшумні чоботи", slot:"boots", def:4, hp:16, agi:3, price:3600, lvl:10},
+  elf_gloves:{name:"Рукавиці лучника", slot:"gloves", def:2, agi:2, crit:2, hp:12, price:3400, lvl:10},
+  elf_cloak:{name:"Плащ із сріблястого листя", slot:"cloak", hp:30, agi:2, wil:2, price:4300, lvl:10},
+  oak_staff:{name:"Посох Дубового Батька", slot:"weapon", dmg:[35,47], wil:6, hp:30, price:13800, lvl:10, sock:2, rare:true, unique:true},
+  // Царство дроу: трофейний комплект
+  drow_hood:{name:"Каптур дроу", slot:"helmet", def:5, hp:22, agi:2, crit:3, price:4600, lvl:10, sock:1},
+  drow_mail:{name:"Чорна луска дроу", slot:"armor", def:10, hp:36, agi:2, crit:2, price:6600, lvl:10, sock:1},
+  drow_boots:{name:"Чоботи з павутини", slot:"boots", def:4, hp:14, agi:3, crit:1, price:3700, lvl:10},
+  drow_belt:{name:"Пояс вбивці", slot:"belt", hp:28, agi:2, crit:2, price:3800, lvl:10},
+  drow_cloak:{name:"Тіньовий плащ", slot:"cloak", hp:26, agi:3, crit:2, price:4400, lvl:10},
+  drow_dagger:{name:"Отруєний кинджал дроу", slot:"offhand", dmg:[8,12], agi:2, crit:3, price:4800, lvl:10},
+  queen_fang:{name:"Ікло Павучої Королеви", slot:"weapon", dmg:[37,48], agi:3, crit:4, price:13900, lvl:10, sock:2, rare:true, unique:true},
+  // трофеї
+  glow_cap:{name:"Світляний гриб", price:70}, miner_lamp:{name:"Лампа рудокопа", price:110}, blind_claw:{name:"Кіготь Сліпого", price:90}, deep_ore:{name:"Глибинна руда", price:160},
+  crystal_shard:{name:"Живий кришталь", price:140}, worm_hide:{name:"Шкура хробака", price:120},
+  elf_arrow:{name:"Ельфійська стріла", price:60}, silver_leaf:{name:"Срібний лист", price:130}, elf_sap:{name:"Живиця дріади", price:90}, witch_moss:{name:"Відьмин мох", price:100}, cursed_bark:{name:"Проклята кора", price:110},
+  spider_silk:{name:"Павучий шовк", price:70}, spider_eye:{name:"Око павука", price:120}, shadow_silk:{name:"Тіньовий шовк", price:180}, drow_coin:{name:"Монета дроу", price:90}, drow_poison:{name:"Отрута дроу", price:130},
+});
+for (const [id, it] of Object.entries(ITEMS)) if (!it.id) prepItem(id, it);
+Object.assign(ITEM_IC, {
+  deep_pick:"war-axe", crystal_mace:"spiked-mace", miner_helm:"closed-barbute", ore_plate:"breastplate", ore_legs:"leg-armor", crystal_ring:"ring", deep_crown:"crown",
+  elf_blade:"piercing-sword", elf_staff:"skull-staff", elf_helm:"crested-helmet", elf_mail:"chain-mail", elf_boots:"leather-boot", elf_gloves:"gloves", elf_cloak:"cape", oak_staff:"skull-staff",
+  drow_hood:"hood", drow_mail:"metal-scales", drow_boots:"boots", drow_belt:"belt", drow_cloak:"cloak", drow_dagger:"plain-dagger", queen_fang:"daggers",
+  glow_cap:"slime", miner_lamp:"fire", blind_claw:"claws", deep_ore:"ore", crystal_shard:"crystal-cluster", worm_hide:"animal-hide",
+  elf_arrow:"arrow-cluster", silver_leaf:"feather", elf_sap:"drop", witch_moss:"herbs-bundle", cursed_bark:"vines",
+  spider_silk:"spider-web", spider_eye:"eye-target", shadow_silk:"rolled-cloth", drow_coin:"two-coins", drow_poison:"bubbling-flask",
+});
+Object.assign(SETS, {
+  silverlight:{name:"Комплект Срібного Світла", items:["elf_helm","elf_mail","elf_boots","elf_gloves","elf_cloak"], bonus:{2:{agi:2}, 4:{hp:40, crit:2}, 5:{dmgp:9, agi:3}}},
+  shadow:{name:"Комплект Тіні", items:["drow_hood","drow_mail","drow_boots","drow_belt","drow_cloak"], bonus:{2:{crit:2}, 4:{agi:3, hp:30}, 5:{dmgp:10, crit:3}}},
+});
+for (const k of ["silverlight","shadow"]) for (const id of SETS[k].items) ITEMS[id].set = k;
+
+/* ---------- крамниці ---------- */
+Object.assign(SHOPS, {
+  kuzma:["potion_xl","potion_xe","deep_pick","crystal_mace","miner_helm","ore_plate","ore_legs","crystal_ring","w_torch"],
+  lirel:["potion_xl","potion_xe","elf_blade","elf_staff","elf_helm","elf_mail","elf_boots","elf_gloves","elf_cloak"],
+});
+SMITHS.push("kuzma");
+
+/* ---------- жителі (мальовані) ---------- */
+Object.assign(NPCS, {
+  kuzma:{name:"Старий Кузьма", letter:"К", spr:"old_smith", role:"коваль рудокопів", quests:["ug_d1","ug_d2","ug_d3","ug_d4","ug_d5","ug_d6","ug_d7","ug_d8"], shop:"kuzma", heal:true, hello:"Сорок років у шахті. Бачив, як гобліни копали, бачив, як рудокопи гинули. А тепер бачу тебе. Не стій під склепінням, воно сиплеться."},
+  aelina:{name:"Верховна жриця Аеліна", letter:"А", spr:"high_priestess", role:"жриця Срібного Світла", quests:["ug_e1","ug_e2","ug_e3","ug_e4","ug_e5","ug_e6","ug_e7","ug_e8"], heal:true, hello:"Ми живемо під землею тисячу років і ніколи не бачили сонця. Нам світить Дубовий Батько. Світив."},
+  ilvar:{name:"Хранитель Ілвар", letter:"І", spr:"library_keeper", role:"хранитель бібліотеки", quests:["ug_r1","ug_r2","ug_r3","ug_r4","ug_r5","ug_r6","ug_r7","ug_r8"], hello:"Тут записано все, що знали ельфи про дроу. Мало. Дроу не люблять, коли про них пишуть, і вбивають писарів."},
+  lirel:{name:"Майстриня Лірель", letter:"Л", spr:"elf_artisan", role:"зброярка ельфів", quests:["ug_a1","ug_a2"], shop:"lirel", hello:"Срібний дуб ріжеться ножем тільки в ту ніч, коли він спить. Тому наші клинки такі легкі."},
+});
+// мальовані жителі: замість намальованої фігурки беремо спрайт
+{ const na0 = npcArt; npcArt = function(id, w = 46, cls = "nfig"){ const N = NPCS[id], a = N && N.spr && MOB_ART[N.spr];
+    if (!a) return na0(id, w, cls); const h = Math.round(w * 440 / 240), ww = Math.round(Math.min(w * 1.6, h / a.ar));
+    return `<img class="${cls} sprnpc" src="${mobArtURL(N.spr)}" width="${ww}" height="${h}" alt="" aria-hidden="true" draggable="false" style="object-fit:contain;object-position:50% 100%">`; }; }
+{ const np0 = npcPortrait; npcPortrait = function(id, px = 64){ const N = NPCS[id]; if (!N || !N.spr || !MOB_ART[N.spr]) return np0(id, px);
+    return `<img class="nport sprnpc" src="${mobArtURL(N.spr)}" width="${px}" height="${Math.round(px * 150 / 128)}" alt="" aria-hidden="true" draggable="false" style="object-fit:cover;object-position:50% 0">`; }; }
+
+/* ---------- локації ---------- */
+Object.assign(LOCS, {
+  ug_shaft:{desc:"Дно гоблінської шахти. Гобліни копали вниз сто років, поки кайло не провалилося в порожнечу. Звідти тягне теплом і грибами.", mobs:[["blind_one",3,11],["miner_spirit",2,11],["shroom_spirit",2,11]], res:{mine:5}, boss:["blind_one",12],
+    buildings:[["Підйомник нагору", "ug:ic_mine"]]},
+  ug_camp:{desc:"Табір рудокопів, що спустилися за гоблінами й лишилися. Дерев'яні кріплення, ковадло, вагонетки з рудою й тепла піч.", npcs:[["kuzma",470,250]],
+    buildings:[["Кузня Кузьми","npc:kuzma"],["Тепла піч","heal:Ви погрілися біля печі рудокопів. Сили повністю відновилися."]], res:{mine:3}},
+  ug_glow:{desc:"Грот, де гриби вищі за людину й світять рожевим. Повітря солодке, а від нього паморочиться в голові.", mobs:[["shroom_spirit",4,11],["miner_spirit",1,11],["blind_one",1,11]], res:{herb:5}, boss:["shroom_spirit",12]},
+  ug_lake:{desc:"Підземне озеро, чорне й нерухоме. Риба в ньому без очей, а на дні світяться кришталі.", mobs:[["blind_one",2,11],["miner_spirit",2,11],["cave_spider",1,11]], res:{fish:5, herb:2}, boss:["miner_spirit",12]},
+  ug_crystal:{desc:"Печери, що проросли кришталем. Кожен крок віддзвонює під склепінням, а в стінах ворушаться ті, хто з кришталю виріс.", mobs:[["crystal_golem",3,12],["blind_one",2,12],["miner_spirit",1,12]], res:{mine:5}, boss:["crystal_golem",13]},
+  ug_worm:{desc:"Ходи, вигризені в скелі хробаками. Стіни гладенькі, як скло, і теплі. Десь поруч хрумтить камінь.", mobs:[["abyss_worm",3,12],["blind_one",2,12],["shroom_spirit",1,12]], res:{mine:5}, boss:["abyss_worm",13]},
+  ug_abyss:{desc:"Край прірви, що не має дна. Знизу підіймається жар і червоне світло, а в ньому щось дихає.", mobs:[["abyss_worm",2,13],["crystal_golem",2,13],["miner_spirit",2,12]], res:{mine:5}, boss:["abyss_worm",13]},
+  ug_town:{desc:"Срібне Світло, останнє місто ельфів під землею. Будинки виростають прямо зі стовбурів, а ліхтарі горять соком срібного дуба.", npcs:[["aelina",330,230],["ilvar",600,230],["lirel",460,380]],
+    buildings:[["Храм Дубового Батька","npc:aelina"],["Бібліотека","npc:ilvar"],["Майстерня Лірель","npc:lirel"],["Сріблястий фонтан","heal:Ви вмилися у сріблястій воді. Сили повністю відновилися."]], res:{herb:3}},
+  ug_garden:{desc:"Сади, які ельфи вирощували без сонця. Дерева тягнуться до каменю над головою, а між ними тепер ходять ті, хто садів не садив.", mobs:[["dryad",3,11],["wild_elf",2,11],["shroom_spirit",1,11]], res:{herb:5}, boss:["dryad",12]},
+  ug_watch:{desc:"Варта на кордоні ельфів. Вартові досі стоять на постах, але дивляться не на ворога, а на тебе.", mobs:[["elf_guard",3,12],["wild_elf",2,12],["dryad",1,12]], res:{herb:3, mine:3}, boss:["elf_guard",13]},
+  ug_grove:{desc:"Гай, де відьма прокляла дерева. Кора чорна, листя мовчить, а коріння ворушиться під ногами.", mobs:[["cursed_tree",2,12],["forest_witch",2,12],["dryad",2,12]], res:{herb:5}, boss:["forest_witch",13]},
+  ug_oak:{desc:"Серце Діброви. Тут росте Дубовий Батько, і раніше від нього йшло світло. Тепер іде гниль.", mobs:[["cursed_tree",3,13],["forest_witch",2,12],["wild_elf",2,12]], res:{herb:5}, boss:["cursed_tree",13]},
+  ug_bridge:{desc:"Міст, сплетений павуками над прірвою. Під ногами пружинить шовк, а з нього звисають коконы з тим, що колись ходило.", mobs:[["cave_spider",4,12],["spider_steed",2,12],["shadow_spider",1,12]], res:{herb:3}, boss:["spider_steed",13]},
+  ug_outpost:{desc:"Застава дроу: чорні вежі з обсидіану й ворота у вигляді павука. Дроу не тримають полонених.", mobs:[["drow_knight",3,12],["drow_assassin",2,12],["spider_steed",2,12]], res:{mine:4}, boss:["drow_knight",13]},
+  ug_nest:{desc:"Гнізда павуків, від стіни до стіни затягнуті шовком. Скрізь яйця, і деякі з них ворушаться.", mobs:[["cave_spider",4,13],["shadow_spider",3,13],["spider_steed",1,13]], res:{herb:4}, boss:["shadow_spider",13]},
+  ug_temple:{desc:"Храм Павучихи. Жриці співають у темряві, а з-під склепіння на співи спускаються павуки.", mobs:[["spider_priestess",3,13],["drow_knight",2,13],["shadow_spider",2,13]], res:{mine:4}, boss:["spider_priestess",13]},
+  ug_city:{desc:"Чорне Місто дроу. Вулиці перекриті павутинням, на дахах сидять павуки, а в серці міста живе їхня мати.", mobs:[["drow_assassin",3,13],["drow_knight",2,13],["spider_priestess",2,13]], res:{mine:5}, boss:["drow_assassin",13]},
+  ug_ruins:{desc:"Руїни гномового міста, яке дроу спустошили століття тому. На стінах руни, у кузнях холодні горни.", mobs:[["blind_one",2,12],["drow_assassin",2,12],["crystal_golem",1,12]], res:{mine:5}, boss:["crystal_golem",13],
+    buildings:[["Гномові сходи нагору", "ug:sd_lamia"]]},
+});
+for (const id of UG_IDS) prepLoc(LOCS[id]);
+// входи з поверхні
+LOCS.ic_mine.buildings = (LOCS.ic_mine.buildings || []).concat([["Спуск у Підзем'я", "ug:ug_shaft"]]);
+LOCS.sd_lamia.buildings = (LOCS.sd_lamia.buildings || []).concat([["Гномові сходи вниз", "ug:ug_ruins"]]);
+
+Object.assign(REG_RULE, {
+  ug_deep:() => `<div class="regrule"><b>Глибини.</b> Тут темно й душно. Голем розколюється булавою, а хробаки й гриби бояться вогню. Духи рудокопів не терплять срібла й солі.</div>`,
+  ug_elf:() => `<div class="regrule"><b>Нижні Сади.</b> Прокляті дерева відростають, якщо їх не палити: беріть смолоскипи й сувої вогню. Відьма й зачаровані вартові бояться срібла.</div>`,
+  ug_drow:() => `<div class="regrule"><b>Царство дроу.</b> Павуки обплутують шовком і труять, тож майте зілля від отрути. Дроу наводять морок: часом удар іде мимо.</div>`,
+});
+Object.assign(REG_PRICE, {ug_deep:{herb:1.2, mine:.75, fish:1.1, misc:1.25}, ug_elf:{herb:.8, mine:1.3, fish:1.2, misc:1.15}, ug_drow:{herb:1.3, mine:1, fish:1.4, misc:1.3}});
+
+/* ---------- перехід між поверхнею й Підзем'ям ---------- */
+function ugGo(target){
+  if (B || T || DG || !NODES[target]) return;
+  const down = isUG(target);
+  if (down && S.lvl < 10 && !UI.ugWarn){ UI.ugWarn = true; return msg("Унизу живуть вороги 11–13 рівня. Без 10 рівня краще не спускатися. Натисніть ще раз, якщо певні.", "warn"); }
+  S.prev = S.loc; S.loc = target; UI.cam = null; UI.view = "loc";
+  msg(down ? "Ви спускаєтеся в темряву. Світло зверху стає маленьким, потім зникає зовсім." : "Ви вибираєтеся нагору. Повітря свіже, а світло ріже очі.", down ? "warn" : "good");
+  if (typeof SND2 !== "undefined" && SND2.play) try { SND2.play("door"); } catch (e) {}
+  arrive();
+}
+document.addEventListener("click", e => { const t = e.target.closest && e.target.closest('[data-build^="ug:"]'); if (!t || !isLive()) return; e.stopPropagation(); e.preventDefault(); ugGo(t.dataset.build.slice(3)); }, true);
+
+/* ---------- квести ---------- */
+Object.assign(QUESTS, {
+  // міст із поверхні
+  ic_ug:{name:"Що відкопали гобліни", giver:"ratmir", req:"ic_q6", minLvl:10, text:"У Копальні гоблінів кайло провалилося в порожнечу. Звідти тягне теплом, і гобліни бояться туди лізти. Спустися й подивися, що там.", goal:{visit:"ug_shaft", n:1}, reward:{cop:1200, xp:300, items:{potion_xe:3}}},
+  sd_ug:{name:"Сходи під піском", giver:"yusuf", minLvl:10, text:"У Печері ламії знайшли сходи, вирізані гномами. Каравани кажуть, що вони ведуть до міста, якого нема на жодній мапі.", goal:{visit:"ug_ruins", n:1}, reward:{cop:1200, xp:300, items:{potion_xe:3}}},
+  // Глибини: Кузьма
+  ug_d1:{name:"Сліпі в шахті", giver:"kuzma", text:"Сліпі приходять на стук кайла. Вже трьох наших забрали. Поклади вісьмох, і ми знову зможемо працювати.", goal:{kill:"blind_one", n:8}, reward:{cop:2400, xp:560, choice:[{item:"ore_legs"},{item:"miner_helm"},{item:"potion_xe", n:3}]}},
+  ug_d2:{name:"Лампи рудокопів", giver:"kuzma", req:"ug_d1", text:"Мертві рудокопи носять лампи, які ми їм колись дали. Принеси мені шість, поставлю їх на могилах.", goal:{item:"miner_lamp", n:6}, reward:{cop:2600, xp:600, choice:[{item:"crystal_ring"},{item:"gem_topaz3"},{item:"elix_str", n:2}]}},
+  ug_d3:{name:"Гриби з гроту", giver:"kuzma", req:"ug_d2", text:"Грибовики розростаються, і скоро спори дійдуть до табору. Розчисти грот: здолай десятьох.", goal:{kill:"shroom_spirit", n:10}, reward:{cop:2800, xp:640, choice:[{item:"ore_plate"},{item:"deep_pick"},{item:"potion_xe", n:4}]}},
+  ug_d4:{name:"Живий кришталь", giver:"kuzma", req:"ug_d3", text:"Із живого кришталю виходить булава, яка розколює камінь. Принеси вісім уламків, і я скую тобі таку.", goal:{item:"crystal_shard", n:8}, reward:{cop:3000, xp:700, item:"crystal_mace"}},
+  ug_d5:{name:"Хробаки під табором", giver:"kuzma", req:"ug_d4", text:"Земля під табором тремтить: хробаки підгризають скелю. Поклади п'ятьох, поки ми не провалилися в їхні нори.", goal:{kill:"abyss_worm", n:5}, reward:{cop:3300, xp:760, choice:[{item:"gem_ruby3"},{item:"elix_skin", n:2},{item:"potion_xe", n:5}]}},
+  ug_d6:{name:"Жар із Безодні", giver:"kuzma", req:"ug_d5", text:"Знизу піднімається жар, і я знаю, хто його дихає. Гобліни розбудили Владаря Глибин. Спустися в Пекельний спуск і поклади його.", goal:{dungeon:"ug_dg_deep", n:1}, reward:{cop:4800, xp:1100, perk:{str:2, hp:20}}, perkText:"+2 сили, +20 здоров'я"},
+  ug_d7:{name:"Глибинна руда", giver:"kuzma", req:"ug_d6", text:"Тепер, як Владар упав, руда в глибинах тепла й м'яка. Принеси десять шматків, і я навчу тебе дечого про метал.", goal:{item:"deep_ore", n:10}, reward:{cop:3600, xp:800, choice:[{item:"gem_onyx3", n:2},{item:"box"}]}},
+  ug_d8:{name:"Вогонь не згасне", giver:"kuzma", req:"ug_d7", text:"Владар повертається, поки горить Безодня. Пройди Пекельний спуск ще двічі, щоб він засинав надовго.", goal:{dungeon:"ug_dg_deep", n:2}, reward:{cop:4200, xp:1000, perk:{def:3}}, perkText:"+3 захисту"},
+  // Нижні Сади: жриця Аеліна
+  ug_e1:{name:"Сади без садівників", giver:"aelina", text:"Дріади з наших садів збожеволіли й нападають на всіх. Заспокой вісьмох. Їм уже не допомогти.", goal:{kill:"dryad", n:8}, reward:{cop:2400, xp:560, choice:[{item:"elf_boots"},{item:"elf_gloves"},{item:"potion_xe", n:3}]}},
+  ug_e2:{name:"Брати в лісі", giver:"aelina", req:"ug_e1", text:"Частина наших пішла в гаї й здичавіла. Вони стріляють у своїх. Зупини вісьмох диких ельфів.", goal:{kill:"wild_elf", n:8}, reward:{cop:2600, xp:600, choice:[{item:"elf_helm"},{item:"elf_cloak"},{item:"gem_emer3"}]}},
+  ug_e3:{name:"Варта, що не впізнає", giver:"aelina", req:"ug_e2", text:"Відьма зачарувала наших вартових. Вони стоять на постах і вбивають кожного. Звільни шістьох мечем: так вони хоч заснуть.", goal:{kill:"elf_guard", n:6}, reward:{cop:2900, xp:660, choice:[{item:"elf_mail"},{item:"elf_blade"},{item:"potion_xe", n:4}]}},
+  ug_e4:{name:"Чорна кора", giver:"aelina", req:"ug_e3", text:"Прокляті дуби несуть у собі відьмину злобу. Принеси шість шматків їхньої кори: я спалю її на вівтарі.", goal:{item:"cursed_bark", n:6}, reward:{cop:3000, xp:700, choice:[{item:"elf_staff"},{item:"gem_ruby3"},{item:"elix_skin", n:2}]}},
+  ug_e5:{name:"Лісова відьма", giver:"aelina", req:"ug_e4", text:"Відьма ховається в Проклятих гаях. Поки вона жива, прокляття росте. Знищ п'ятьох відьом, щоб жодна не лишилася.", goal:{kill:"forest_witch", n:5}, reward:{cop:3400, xp:780, choice:[{item:"gem_emer3", n:2},{item:"box"}]}},
+  ug_e6:{name:"Серце Діброви", giver:"aelina", req:"ug_e5", text:"Дубовий Батько хворий. Його серце гниє, і з коріння лізуть прокляті дуби. Спустися під його коріння й звільни його. Навіть якщо це означає зрубати.", goal:{dungeon:"ug_dg_oak", n:1}, reward:{cop:4800, xp:1100, perk:{wil:3, hp:20}}, perkText:"+3 волі, +20 здоров'я"},
+  ug_e7:{name:"Живиця для саджанця", giver:"aelina", req:"ug_e6", text:"З жолудя Батька ми посадили новий дуб. Йому треба живиця. Принеси дев'ять крапель від дріад.", goal:{item:"elf_sap", n:9}, reward:{cop:3500, xp:780, choice:[{item:"elf_cloak"},{item:"gem_topaz3", n:2}]}},
+  ug_e8:{name:"Гниль у корінні", giver:"aelina", req:"ug_e7", text:"Гниль глибоко в корінні й щоразу підіймається знову. Пройди Корінь Діброви ще двічі.", goal:{dungeon:"ug_dg_oak", n:2}, reward:{cop:4200, xp:1000, perk:{agi:2}}, perkText:"+2 спритності"},
+  // Царство дроу: хранитель Ілвар
+  ug_r1:{name:"Павучий міст", giver:"ilvar", text:"Дроу сплели міст через прірву, і павуки ходять ним до озера. Знищ десять печерних павуків, поки вони не дійшли до нас.", goal:{kill:"cave_spider", n:10}, reward:{cop:2500, xp:580, choice:[{item:"drow_boots"},{item:"elix_skin", n:2},{item:"potion_xe", n:3}]}},
+  ug_r2:{name:"Шовк для книг", giver:"ilvar", req:"ug_r1", text:"Павучий шовк міцніший за пергамент. Принеси дванадцять мотків, і я перепишу найстаріші книги, поки вони не розсипалися.", goal:{item:"spider_silk", n:12}, reward:{cop:2600, xp:600, choice:[{item:"drow_belt"},{item:"gem_onyx3"},{item:"elix_str", n:2}]}},
+  ug_r3:{name:"Вершники без вершників", giver:"ilvar", req:"ug_r2", text:"Павуки-верховики полюють уздовж прірви. Здолай шістьох, і дроу втратять своїх коней.", goal:{kill:"spider_steed", n:6}, reward:{cop:2900, xp:660, choice:[{item:"drow_hood"},{item:"drow_cloak"},{item:"potion_xe", n:4}]}},
+  ug_r4:{name:"Застава дроу", giver:"ilvar", req:"ug_r3", text:"Лицарі дроу стоять на заставі й готуються йти на нас. Поклади шістьох лицарів і забери їхні монети: я хочу знати, що на них карбують.", goal:{kill:"drow_knight", n:6}, reward:{cop:3100, xp:720, choice:[{item:"drow_mail"},{item:"drow_dagger"},{item:"gem_ruby3"}]}},
+  ug_r5:{name:"Жриці співають", giver:"ilvar", req:"ug_r4", text:"Жриці Павучихи співають у храмі, і на їхній спів сходяться павуки з усього Підзем'я. Обірви пісню: здолай п'ятьох жриць.", goal:{kill:"spider_priestess", n:5}, reward:{cop:3400, xp:780, choice:[{item:"gem_onyx3", n:2},{item:"box"}]}},
+  ug_r6:{name:"Мати павуків", giver:"ilvar", req:"ug_r5", text:"У серці Чорного Міста живе Павуча Королева. Поки вона жива, павуки народжуються швидше, ніж ти їх б'єш. Пройди Павутинний палац і вбий її.", goal:{dungeon:"ug_dg_spider", n:1}, reward:{cop:4800, xp:1100, perk:{crit:2, hp:20}}, perkText:"+2% криту, +20 здоров'я"},
+  ug_r7:{name:"Тіні з-під склепіння", giver:"ilvar", req:"ug_r6", text:"Королева мертва, але тіньові павуки досі спускаються зі склепінь. Здолай вісьмох, і я впишу твоє ім'я в книгу.", goal:{kill:"shadow_spider", n:8}, reward:{cop:3500, xp:800, choice:[{item:"drow_cloak"},{item:"gem_emer3", n:2}]}},
+  ug_r8:{name:"Нова королева", giver:"ilvar", req:"ug_r7", text:"Дроу вже кладуть яйце на трон. Пройди Павутинний палац ще двічі, щоб із нього ніхто не вилупився.", goal:{dungeon:"ug_dg_spider", n:2}, reward:{cop:4200, xp:1000, perk:{dmg:3}}, perkText:"+3% шкоди"},
+  // Лірель
+  ug_a1:{name:"Срібне листя", giver:"lirel", text:"Вартові носять срібні листки як оберіг. Принеси мені вісім, і я прикрашу ними твій обладунок.", goal:{item:"silver_leaf", n:8}, reward:{cop:2600, xp:600, choice:[{item:"elf_helm"},{item:"elf_gloves"},{item:"gem_topaz3"}]}},
+  ug_a2:{name:"Стріли з темряви", giver:"lirel", req:"ug_a1", text:"Дикі ельфи стріляють нашими ж стрілами. Принеси десять, я перекую наконечники.", goal:{item:"elf_arrow", n:10}, reward:{cop:2800, xp:640, choice:[{item:"elf_boots"},{item:"elf_blade"},{item:"potion_xe", n:4}]}},
+});
+NPCS.ratmir.quests.push("ic_ug"); NPCS.yusuf.quests.push("sd_ug");
+for (const [id, q] of Object.entries(QUESTS)) if (q.reward && q.reward.choice) q.reward.choice = q.reward.choice.filter(c => !c.item || ITEMS[c.item]);
+for (const q of Object.values(QUESTS)) if (q.reward && q.reward.items) for (const k of Object.keys(q.reward.items)) if (!ITEMS[k]) delete q.reward.items[k];
+
+/* ---------- підземелля ---------- */
+Object.assign(DUNGEONS, {
+  ug_dg_deep:{name:"Пекельний спуск", node:"ug_abyss", lvl:12, rooms:7, pool:["abyss_worm", "crystal_golem", "miner_spirit", "blind_one"], boss:"deep_lord", scene:"ugdeep",
+    text:"Східці, вирубані в стіні Безодні, ведуть униз, у жар. На кожному повороті хтось лишив кайло, і жоден не повернувся по нього."},
+  ug_dg_oak:{name:"Корінь Діброви", node:"ug_oak", lvl:12, rooms:7, pool:["cursed_tree", "forest_witch", "dryad", "wild_elf"], boss:"oak_father", scene:"ugoak",
+    text:"Під Дубовим Батьком печери з коріння. Раніше ельфи ходили туди молитися. Тепер коріння ворушиться й хапає за ноги."},
+  ug_dg_spider:{name:"Павутинний палац", node:"ug_city", lvl:12, rooms:7, pool:["cave_spider", "shadow_spider", "drow_knight", "spider_priestess", "drow_assassin"], boss:"spider_queen", scene:"ugweb",
+    text:"Палац у серці Чорного Міста весь затягнутий шовком. Дроу приносять сюди жертви, а Королева їсть повільно."},
+});
+LOCS.ug_abyss.buildings = (LOCS.ug_abyss.buildings || []).concat([["Пекельний спуск", "dungeon:ug_dg_deep"]]);
+LOCS.ug_oak.buildings = (LOCS.ug_oak.buildings || []).concat([["Корінь Діброви", "dungeon:ug_dg_oak"]]);
+LOCS.ug_city.buildings = (LOCS.ug_city.buildings || []).concat([["Павутинний палац", "dungeon:ug_dg_spider"]]);
+Object.assign(DG_COL, {ugdeep:["#4a2418", "#2a120a"], ugoak:["#2e3a22", "#1a2214"], ugweb:["#2a2234", "#16121e"]});
+Object.assign(DG_DECOR, {
+  ugdeep(r){ let s = `<path d="M0 470q120 -20 240 6t240 -4t240 8t180 -6v60H0z" fill="#ff5a1a" opacity=".22"/>`;
+    for (let i = 0; i < 6; i++){ const x = 60 + r() * 780, y = 380 + r() * 120; s += `<path d="M${x} ${y}q${10 + r() * 20} ${-6 - r() * 10} ${30 + r() * 30} 0" stroke="#ff8a2a" stroke-width="3" fill="none" opacity=".55"/>`; }
+    for (let i = 0; i < 7; i++){ const x = 40 + r() * 820, h = 40 + r() * 70; s += `<path d="M${x} 0l${8 + r() * 8} ${h}l${8 + r() * 8} ${-h}z" fill="#2a1a14" opacity=".9"/>`; }
+    return s; },
+  ugoak(r){ let s = ""; for (let i = 0; i < 9; i++){ const x = r() * 900, y = 200 + r() * 300; s += `<path d="M${x} ${y}q${40 - r() * 80} ${-40 - r() * 60} ${80 - r() * 160} ${-120 - r() * 80}" stroke="#3a2a1a" stroke-width="${8 + r() * 10}" fill="none" stroke-linecap="round" opacity=".85"/>`; }
+    for (let i = 0; i < 14; i++){ const x = 30 + r() * 840, y = 60 + r() * 420; s += `<circle cx="${x}" cy="${y}" r="${2 + r() * 3}" fill="#c8ff8a" opacity=".55"/>`; }
+    return s; },
+  ugweb(r){ let s = ""; for (let i = 0; i < 4; i++){ const cx = 80 + r() * 740, cy = 60 + r() * 200, R = 50 + r() * 60;
+      for (let k = 0; k < 8; k++){ const a = k / 8 * Math.PI * 2; s += `<path d="M${cx} ${cy}L${cx + Math.cos(a) * R} ${cy + Math.sin(a) * R}" stroke="#d8d0e8" stroke-width="1" opacity=".35"/>`; }
+      for (let q = 1; q <= 3; q++) s += `<circle cx="${cx}" cy="${cy}" r="${R * q / 3.2}" stroke="#d8d0e8" stroke-width="1" fill="none" opacity=".25"/>`; }
+    for (let i = 0; i < 5; i++){ const x = 60 + r() * 780, y = 360 + r() * 130; s += `<ellipse cx="${x}" cy="${y}" rx="12" ry="18" fill="#e8e0d0" opacity=".55"/>`; }
+    return s; },
+});
+
+ACH.push(
+  {id:"ug1", icon:"teleport", name:"Нижче коріння", text:"Спуститися в Підзем'я", val:() => [...UG_IDS].some(k => S.visited[k]) ? 1 : 0, n:1, rew:{cop:3000}},
+  {id:"ug2", icon:"crowned-skull", name:"Володарі темряви", text:"Здолати Владаря Глибин, Дубового Батька й Павучу Королеву", val:() => ["ug_dg_deep", "ug_dg_oak", "ug_dg_spider"].filter(d => S.dung && S.dung[d]).length, n:3, rew:{hp:30, dmg:2}},
+);
+
+/* ============ Підзем'я: окрема карта (свій малюнок, свої вузли й дороги) ============ */
+const ugNow = () => isUG(T ? T.legs[T.i][1] : S.loc);
+function ugView(){ return typeof S !== "undefined" && S && S.loc ? ugNow() : false; }
+// поки малюється один шар, вузли й дороги іншого шару ховаємо (зберігаючи порядок)
+function withLayer(ug, fn){
+  const all = Object.entries(NODES), roads = ROADS.slice();
+  for (const [k] of all) if (isUG(k) !== ug) delete NODES[k];
+  ROADS.length = 0; for (const r of roads) if (isUG(r.a) === ug && isUG(r.b) === ug) ROADS.push(r);
+  try { return fn(); }
+  finally { for (const k of Object.keys(NODES)) delete NODES[k]; for (const [k, v] of all) NODES[k] = v; ROADS.length = 0; ROADS.push(...roads); }
+}
+{ const ms0 = mapSVG; mapSVG = function(){ return withLayer(false, () => ms0.apply(this, arguments)); }; }
+{ const mf0 = mapFX; mapFX = function(){ return ugView() ? ugFX() : withLayer(false, () => mf0.apply(this, arguments)); }; }
+{ const ml0 = mapLayer; mapLayer = function(){ return ugView() ? ugLayer() : ml0.apply(this, arguments); }; }
+{ const rm0 = renderMap; renderMap = function(){ const ug = ugView();
+    if (UI.mapUG !== ug){ UI.mapUG = ug; UI.cam = null; }
+    const out = withLayer(ug, () => rm0.apply(this, arguments));
+    const p = $("#panel"); if (p){ const h = p.querySelector(".ph"); if (h) h.textContent = ug ? "Карта Підзем'я" : "Карта світу";
+      p.querySelectorAll(".sub").forEach(s => { const nx = s.nextElementSibling; if (nx && !nx.children.length){ nx.remove(); s.remove(); } });
+      const gates = ug ? [["ug_shaft", "Підйомник нагору: Копальня гоблінів"], ["ug_ruins", "Гномові сходи нагору: Печера ламії"]] : [["ic_mine", "Спуск у Підзем'я: Копальня гоблінів"], ["sd_lamia", "Сходи в Підзем'я: Печера ламії"]];
+      p.insertAdjacentHTML("beforeend", `<div class="sub">${ug ? "Виходи нагору" : "Входи в Підзем'я"}</div><div>${gates.map(([id, t]) => `<button class="row" data-node="${id}" title="${t}"><span class="qm no"></span><span class="g">${t}</span><span class="r">${S.visited[id] ? "" : "?"}</span></button>`).join("")}</div>`); }
+    const w = document.getElementById("mapwrap"); if (w) w.classList.toggle("ugmap", ug);
+    return out; }; }
+
+/* ---------- малюнок підземної карти: печери, тунелі, світло ---------- */
+let UG_URL = null;
+function ugLayer(){ if (!UG_URL) UG_URL = ugBake(); return `<img id="mapimg" src="${UG_URL}" width="${WORLD.w}" height="${WORLD.h}" alt="" draggable="false" style="position:absolute;left:0;top:0;width:${WORLD.w}px;height:${WORLD.h}px;pointer-events:none">`; }
+function ugBake(){
+  const K = .65, W = Math.round(WORLD.w * K), H = Math.round(WORLD.h * K), cv = document.createElement("canvas"); cv.width = W; cv.height = H;
+  let c = cv.getContext("2d"); const r = rng("ugmap"), nodes = [...UG_IDS].map(k => Object.assign({id:k}, NODES[k])), roads = ROADS.filter(rd => isUG(rd.a) && isUG(rd.b));
+  c.scale(K, K);
+  const TINT = {ug_deep:[200, 110, 50], ug_elf:[90, 190, 120], ug_drow:[150, 90, 210]};
+  // 1. товща скелі
+  let g = c.createLinearGradient(0, 0, 0, WORLD.h); g.addColorStop(0, "#17130f"); g.addColorStop(1, "#0d0b0a"); c.fillStyle = g; c.fillRect(0, 0, WORLD.w, WORLD.h);
+  for (let i = 0; i < 2600; i++){ const x = r() * WORLD.w, y = r() * WORLD.h, s = 6 + r() * 34; c.fillStyle = `rgba(${40 + r() * 30 | 0},${34 + r() * 24 | 0},${28 + r() * 20 | 0},${.1 + r() * .16})`;
+    c.beginPath(); c.moveTo(x, y - s * .6); c.lineTo(x + s * .7, y - s * .1); c.lineTo(x + s * .4, y + s * .6); c.lineTo(x - s * .5, y + s * .5); c.lineTo(x - s * .7, y - s * .2); c.closePath(); c.fill(); }
+  // 2. порожнини: тунелі вздовж доріг і зали навколо місць
+  const cave = (fill) => { c.fillStyle = fill; c.strokeStyle = fill;
+    for (const rd of roads){ const A = NODES[rd.a], Bn = NODES[rd.b]; c.lineWidth = 120; c.lineCap = "round"; c.beginPath(); c.moveTo(A.x, A.y); c.quadraticCurveTo(rd.cx, rd.cy, Bn.x, Bn.y); c.stroke(); }
+    for (const n of nodes){ const R = n.kind === "town" ? 250 : 190; c.beginPath();
+      for (let a = 0; a <= 24; a++){ const t = a / 24 * Math.PI * 2, k = R * (.82 + .3 * Math.sin(t * 3 + n.x) * .5 + r() * .12); const px = n.x + Math.cos(t) * k * 1.25, py = n.y + Math.sin(t) * k * .85; a ? c.lineTo(px, py) : c.moveTo(px, py); }
+      c.closePath(); c.fill(); } };
+  // м'які краї печер: малюємо дрібно й розтягуємо (дешевше за blur)
+  const soft = (q, fn) => { const lc = document.createElement("canvas"); lc.width = Math.ceil(WORLD.w * q); lc.height = Math.ceil(WORLD.h * q); const lx = lc.getContext("2d"); lx.scale(q, q); fn(lx); c.save(); c.imageSmoothingQuality = "high"; c.drawImage(lc, 0, 0, WORLD.w, WORLD.h); c.restore(); };
+  const caveOn = (cx, fill) => { const keep = c; c = cx; cave(fill); c = keep; };
+  soft(.06, lx => caveOn(lx, "#2c251e")); soft(.14, lx => { lx.globalAlpha = .8; caveOn(lx, "#3a3128"); });
+  // підлога печер: плями й дрібне каміння
+  for (const n of nodes){ const [tr, tg, tb] = TINT[n.r];
+    const rg = c.createRadialGradient(n.x, n.y, 10, n.x, n.y, 300); rg.addColorStop(0, `rgba(${tr},${tg},${tb},.22)`); rg.addColorStop(1, `rgba(${tr},${tg},${tb},0)`); c.fillStyle = rg; c.beginPath(); c.arc(n.x, n.y, 300, 0, 7); c.fill();
+    for (let i = 0; i < 40; i++){ const a = r() * 7, d = r() * 200, x = n.x + Math.cos(a) * d * 1.2, y = n.y + Math.sin(a) * d * .8; c.fillStyle = `rgba(20,16,12,${.2 + r() * .3})`; c.beginPath(); c.ellipse(x, y, 4 + r() * 10, 3 + r() * 6, 0, 0, 7); c.fill(); } }
+  // 3. річки й озера
+  const water = (x, y, rx, ry, col) => { soft(.1, lx => { lx.fillStyle = col; lx.beginPath(); lx.ellipse(x, y, rx, ry, 0, 0, 7); lx.fill(); });
+    c.strokeStyle = "rgba(160,220,255,.25)"; c.lineWidth = 3; for (let i = 0; i < 6; i++){ c.beginPath(); c.ellipse(x + (r() - .5) * rx, y + (r() - .5) * ry, rx * .2, ry * .06, 0, 0, 3); c.stroke(); } };
+  water(2380, 1260, 230, 120, "#14303e"); water(2150, 1080, 120, 60, "#163444");
+  // лава в Безодні
+  { const lg = c.createRadialGradient(4620, 1700, 20, 4620, 1700, 330); lg.addColorStop(0, "rgba(255,180,60,.95)"); lg.addColorStop(.4, "rgba(230,80,20,.75)"); lg.addColorStop(1, "rgba(80,10,0,0)"); c.fillStyle = lg; c.beginPath(); c.ellipse(4640, 1720, 360, 220, 0, 0, 7); c.fill(); }
+  c.strokeStyle = "rgba(255,120,30,.75)"; c.lineWidth = 6; c.lineCap = "round";
+  for (let i = 0; i < 9; i++){ let x = 4300 + r() * 600, y = 1500 + r() * 380; c.beginPath(); c.moveTo(x, y); for (let k = 0; k < 6; k++){ x += (r() - .5) * 90; y += 20 + r() * 30; c.lineTo(x, y); } c.stroke(); }
+  // прірва під мостом
+  soft(.05, lx => { lx.fillStyle = "#020203"; lx.beginPath(); lx.ellipse(2330, 1730, 120, 300, -.3, 0, 7); lx.fill(); });
+  // 4. регіональні деталі
+  const glow = (x, y, R, rgb, a) => { const gg = c.createRadialGradient(x, y, 1, x, y, R); gg.addColorStop(0, `rgba(${rgb},${a})`); gg.addColorStop(1, `rgba(${rgb},0)`); c.fillStyle = gg; c.beginPath(); c.arc(x, y, R, 0, 7); c.fill(); };
+  const near = (x, y, reg, d = 280) => nodes.some(n => n.r === reg && Math.hypot(n.x - x, (n.y - y) * 1.2) < d);
+  const free = (x, y, d = 70) => nodes.every(n => Math.hypot(n.x - x, n.y - y) > d);
+  // гриби
+  for (let i = 0; i < 420; i++){ const x = r() * WORLD.w, y = r() * WORLD.h; if (!(near(x, y, "ug_deep", 260) || near(x, y, "ug_elf", 300)) || !free(x, y)) continue;
+    const pink = near(x, y, "ug_deep") && r() < .7, s = 6 + r() * 14, col = pink ? "232,106,168" : "120,230,190";
+    glow(x, y - s, s * 3, col, .35); c.fillStyle = "#cfc8b8"; c.fillRect(x - s * .15, y - s, s * .3, s); c.fillStyle = `rgb(${col})`; c.beginPath(); c.ellipse(x, y - s, s * .8, s * .45, 0, Math.PI, 0); c.fill(); }
+  // кришталі
+  for (let i = 0; i < 300; i++){ const x = 3600 + r() * 1400, y = 400 + r() * 1300; if (!near(x, y, "ug_deep", 320) || !free(x, y, 80)) continue;
+    const s = 10 + r() * 26; glow(x, y - s / 2, s * 2.2, "150,230,255", .3); c.fillStyle = r() < .5 ? "#8ad8f0" : "#5aa8d0";
+    for (let k = 0; k < 3; k++){ const ox = (k - 1) * s * .35, h = s * (.7 + r() * .6); c.beginPath(); c.moveTo(x + ox - s * .15, y); c.lineTo(x + ox, y - h); c.lineTo(x + ox + s * .15, y); c.fill(); } }
+  // ельфійські дерева
+  for (let i = 0; i < 260; i++){ const x = 500 + r() * 1900, y = 600 + r() * 1700; if (!near(x, y, "ug_elf", 330) || !free(x, y, 90)) continue;
+    const s = 18 + r() * 26, cursed = near(x, y, "ug_elf") && nodes.some(n => (n.id === "ug_grove" || n.id === "ug_oak") && Math.hypot(n.x - x, n.y - y) < 330);
+    c.fillStyle = "#2a1e14"; c.fillRect(x - s * .1, y - s * .9, s * .2, s * .9);
+    if (!cursed) glow(x, y - s, s * 2.4, "160,255,180", .28);
+    c.fillStyle = cursed ? "#1a1810" : (r() < .5 ? "#3a8a5a" : "#4aa070"); for (let k = 0; k < 4; k++){ c.beginPath(); c.arc(x + (r() - .5) * s * .9, y - s - r() * s * .5, s * (.35 + r() * .25), 0, 7); c.fill(); }
+    if (!cursed) for (let k = 0; k < 4; k++){ c.fillStyle = "rgba(220,255,200,.9)"; c.fillRect(x + (r() - .5) * s, y - s - r() * s * .6, 2, 2); } }
+  // павутиння й обсидіанові шпилі дроу
+  c.strokeStyle = "rgba(220,210,235,.22)"; c.lineWidth = 1.4;
+  for (let i = 0; i < 70; i++){ const x = 1900 + r() * 1900, y = 1500 + r() * 1400; if (!near(x, y, "ug_drow", 330)) continue; const R = 30 + r() * 60;
+    c.beginPath(); for (let k = 0; k < 8; k++){ const a = k / 8 * 7; c.moveTo(x, y); c.lineTo(x + Math.cos(a) * R, y + Math.sin(a) * R); } c.stroke();
+    for (let q = 1; q <= 3; q++){ c.beginPath(); c.arc(x, y, R * q / 3.2, 0, 7); c.stroke(); } }
+  for (let i = 0; i < 160; i++){ const x = 1900 + r() * 1900, y = 1700 + r() * 1300; if (!near(x, y, "ug_drow", 300) || !free(x, y, 90)) continue;
+    const h = 30 + r() * 60, w = 10 + r() * 10; c.fillStyle = "#1c1624"; c.beginPath(); c.moveTo(x - w, y); c.lineTo(x, y - h); c.lineTo(x + w, y); c.fill(); c.fillStyle = "#2c2238"; c.beginPath(); c.moveTo(x, y - h); c.lineTo(x + w, y); c.lineTo(x + 2, y); c.fill();
+    if (r() < .5){ glow(x, y - h * .5, 14, "190,110,255", .7); c.fillStyle = "#d8a8ff"; c.fillRect(x - 1.5, y - h * .55, 3, 4); } }
+  // сталагміти скрізь у залах
+  for (let i = 0; i < 900; i++){ const x = r() * WORLD.w, y = r() * WORLD.h; if (!nodes.some(n => Math.hypot(n.x - x, (n.y - y) * 1.3) < 260) || !free(x, y, 85)) continue;
+    const h = 12 + r() * 30, w = 5 + r() * 8; c.fillStyle = "#2a231c"; c.beginPath(); c.moveTo(x - w, y); c.lineTo(x - 1, y - h); c.lineTo(x + w, y); c.fill(); c.fillStyle = "#5a4c3c"; c.beginPath(); c.moveTo(x - 1, y - h); c.lineTo(x + w, y); c.lineTo(x + w * .3, y); c.fill(); }
+  // рейки рудокопів і кріплення
+  const rails = roads.filter(rd => rd.name === "Рейки рудокопів" || rd.name === "Старий гномів тракт");
+  for (const rd of rails){ const pts = roadPts(rd, 40); c.strokeStyle = "rgba(90,70,50,.9)"; c.lineWidth = 3;
+    for (let i = 1; i < pts.length; i++){ const [x0, y0] = pts[i - 1], [x1, y1] = pts[i], a = Math.atan2(y1 - y0, x1 - x0), nx = -Math.sin(a) * 9, ny = Math.cos(a) * 9;
+      c.beginPath(); c.moveTo(x0 + nx, y0 + ny); c.lineTo(x1 + nx, y1 + ny); c.moveTo(x0 - nx, y0 - ny); c.lineTo(x1 - nx, y1 - ny); c.stroke(); } }
+  // 5. дороги: пунктир, як нагорі
+  for (const rd of roads){ const A = NODES[rd.a], Bn = NODES[rd.b]; c.lineCap = "round";
+    c.setLineDash([]); c.strokeStyle = "rgba(0,0,0,.45)"; c.lineWidth = 9; c.beginPath(); c.moveTo(A.x, A.y); c.quadraticCurveTo(rd.cx, rd.cy, Bn.x, Bn.y); c.stroke();
+    c.setLineDash([2, 13]); c.strokeStyle = rd.danger ? "#d0603a" : "#efe2c2"; c.lineWidth = 5.5; c.beginPath(); c.moveTo(A.x, A.y); c.quadraticCurveTo(rd.cx, rd.cy, Bn.x, Bn.y); c.stroke(); }
+  c.setLineDash([]);
+  // 6. входи нагору: світло згори
+  for (const id of ["ug_shaft", "ug_ruins"]){ const n = NODES[id]; glow(n.x + 30, n.y - 40, 110, "255,240,200", .28); c.strokeStyle = "rgba(255,240,200,.12)"; c.lineWidth = 22; c.beginPath(); c.moveTo(n.x + 10, n.y - 330); c.lineTo(n.x + 40, n.y - 40); c.stroke(); }
+  // 7. назви країв
+  c.textAlign = "center"; c.font = "italic 700 64px 'PT Serif', Georgia, serif";
+  for (const [t, x, y, col] of [["Глибини", 3900, 330, "rgba(255,190,130,.38)"], ["Нижні Сади", 1250, 600, "rgba(170,255,190,.36)"], ["Царство дроу", 2900, 1560, "rgba(210,170,255,.36)"]]){ c.fillStyle = col; c.fillText(t, x, y); }
+  // 8. рамка й віньєтка
+  const vg = c.createRadialGradient(WORLD.w / 2, WORLD.h / 2, WORLD.h * .4, WORLD.w / 2, WORLD.h / 2, WORLD.w * .62); vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,.7)"); c.fillStyle = vg; c.fillRect(0, 0, WORLD.w, WORLD.h);
+  c.strokeStyle = "rgba(10,8,6,.8)"; c.lineWidth = 20; c.strokeRect(10, 10, WORLD.w - 20, WORLD.h - 20); c.strokeStyle = "rgba(201,162,74,.5)"; c.lineWidth = 4; c.strokeRect(28, 28, WORLD.w - 56, WORLD.h - 56);
+  try { const u = cv.toDataURL("image/webp", .85); if (u.startsWith("data:image/webp")) return u; } catch (e) {}
+  return cv.toDataURL("image/jpeg", .85);
+}
+// живий шар Підзем'я: спори й іскри, що повільно пливуть
+function ugFX(){ if (S.opt && S.opt.mapfx === false) return ""; const r = rng("ugfx"); let h = `<div class="mfx ugfx" aria-hidden="true">`;
+  for (const id of UG_IDS){ const n = NODES[id], col = n.r === "ug_deep" ? "#ffb070" : n.r === "ug_elf" ? "#b8ffc8" : "#d8a8ff";
+    for (let i = 0; i < 6; i++) h += `<i class="ugsp" style="left:${n.x - 160 + r() * 320 | 0}px;top:${n.y - 120 + r() * 220 | 0}px;background:${col};animation-delay:${-(r() * 8).toFixed(2)}s;animation-duration:${(6 + r() * 6).toFixed(2)}s"></i>`; }
+  return h + `</div>`; }
+// карту Підзем'я малюємо наперед, поки гравець ще в локації
+{ const ar0 = arrive; arrive = function(){ const o = ar0.apply(this, arguments); if (ugNow() && !UG_URL){ const go = () => { if (!UG_URL) UG_URL = ugBake(); }; if (window.requestIdleCallback) requestIdleCallback(go, {timeout:3000}); else setTimeout(go, 800); } return o; }; }
+
+/* ============ Підзем'я: сцени локацій (печери, гриби, кришталі, павутиння, ельфійські дерева) ============ */
+Object.assign(BIOME, {
+  cave_deep:{ground:["#3b332b","#453c32","#2f281f"], grass:"#5a4e40", veg:{rocks:14}, mood:"cave"},
+  cave_elf:{ground:["#2c3829","#354232","#242e20"], grass:"#4a6a48", veg:{rocks:8, grass:10}, mood:"cave"},
+  cave_drow:{ground:["#29252f","#322d39","#211d27"], grass:"#4a4058", veg:{rocks:10}, mood:"cave"},
+  cave_lava:{ground:["#3a2a22","#45322a","#2e211a"], grass:"#5a3a2a", veg:{rocks:12}, mood:"cave"},
+});
+Object.assign(Z_BIO, {
+  cave_deep:{line:null, edge:{stal:9, rock:5}, mid:{rock:5, stal:3}, fg:"stal"},
+  cave_elf:{line:null, edge:{elftree:6, stal:4}, mid:{shroomg:4, rock:3}, fg:"stal"},
+  cave_drow:{line:null, edge:{stal:7, spire:3}, mid:{web:4, rock:4}, fg:"stal"},
+  cave_lava:{line:null, edge:{stal:10}, mid:{rock:6, stal:2}, fg:"stal"},
+});
+const UG_SCENE = {
+  ug_shaft:{b:"cave_deep", x:["rails","props","shroom"]}, ug_camp:{b:"cave_deep", road:true, x:["rails","props","camp"]}, ug_glow:{b:"cave_deep", x:["shroom","shroom2"]},
+  ug_lake:{b:"cave_deep", lake:true, x:["crystal","shroom"]}, ug_crystal:{b:"cave_deep", x:["crystal","crystal2"]}, ug_worm:{b:"cave_deep", x:["holes","crystal"]},
+  ug_abyss:{b:"cave_lava", x:["lava","holes"]},
+  ug_town:{b:"cave_elf", road:true, x:["elfhouses","elftrees","lights"]}, ug_garden:{b:"cave_elf", x:["elftrees","shroomg","lights"]}, ug_watch:{b:"cave_elf", road:true, x:["elftrees","posts"]},
+  ug_grove:{b:"cave_elf", x:["deadtrees","roots"]}, ug_oak:{b:"cave_elf", x:["bigoak","roots","deadtrees"]},
+  ug_bridge:{b:"cave_drow", x:["chasm","web","cocoon"]}, ug_outpost:{b:"cave_drow", road:true, x:["spires","web"]}, ug_nest:{b:"cave_drow", x:["web","cocoon","eggs"]},
+  ug_temple:{b:"cave_drow", x:["altar","spires","web"]}, ug_city:{b:"cave_drow", road:true, x:["spires","spires2","web"]}, ug_ruins:{b:"cave_deep", x:["ruins","crystal"]},
+};
+Object.assign(SCENE, UG_SCENE);
+
+/* ---------- дрібні малюнки ---------- */
+function ugStal(x, y, s = 1, col = "#4a4034"){ const h = 46 * s, w = 13 * s;
+  return zSh(x + 8 * s, y + 2, w * 1.3, 4 * s, .35) + `<path d="M${x - w} ${y}Q${x - w * .3} ${y - h * .5} ${x - 1} ${y - h}L${x + 2} ${y - h}Q${x + w * .4} ${y - h * .5} ${x + w} ${y}z" fill="${col}"/><path d="M${x + 1} ${y - h}Q${x + w * .45} ${y - h * .5} ${x + w} ${y}H${x + w * .2}Q${x + w * .2} ${y - h * .5} ${x + 1} ${y - h}z" fill="${shade(col, .62)}"/><path d="M${x - w * .5} ${y - h * .3}q${w * .3} -${h * .2} ${w * .4} -${h * .45}" stroke="${shade(col, 1.35)}" stroke-width="${1.4 * s}" fill="none" opacity=".6"/>`; }
+function ugShroom(K, x, y, s = 1, col = "#e86aa8"){ K.light(x, y - 22 * s, 40 * s, col, .6);
+  return zSh(x + 6 * s, y + 2, 12 * s, 3.5 * s, .3) + `<path d="M${x - 3 * s} ${y}q-1 -${12 * s} ${1 * s} -${22 * s}h${4 * s}q2 ${10 * s} ${1 * s} ${22 * s}z" fill="#d8d0c0"/><path d="M${x - 15 * s} ${y - 20 * s}q${15 * s} -${20 * s} ${30 * s} 0q-${15 * s} ${5 * s} -${30 * s} 0z" fill="${col}"/><path d="M${x - 15 * s} ${y - 20 * s}q${15 * s} ${5 * s} ${30 * s} 0" stroke="${shade(col, .6)}" stroke-width="${1.5 * s}" fill="none"/>` +
+    [[-7, -26], [3, -29], [8, -24], [-2, -23]].map(([a, b]) => `<circle cx="${x + a * s}" cy="${y + b * s}" r="${1.6 * s}" fill="#fff" opacity=".8"/>`).join(""); }
+function ugCrystal(K, x, y, s = 1, col = "#8ad8f0"){ K.light(x, y - 20 * s, 46 * s, col, .55); let g = zSh(x + 8 * s, y + 2, 20 * s, 5 * s, .35);
+  for (const [ox, h, w, a] of [[-12, 30, 7, -18], [0, 48, 9, 0], [11, 36, 8, 16], [5, 22, 6, 30], [-6, 20, 6, -34]]){ const X = x + ox * s;
+    g += `<g transform="rotate(${a} ${X} ${y})"><path d="M${X - w * s} ${y}L${X - w * s * .8} ${y - h * s * .75}L${X} ${y - h * s}L${X + w * s * .8} ${y - h * s * .75}L${X + w * s} ${y}z" fill="${col}" opacity=".9"/><path d="M${X} ${y - h * s}L${X + w * s * .8} ${y - h * s * .75}L${X + w * s} ${y}H${X}z" fill="${shade(col, .65)}" opacity=".9"/><path d="M${X - w * s * .4} ${y - h * s * .6}l${w * s * .3} -${h * s * .2}" stroke="#fff" stroke-width="${1.4 * s}" opacity=".7"/></g>`; }
+  return g; }
+function ugWeb(x, y, R = 60, op = .32){ let g = ""; for (let k = 0; k < 9; k++){ const a = k / 9 * Math.PI * 2; g += `M${x} ${y}L${zr(x + Math.cos(a) * R)} ${zr(y + Math.sin(a) * R * .8)}`; }
+  let ring = ""; for (let q = 1; q <= 4; q++){ const rr = R * q / 4.3; ring += `<ellipse cx="${x}" cy="${y}" rx="${zr(rr)}" ry="${zr(rr * .8)}" fill="none" stroke="#e8e0f0" stroke-width=".9" opacity="${op * .8}" stroke-dasharray="${zr(rr * .5)} ${zr(rr * .12)}"/>`; }
+  return `<path d="${g}" stroke="#e8e0f0" stroke-width="1" opacity="${op}"/>${ring}`; }
+function ugCocoon(x, y, s = 1){ return zSh(x + 6, y + 2, 10 * s, 3, .3) + `<path d="M${x} ${y - 40 * s}v-${30 * s}" stroke="#e8e0f0" stroke-width="1" opacity=".5"/><ellipse cx="${x}" cy="${y - 22 * s}" rx="${9 * s}" ry="${20 * s}" fill="#d8d0c4"/><path d="M${x - 9 * s} ${y - 28 * s}q${9 * s} 6 ${18 * s} 0M${x - 8 * s} ${y - 16 * s}q${8 * s} 6 ${16 * s} 0M${x - 8 * s} ${y - 36 * s}q${8 * s} 5 ${16 * s} 0" stroke="#a89c90" stroke-width="1.2" fill="none"/>`; }
+function ugElfTree(K, x, y, s = 1, lit = true){ let g = zSh(x + 14 * s, y + 3, 34 * s, 8 * s, .35) + `<path d="M${x - 6 * s} ${y}q-3 -${30 * s} ${2 * s} -${60 * s}h${8 * s}q5 ${30 * s} ${3 * s} ${60 * s}z" fill="#4a3a2a"/><path d="M${x + 2 * s} ${y}q3 -${30 * s} ${2 * s} -${60 * s}h${3 * s}q4 ${30 * s} ${2 * s} ${60 * s}z" fill="#2a2018"/>`;
+  const leaf = lit ? ["#3a8a5a", "#4aa070", "#2e7a50"] : ["#2a2a1e", "#22221a", "#1a1a14"];
+  for (const [ox, oy, r] of [[-18, -66, 20], [16, -70, 22], [0, -88, 24], [-8, -76, 18], [12, -56, 15]]) g += `<circle cx="${x + ox * s}" cy="${y + oy * s}" r="${r * s}" fill="${leaf[(ox + 40) % 3]}"/>`;
+  if (lit){ K.light(x, y - 70 * s, 70 * s, "#b8ffc8", .5); for (let i = 0; i < 7; i++) g += `<circle cx="${zr(x + (K.r() - .5) * 50 * s)}" cy="${zr(y - 60 * s - K.r() * 40 * s)}" r="${1.6 * s}" fill="#efffd8"/>`; }
+  return g; }
+function ugSpire(K, x, y, h = 110, lit = true){ const w = h * .16; let g = zSh(x + w, y + 3, w * 1.8, 5, .4) + `<path d="M${x - w} ${y}L${x - w * .55} ${y - h * .75}L${x} ${y - h}L${x + w * .55} ${y - h * .75}L${x + w} ${y}z" fill="#221c2c"/><path d="M${x} ${y - h}L${x + w * .55} ${y - h * .75}L${x + w} ${y}H${x}z" fill="#120e18"/>`;
+  if (lit){ for (const f of [.35, .6]) g += `<rect x="${x - 3}" y="${zr(y - h * f)}" width="6" height="9" rx="3" fill="#d8a8ff"/>`; K.light(x, y - h * .5, 30, "#b86aff", .55); }
+  return g; }
+function ugElfHouse(K, x, y, s = 1){ let g = zSh(x + 24 * s, y + 4, 54 * s, 12 * s, .35) + `<path d="M${x - 30 * s} ${y}q-6 -${40 * s} ${8 * s} -${70 * s}q${22 * s} -${16 * s} ${44 * s} 0q${14 * s} ${30 * s} ${8 * s} ${70 * s}z" fill="#5a4630"/><path d="M${x + 10 * s} ${y}q${12 * s} -${40 * s} ${12 * s} -${70 * s}q${10 * s} ${30 * s} ${8 * s} ${70 * s}z" fill="#3a2c1e"/>`;
+  g += `<path d="M${x - 8 * s} ${y}v-${22 * s}a${8 * s} ${8 * s} 0 0 1 ${16 * s} 0v${22 * s}z" fill="#1a120c"/><circle cx="${x - 18 * s}" cy="${y - 44 * s}" r="${5 * s}" fill="#d8ffb8"/><circle cx="${x + 14 * s}" cy="${y - 50 * s}" r="${5 * s}" fill="#d8ffb8"/>`;
+  for (const [ox, oy, r] of [[-24, -80, 22], [20, -84, 24], [0, -100, 26]]) g += `<circle cx="${x + ox * s}" cy="${y + oy * s}" r="${r * s}" fill="${ox ? "#3a8a5a" : "#4aa070"}"/>`;
+  K.light(x, y - 40 * s, 60 * s, "#d8ffb8", .5); return g; }
+function ugCart(x, y){ return zSh(x + 10, y + 3, 26, 5, .35) + `<path d="M${x - 22} ${y - 6}l4 -20h36l4 20z" fill="#5a4630"/><path d="M${x - 16} ${y - 26}q16 -10 32 0" fill="#3a3a3e"/><circle cx="${x - 12}" cy="${y - 4}" r="5" fill="#2a2420"/><circle cx="${x + 12}" cy="${y - 4}" r="5" fill="#2a2420"/>` +
+  [[-8, -28], [2, -31], [10, -27]].map(([a, b]) => `<circle cx="${x + a}" cy="${y + b}" r="4" fill="${a ? "#7a6a5a" : "#c8a868"}"/>`).join(""); }
+function ugProp(x, y, h = 120){ return zSh(x + 30, y + 3, 40, 5, .3) + `<rect x="${x - 34}" y="${y - h}" width="8" height="${h}" fill="#5a4630"/><rect x="${x + 26}" y="${y - h}" width="8" height="${h}" fill="#4a3a28"/><rect x="${x - 40}" y="${y - h - 8}" width="80" height="10" fill="#6a5438"/>`; }
+function ugRails(K, y0 = 330){ let g = ""; for (let x = -10; x < 920; x += 22) g += `<rect x="${x}" y="${y0 - 10}" width="8" height="22" fill="#4a3a2a" opacity=".85"/>`; g += `<path d="M-10 ${y0 - 6}H920M-10 ${y0 + 8}H920" stroke="#7a7a80" stroke-width="2.5"/>`; K.under += g; K.paths.push({pts:[[0, y0], [300, y0], [600, y0], [900, y0]], w:28}); }
+function ugLava(K, x, y, rx, ry){ K.under += `<ellipse cx="${x}" cy="${y}" rx="${rx + 12}" ry="${ry + 8}" fill="#1a0c06"/><ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="#d8501a"/><ellipse cx="${x - rx * .2}" cy="${y - ry * .2}" rx="${rx * .6}" ry="${ry * .5}" fill="#ffa040" opacity=".8"/>` +
+  [0, 1, 2, 3].map(i => `<path d="M${x - rx * .7 + i * rx * .4} ${y - ry * .2}q${rx * .1} ${ry * .3} ${rx * .25} 0" stroke="#3a1608" stroke-width="3" fill="none" opacity=".7"/>`).join(""); K.light(x, y, rx * 1.3, "#ff7a2a", .9); K.claim(x, y, rx); }
+function ugRoots(K, n = 6){ for (let i = 0; i < n; i++){ const x = K.r() * 900, y = 120 + K.r() * 400, L = 60 + K.r() * 90, a = K.r() * Math.PI;
+  K.under += `<path d="M${zr(x)} ${zr(y)}q${zr(Math.cos(a) * L * .5)} ${zr(-20 + K.r() * 40)} ${zr(Math.cos(a) * L)} ${zr(Math.sin(a) * L * .3)}" stroke="#3a2a1a" stroke-width="${zr(6 + K.r() * 6)}" fill="none" stroke-linecap="round" opacity=".9"/>`; } }
+
+// склепіння й стіни печери: темна скеля зверху й по боках
+function ugWalls(K, col = "#1a1612"){ const r = K.r; let top = `M-10 -10H920V${40 + r() * 20}`;
+  for (let x = 900; x >= -10; x -= 30){ const ex = K.exits.some(([ex2, ey2]) => ey2 < 140 && Math.abs(ex2 - x) < 70); top += `L${x} ${ex ? 18 + r() * 8 : 34 + r() * 42}`; }
+  K.top += `<path d="${top}Z" fill="${col}" opacity=".95"/>`;
+  for (let x = 20; x < 900; x += 38 + r() * 40){ if (K.exits.some(([ex2, ey2]) => ey2 < 140 && Math.abs(ex2 - x) < 70)) continue; const h = 20 + r() * 50, w = 6 + r() * 8;
+    K.top += `<path d="M${zr(x - w)} 40L${zr(x)} ${zr(40 + h)}L${zr(x + w)} 40z" fill="${col}"/><path d="M${zr(x)} ${zr(40 + h)}L${zr(x + w)} 40h-${zr(w * .5)}z" fill="${shade(col, 1.8)}" opacity=".5"/>`; }
+  K.top += `<rect x="0" y="0" width="60" height="${ZH}" fill="url(#ugsd)"/><rect x="${ZW - 60}" y="0" width="60" height="${ZH}" fill="url(#ugsd2)"/>`; }
+{ const zt0 = zTree; zTree = function(K, kind, x, y, s){
+    if (kind === "stal") return ugStal(x, y, s * .9, K.c.b === "cave_drow" ? "#3a3444" : K.c.b === "cave_elf" ? "#3e4434" : "#4a4034");
+    if (kind === "shroom") return ugShroom(K, x, y, s * .8);
+    if (kind === "shroomg") return ugShroom(K, x, y, s * .7, "#78e6be");
+    if (kind === "crystal") return ugCrystal(K, x, y, s * .7);
+    if (kind === "web") return ugWeb(x, y, 40 * s);
+    if (kind === "elftree") return ugElfTree(K, x, y, s * .8);
+    if (kind === "spire") return ugSpire(K, x, y, 80 * s, K.r() < .5);
+    return zt0.apply(this, arguments); }; }
+{ const zm0 = zMood; zMood = function(K){ const m = K.c.mood || K.Bm.mood; if (m !== "cave") return zm0(K);
+    const tint = K.c.b === "cave_elf" ? "#0a2a1a" : K.c.b === "cave_drow" ? "#1a0a2a" : K.c.b === "cave_lava" ? "#2a0a00" : "#1a1006";
+    return `<defs><linearGradient id="ugsd" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".75"/><stop offset="1" stop-color="#000" stop-opacity="0"/></linearGradient><linearGradient id="ugsd2" x1="1" x2="0"><stop offset="0" stop-color="#000" stop-opacity=".75"/><stop offset="1" stop-color="#000" stop-opacity="0"/></linearGradient></defs>` +
+      `<rect width="${ZW}" height="${ZH}" fill="#05040a" opacity=".42"/><rect width="${ZW}" height="${ZH}" fill="${tint}" opacity=".25"/>`; }; }
+
+/* ---------- сцени ---------- */
+function ugBase(K, o = {}){ const r = K.r; K.dress = Object.assign({}, o.dress || {}); ugWalls(K, o.wall); if (o.rails) ugRails(K, o.rails);
+  const X = K.c.x || [], has = k => X.includes(k);
+  if (has("shroom")) for (let i = 0; i < (has("shroom2") ? 10 : 5); i++) K.scatter(1, 16, (x, y) => ugShroom(K, x, y, .8 + r() * (has("shroom2") ? 1.4 : .6)), {box:[40, 120, 860, 520]});
+  if (has("crystal")) for (let i = 0; i < (has("crystal2") ? 9 : 4); i++) K.scatter(1, 18, (x, y) => ugCrystal(K, x, y, .8 + r() * (has("crystal2") ? 1.1 : .5), r() < .3 ? "#c8a8ff" : "#8ad8f0"), {box:[40, 120, 860, 520]});
+  if (has("web")) for (let i = 0; i < 5; i++){ const x = 60 + r() * 780, y = 110 + r() * 300; K.over += ugWeb(x, y, 40 + r() * 50, .28); }
+  if (has("cocoon")) K.scatter(5, 14, (x, y) => ugCocoon(x, y, .9 + r() * .5), {box:[40, 140, 860, 500]});
+  if (has("eggs")) K.scatter(7, 12, (x, y) => zSh(x + 4, y + 2, 14, 4, .3) + [0, 1, 2].map(k => `<ellipse cx="${x - 8 + k * 8}" cy="${y - 7 - (k % 2) * 3}" rx="6" ry="8" fill="#e8e0cc"/>`).join(""), {box:[60, 160, 840, 500]});
+  if (has("holes")) for (let i = 0; i < 4; i++) K.scatter(1, 30, (x, y) => `<ellipse cx="${x}" cy="${y}" rx="34" ry="16" fill="#0a0806"/><ellipse cx="${x}" cy="${y - 3}" rx="36" ry="17" fill="none" stroke="#5a4a3a" stroke-width="5"/>`, {box:[80, 160, 820, 500]});
+  if (has("elftrees")) K.scatter(7, 34, (x, y) => ugElfTree(K, x, y, .9 + r() * .5), {box:[20, 110, 880, 520]});
+  if (has("deadtrees")) K.scatter(8, 30, (x, y) => zDead(x, y, 1.1 + r() * .6, "#1a1612") + `<circle cx="${x - 4}" cy="${y - 50}" r="2.5" fill="#ff3a2a"/><circle cx="${x + 6}" cy="${y - 64}" r="2" fill="#ff3a2a"/>`, {box:[20, 110, 880, 520]});
+  if (has("roots")) ugRoots(K, 8);
+  if (has("spires")) for (const [x, y, h] of has("spires2") ? [[150, 200, 150], [300, 170, 120], [610, 175, 140], [760, 205, 170], [220, 470, 110], [700, 480, 120]] : [[180, 200, 120], [720, 210, 140], [760, 470, 100]]) K.place(x, y, 30, (px, py) => ugSpire(K, px, py, h), {cy:20});
+  if (has("lights")) for (let i = 0; i < 8; i++){ const x = 60 + r() * 780, y = 120 + r() * 360; K.glow += `<circle cx="${zr(x)}" cy="${zr(y)}" r="2.2" fill="#efffd8"/>`; K.light(x, y, 18, "#d8ffb8", .5); }
+  if (has("props")) for (const [x, y] of [[120, 240], [780, 250]]) K.place(x, y, 40, (px, py) => ugProp(px, py), {cy:20});
+}
+Object.assign(ZS, {
+  ug_shaft(K){ ugBase(K, {rails:330}); K.place(700, 300, 30, (px, py) => ugCart(px, py), {path:1}); K.place(260, 420, 30, (px, py) => ugCart(px, py)); K.place(460, 160, 40, (px, py) => `<rect x="${px - 50}" y="${py - 70}" width="100" height="70" fill="#0a0806"/>` + ugProp(px, py, 74), {cy:30}); K.light(470, 90, 120, "#fff2cc", .55); K.top += `<path d="M430 0L400 330L540 330L510 0z" fill="#fff2cc" opacity=".07"/>`; },
+  ug_camp(K){ ugBase(K, {rails:440});
+    K.place(300, 230, 52, (px, py) => zShed(K, px, py, 100, 54, 40, {wall:"#5a4630", roof:"#3a3026"}), {cy:30});
+    K.place(640, 240, 52, (px, py) => zShed(K, px, py, 110, 56, 40, {wall:"#5a4630", roof:"#3a3026", inner:Z.anvil(px - 70, py + 16)}), {cy:30}); K.light(640, 230, 70, "#ff7a2a", .6);
+    for (const [x, y] of [[230, 370], [700, 380]]) K.place(x, y, 14, (px, py) => zBrazier(K, px, py), {npc:1});
+    K.place(820, 420, 30, (px, py) => ugCart(px, py), {path:1}); K.place(110, 300, 40, (px, py) => ugProp(px, py), {cy:20}); },
+  ug_glow(K){ ugBase(K); for (const [x, y, s] of [[200, 260, 2.6], [700, 250, 3], [460, 470, 2.2]]) K.place(x, y, 40, (px, py) => ugShroom(K, px, py, s), {cy:30}); },
+  ug_lake(K){ ugBase(K); K.place(220, 430, 20, (px, py) => ugCrystal(K, px, py, 1.2, "#8ad8f0"), {}); },
+  ug_crystal(K){ ugBase(K); K.place(450, 250, 60, (px, py) => ugCrystal(K, px, py, 2.6, "#a8e8ff"), {cy:40}); },
+  ug_worm(K){ ugBase(K); },
+  ug_abyss(K){ ugBase(K, {wall:"#1a0c08"}); ugLava(K, 640, 330, 170, 70); ugLava(K, 200, 450, 80, 30); for (let i = 0; i < 10; i++) K.glow += `<circle cx="${zr(500 + K.r() * 300)}" cy="${zr(200 + K.r() * 200)}" r="1.8" fill="#ffd27a"/>`; },
+  ug_town(K){ ugBase(K, {wall:"#141a12"});
+    for (const [x, y, s] of [[200, 200, 1.1], [740, 210, 1.15], [160, 440, .95], [780, 450, 1]]) K.place(x, y, 50, (px, py) => ugElfHouse(K, px, py, s), {cy:30});
+    K.place(460, 300, 30, (px, py) => zFountain(K, px, py, .9) + zGlow(px, py - 20, 40, "#c8f0ff", .5), {cy:10}); },
+  ug_garden(K){ ugBase(K); },
+  ug_watch(K){ ugBase(K); for (const [x, y] of [[300, 180], [620, 185]]) K.place(x, y, 30, (px, py) => zTower(K, px, py, 22, 110, {wall:"#5a6a5a", roof:"#2e5a3e", rh:34}) + zGlow(px, py - 90, 20, "#d8ffb8", .6), {cy:40}); },
+  ug_grove(K){ ugBase(K, {dress:{veg:.6}}); K.fog = true; K.fogCol = "#2a3a24"; K.fogOp = .22; },
+  ug_oak(K){ ugBase(K, {dress:{veg:.5}});
+    K.place(450, 250, 90, (px, py) => zSh(px + 40, py + 6, 120, 22, .45) + `<path d="M${px - 40} ${py}q-14 -80 6 -150h68q20 70 6 150z" fill="#3a2a1a"/><path d="M${px + 12} ${py}q16 -80 6 -150h22q10 70 2 150z" fill="#22180e"/>` +
+      [[-70, -170, 60], [60, -175, 64], [0, -215, 70], [-40, -200, 50], [40, -150, 46]].map(([a, b, rr]) => `<circle cx="${px + a}" cy="${py + b}" r="${rr}" fill="${a % 20 ? "#2a3020" : "#20261a"}"/>`).join("") + `<ellipse cx="${px}" cy="${py - 80}" rx="12" ry="18" fill="#ffb84a" opacity=".85"/>`, {cy:60});
+    K.light(450, 170, 90, "#ffd86f", .4); },
+  ug_bridge(K){ ugBase(K, {wall:"#120e16"}); K.under += `<path d="M260 -10Q200 260 300 540H620Q700 260 640 -10z" fill="#030205"/>`; K.claim(450, 270, 170);
+    let w = ""; for (let i = 0; i < 9; i++) w += `M0 ${280 + i * 3}Q450 ${300 + i * 4} 900 ${272 + i * 3}`; K.under += `<path d="${w}" stroke="#d8d0e4" stroke-width="1.2" fill="none" opacity=".6"/><path d="M0 284Q450 310 900 278" stroke="#efe8f8" stroke-width="7" fill="none" opacity=".35"/>`;
+    K.paths.push({pts:[[0, 285], [450, 305], [900, 280]], w:40}); },
+  ug_outpost(K){ ugBase(K, {wall:"#120e16"}); K.place(450, 160, 70, (px, py) => `<path d="M${px - 70} ${py}v-70l70 -30l70 30v70z" fill="#1a1622"/><path d="M${px - 26} ${py}v-40h52v40z" fill="#050408"/>` + ugWeb(px, py - 40, 34, .5), {cy:30}); },
+  ug_nest(K){ ugBase(K, {wall:"#120e16"}); for (let i = 0; i < 4; i++){ const x = 80 + K.r() * 740, y = 140 + K.r() * 340; K.under += `<ellipse cx="${zr(x)}" cy="${zr(y)}" rx="${zr(60 + K.r() * 60)}" ry="${zr(30 + K.r() * 20)}" fill="#e8e0f0" opacity=".14"/>`; } },
+  ug_temple(K){ ugBase(K, {wall:"#120e16"});
+    K.place(450, 200, 60, (px, py) => zSh(px + 20, py + 4, 80, 12, .4) + `<path d="M${px - 60} ${py}v-20h120v20z" fill="#2a2234"/><path d="M${px - 40} ${py - 20}v-14h80v14z" fill="#3a3044"/><circle cx="${px}" cy="${py - 60}" r="24" fill="#1a1422"/>` +
+      [-1, 1].map(sx => [0, 1, 2, 3].map(k => `<path d="M${px + sx * 14} ${py - 60 + k * 6 - 8}q${sx * 30} ${-14 + k * 6} ${sx * 46} ${10 + k * 10}" stroke="#1a1422" stroke-width="4" fill="none"/>`).join("")).join("") + `<circle cx="${px}" cy="${py - 64}" r="5" fill="#ff7ad0"/>`, {cy:40});
+    K.light(450, 140, 80, "#ff7ad0", .5); for (const [x, y] of [[300, 260], [600, 260]]) K.place(x, y, 14, (px, py) => zBrazier(K, px, py, "#c86aff"), {npc:1}); },
+  ug_city(K){ ugBase(K, {wall:"#120e16"}); },
+  ug_ruins(K){ ugBase(K);
+    for (const [x, y] of [[200, 220], [690, 230], [300, 450], [640, 460]]) K.place(x, y, 44, (px, py) => zSh(px + 20, py + 4, 50, 10, .35) + `<path d="M${px - 40} ${py}v-${40 + (px % 30)}l12 -10v20l14 -8v${60}z" fill="#6a6258"/><path d="M${px - 14} ${py}v-38l40 -6v44z" fill="#585048"/><path d="M${px - 30} ${py - 30}h10M${px - 4} ${py - 22}h14" stroke="#c8a868" stroke-width="2" opacity=".6"/>`, {cy:30});
+    K.place(460, 160, 40, (px, py) => `<path d="M${px - 40} ${py}v-60a40 40 0 0 1 80 0v60z" fill="#4a443c"/><path d="M${px - 26} ${py}v-50a26 26 0 0 1 52 0v50z" fill="#0a0806"/>` + zGlow(px, py - 30, 40, "#fff2cc", .3), {cy:30}); },
+});
+// під землею нема погоди
+{ const wf0 = wxFull; wxFull = id => isUG(id) ? null : wf0(id); const wo0 = wxOf; wxOf = id => isUG(id) ? null : wo0(id); }
+
+/* ============ нові вміння гілок: 9 і 10 рівень ============ */
+Object.assign(SKILLS, {
+  whirl:{short:"Вихор", br:"war", lvl:9, name:"Вихор", icon:"crossed-swords", cost:{en:25}, kind:"attack", text:"Ви крутитеся з мечем і б'єте всіх ворогів одразу (70% звичайного удару)."},
+  stunblow:{short:"Оглуш.", br:"war", lvl:10, name:"Оглушливий удар", icon:"mailed-fist", cost:{en:25}, kind:"attack", text:"Сильний удар, що оглушує ціль: вона пропустить хід. Боса оглушує з шансом 40%."},
+  trap:{short:"Капкан", br:"hunt", lvl:9, name:"Капкан", icon:"spider-web", cost:{en:15}, free:true, kind:"curse", text:"Ставите капкан під ноги цілі: вона пропустить наступний хід. Бос виривається з шансом 50%. На кожну ціль раз за бій."},
+  dshot:{short:"Дуплет", br:"hunt", lvl:10, name:"Подвійний постріл", icon:"arrow-cluster", cost:{en:30}, kind:"attack", text:"Два удари поспіль по одній цілі."},
+  chain:{short:"Ланцюг", br:"myst", lvl:9, name:"Ланцюгова блискавка", icon:"magic-swirl", cost:{mp:35}, kind:"attack", text:"Блискавка б'є ціль і перескакує ще на трьох ворогів (60% шкоди)."},
+  drain:{short:"Висмокт.", br:"myst", lvl:10, name:"Висмоктати життя", icon:"drop", cost:{mp:30}, kind:"attack", text:"Чари крізь захист: половину завданої шкоди ви забираєте собі як здоров'я."},
+});
+{ const fs0 = freeSkill; freeSkill = function(id){
+    if (id !== "trap") return fs0(id);
+    const k = SKILLS[id]; if (!skillOk(id)) return; payCost(k); B.free = (B.free || 0) + 1; const tg = B.enemies[B.target]; tg.trap = 1;
+    if (!tg.boss || Math.random() < .5){ tg.stun = 1; blog(`${tg.name} у капкані: пропустить наступний хід. Хід ще ваш.`, "good"); } else blog(`${tg.name} вириває ногу з капкана. Хід ще ваш.`, "warn");
+    B.log.push([B.round, `${S.name}: капкан → ${tg.name}`, "вільна дія", "heal"]); render(); fx(document.getElementById("f-e" + B.target), "капкан", "#c88aff"); }; }
+
+/* ---------- боси в бою більші за звичайних ворогів (як у Кристалі) ---------- */
+{ const rb0 = renderBattle; renderBattle = function(){ const o = rb0.apply(this, arguments); try { bossScale(); } catch (e) {} return o; }; }
+function bossScale(){ if (!B) return;
+  B.enemies.forEach((e, i) => { const el = document.getElementById("f-e" + i); if (!el || !(e.boss || e.dboss)) return;
+    if (e.bossK == null){ const G = document.getElementById("game"), z = G ? G.getBoundingClientRect().width / 1280 : 1; let top = 1e9, bot = -1e9;
+      for (const im of el.querySelectorAll(".sprart img")){ const r = im.getBoundingClientRect(); if (r.height < 2) continue; top = Math.min(top, r.top); bot = Math.max(bot, r.bottom); }
+      if (bot < top) return; const h = (bot - top) / z / (parseFloat(el.style.scale) || 1) / (parseFloat((el.querySelector(".sprart") || {style:{}}).style.scale) || 1); e.bossK = h < 165 ? Math.min(1.45, 175 / Math.max(h, 60)) : 1; }
+    const sp = el.querySelector(".sprart"); if (e.bossK > 1 && sp){ sp.style.scale = e.bossK.toFixed(3); sp.style.transformOrigin = "50% 100%"; } }); }
+
+/* ===================================================================
+   ПІДЗЕМЕЛЛЯ 2.0: вікно входу з вибором тіру, 3 проходи на добу,
+   збереження походу, ключі й скарбниця, табір, торговець, полонений,
+   друга фаза боса, прокляття походу. Нове: Золота гробниця Царя-Ліча.
+   =================================================================== */
+const DG_DAILY = 3;
+const dgShuf = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const dayKey = () => { const d = new Date(); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); };
+function dgToday(id){ if (!S.dgDay || S.dgDay.d !== dayKey()) S.dgDay = {d:dayKey(), n:{}}; return S.dgDay.n[id] || 0; }
+function dgBest(id){ S.dgBest = S.dgBest || {}; return S.dgBest[id] || Math.min(7, S.dung[id] || 0); }
+const dgMaxTier = id => Math.min(7, dgBest(id) + 1);
+dTier = function(){ return DG ? (DG.tier || Math.min(7, DG.run)) : 1; };
+
+/* ---------- прокляття походу (з 2 тіру) ---------- */
+const DG_MODS = {
+  murk:{name:"Морок", text:"Кожен четвертий раунд ваш удар може піти мимо.", rew:.2},
+  fumes:{name:"Отруйні випари", text:"На початку кожного бою ви отруєні на 3 раунди.", rew:.2},
+  wealth:{name:"Багатство", text:"Вороги на 10% міцніші, зате грошей у скринях і за боса на 40% більше.", rew:.1, cop:.4},
+  frenzy:{name:"Шал", text:"Вороги б'ють на 15% сильніше.", rew:.25},
+  stone:{name:"Кам'яна шкіра", text:"Вороги мають на 25% більше захисту, але ключі падають частіше.", rew:.15, keys:.25},
+  blood:{name:"Кров на камені", text:"Святинь і таборів не буде.", rew:.3},
+};
+const dgRewK = () => 1 + (DG && DG.mod ? DG_MODS[DG.mod].rew : 0) + (DG && DG.mod === "wealth" ? DG_MODS.wealth.cop : 0);
+
+/* ---------- вікно входу ---------- */
+UI.dgTier = UI.dgTier || {};
+function openDgGate(id){
+  const Dn = DUNGEONS[id]; if (!Dn) return; if (B || T) return;
+  const mx = dgMaxTier(id), sel = clamp(UI.dgTier[id] || mx, 1, mx); UI.dgTier[id] = sel;
+  const today = dgToday(id), left = DG_DAILY - today, boss = mobDef(Dn.boss);
+  const drops = (boss.drop || []).map(([i]) => ITEMS[i]).filter(Boolean);
+  const tiers = [...Array(mx)].map((_, i) => { const t = i + 1; return `<button class="btn sm${t === sel ? " p" : ""}" data-dgt="${t}" data-dgid="${id}" title="Вороги +${(t - 1) * 12}%, нагорода +${(t - 1) * 15}%">Тір ${t}</button>`; }).join("");
+  openModal(`<div class="mbox dggate" style="width:660px">${mhead(Dn.name)}
+    <p class="hint it">${Dn.text}</p>
+    <div class="dgg">
+      <div class="dggb"><span class="ic">${sprite(Dn.boss, 90, 90, 1.1, false)}</span><b>${boss.name}</b><i>бос підземелля</i></div>
+      <div class="dggi">
+        <div class="kv"><span>Рівень ворогів</span><b>${Dn.lvl}${S.lvl < Dn.lvl - 1 ? ` <em class="bad">радимо ${Dn.lvl - 1}+</em>` : ""}</b></div>
+        <div class="kv"><span>Кімнат</span><b>${Dn.rooms}</b></div>
+        <div class="kv"><span>Пройдено всього</span><b>${S.dung[id] || 0}</b></div>
+        <div class="kv"><span>Найвищий пройдений тір</span><b>${dgBest(id) || "—"}</b></div>
+        <div class="kv"><span>Проходи сьогодні</span><b class="${left > 0 ? "" : "bad"}">${today} / ${DG_DAILY}</b></div>
+        <div class="sub">Можна здобути</div><div class="hint">${drops.map(it => `<span class="${it.rare ? "rare" : ""}">${it.name}</span>`).join(", ")}${drops.length ? ", " : ""}скарбниця за ключі, самоцвіти, золото.</div>
+      </div>
+    </div>
+    <div class="sub">Складність</div><div class="dgtiers">${tiers}</div>
+    <p class="hint">${sel === 1 ? "Тір 1: звичайна складність." : `Тір ${sel}: вороги сильніші на ${(sel - 1) * 12}%, нагорода більша на ${(sel - 1) * 15}%.`}${sel >= 2 ? " На поході лежить випадкове прокляття, і за нього нагорода ще більша." : ""} Кожен пройдений тір відкриває наступний.</p>
+    <p class="hint">Сильні вороги дають ключі. Після боса ключі відкривають скрині скарбниці. Якщо загинете, похід пропаде, а прохід не зарахується.</p>
+    <div class="acts"><button class="btn p" data-dggo="${id}" ${left > 0 ? "" : "disabled"}>${left > 0 ? "Спуститися" : "На сьогодні все: приходьте завтра"}</button><button class="btn" data-close="1">Не зараз</button></div></div>`);
+}
+{ const ed0 = enterDungeon; enterDungeon = function(id, tier){
+    if (tier == null) return openDgGate(id);
+    if (T || B || !DUNGEONS[id]) return;
+    if (dgToday(id) >= DG_DAILY) return msg(`${DUNGEONS[id].name}: на сьогодні проходів більше нема. Приходьте завтра.`, "warn");
+    closeModal(); ed0(id); if (!DG) return;
+    DG.tier = clamp(tier, 1, dgMaxTier(id)); DG.keys = 0; DG.used = {};
+    DG.mod = DG.tier >= 2 ? pick(Object.keys(DG_MODS)) : null;
+    if (DG.mod) msg(`Прокляття походу: «${DG_MODS[DG.mod].name}». ${DG_MODS[DG.mod].text}`, "warn");
+    genDoors(); render(); save(); }; }
+document.addEventListener("click", e => { const t = e.target.closest && e.target.closest("[data-dgt],[data-dggo]"); if (!t || !isLive()) return;
+  if (t.dataset.dgt){ UI.dgTier[t.dataset.dgid] = +t.dataset.dgt; return openDgGate(t.dataset.dgid); }
+  if (t.dataset.dggo){ const id = t.dataset.dggo; enterDungeon(id, UI.dgTier[id] || dgMaxTier(id)); } });
+
+/* ---------- нові кімнати ---------- */
+Object.assign(ROOM, {camp:["Табір","fire"], merchant:["Мандрівний торговець","two-coins"], prisoner:["Полонений","chain-mail"]});
+{ const gd1 = genDoors; genDoors = function(){ gd1(); if (!DG || !DG.doors || DG.doors.length <= 1) return; const u = DG.used || (DG.used = {});
+    for (const d of DG.doors){ if (d.type === "boss") continue; const x = Math.random();
+      if (x < .1 && !u.camp && DG.mod !== "blood" && DG.room >= 2){ d.type = "camp"; u.campOffer = 1; }
+      else if (x < .18 && !u.merchant){ d.type = "merchant"; }
+      else if (x < .26 && !u.prisoner){ d.type = "prisoner"; } }
+    if (DG.mod === "blood") for (const d of DG.doors) if (d.type === "shrine") d.type = "fight";
+    if (DG.seer) for (const d of DG.doors) d.known = true; }; }
+{ const cd1 = chooseDoor; chooseDoor = function(i){ const d = DG && DG.doors[i];
+    if (!d || !["camp", "merchant", "prisoner"].includes(d.type) || (DG.cur && !DG.cur.done)) return cd1(i);
+    DG.cur = {type:d.type, done:false}; DG.used[d.type] = 1;
+    if (d.type === "merchant") DG.cur.offer = dgShuf(["potion_xl", "potion_xe", "elix_str", "elix_skin", "scroll_fire", "scroll_shield"].filter(k => ITEMS[k])).slice(0, 3).map(k => ({id:k, price:Math.round(ITEMS[k].price * 1.6), sold:false}));
+    render(); save(); }; }
+function dgRoomDone(text, cls){ DG.cur.text = text; DG.cur.done = true; if (text) msg(text, cls || ""); nextRoom(true); save(); render(); }
+function dgCamp(){ if (!DG || !DG.cur || DG.cur.type !== "camp" || DG.cur.done) return; const st = stats();
+  S.hp = Math.min(st.maxHp, S.hp + st.maxHp * .3); S.en = Math.min(st.maxEn, S.en + st.maxEn * .3); if (typeof maxMp === "function") S.mp = Math.min(maxMp(), (S.mp || 0) + maxMp() * .3);
+  dgRoomDone("Ви розпалили вогнище в кутку й трохи поспали. +30% здоров'я, енергії й мани.", "good"); }
+function dgBuy(k){ const c = DG && DG.cur; if (!c || c.type !== "merchant" || c.done) return; const o = c.offer[k]; if (!o || o.sold) return;
+  if (S.cop < o.price) return msg("Не вистачає грошей.", "warn"); spend("shop", o.price); give(o.id, 1, true); o.sold = true; msg(`Ви купили ${ITEMS[o.id].name} за ${moneyTxt(o.price)}.`, "good"); renderTop(); save(); render(); }
+function dgFree(){ const c = DG && DG.cur; if (!c || c.type !== "prisoner" || c.done) return; const Dn = DUNGEONS[DG.id], x = Math.random();
+  if (x < .55){ const cop = Math.round(ri(Dn.lvl * 25, Dn.lvl * 55) * (1 + .15 * (dTier() - 1)) * dgRewK()), it = pick(["elix_str", "elix_skin", "potion_xe"]); earn("loot", cop); give(it, 1, true); DG.insp = 1;
+    return dgRoomDone(`Бранець цілує вам руки й віддає все, що сховав: ${moneyTxt(cop)} і ${ITEMS[it].name}. Ви відчуваєте натхнення: до кінця походу +10% шкоди.`, "good"); }
+  if (x < .85){ DG.seer = 1; for (const d of DG.doors) d.known = true; return dgRoomDone("Бранець знає ці коридори: він розповідає, що чекає за кожними дверима. До кінця походу ви бачите всі кімнати наперед.", "good"); }
+  msg("Кайдани падають, і бранець усміхається не своїм ротом. Це пастка!", "warn"); c.type = "elite"; startBattle([{type:pick(Dn.pool), lvl:Dn.lvl, tier:dTier(), elite:true}], null, "dungeon", Dn.node); }
+function dgSkip(){ const c = DG && DG.cur; if (!c || c.done) return; dgRoomDone(c.type === "merchant" ? "Торговець знизує плечима й зникає в темряві." : "Ви пройшли повз.", ""); }
+
+/* ---------- ключі, скарбниця, найкращий тір, ліміт на добу ---------- */
+{ const da0 = dungeonAfterFight; dungeonAfterFight = function(res){ const c = DG && DG.cur;
+    if (res === "win" && c && !c.done){ const ch = c.type === "elite" ? 1 : c.type === "fight" ? .15 : 0, add = DG.mod === "stone" ? .25 : 0;
+      if (ch && Math.random() < ch + add){ DG.keys = (DG.keys || 0) + 1; msg(`Ви знайшли ключ підземелля (${DG.keys}). Він відчиняє скриню в скарбниці за босом.`, "good"); } }
+    const r = da0.apply(this, arguments); save(); return r; }; }
+{ const cp0 = completeDungeon; completeDungeon = function(){ const id = DG.id;
+    S.dgDay = S.dgDay && S.dgDay.d === dayKey() ? S.dgDay : {d:dayKey(), n:{}}; S.dgDay.n[id] = (S.dgDay.n[id] || 0) + 1;
+    S.dgBest = S.dgBest || {}; const was = dgBest(id); if (dTier() > was) S.dgBest[id] = dTier(); else S.dgBest[id] = Math.max(S.dgBest[id] || 0, was);
+    if (dgRewK() > 1){ const Dn = DUNGEONS[id], extra = Math.round(Dn.lvl * 120 * (1 + .15 * (dTier() - 1)) * (dgRewK() - 1)); earn("loot", extra); msg(`За прокляття «${DG_MODS[DG.mod].name}»: ще ${moneyTxt(extra)}.`, "good"); }
+    cp0.apply(this, arguments);
+    DG.vault = DG.keys || 0; DG.loot = []; if (DG.cur && DG.cur.text) DG.cur.text = DG.cur.text.replace(" Наступний похід буде важчим.", dTier() < 7 ? " Можна спробувати вищий тір." : "");
+    if (dTier() > was && dTier() < 7) msg(`Відкрито тір ${dTier() + 1} для «${DUNGEONS[id].name}».`, "good");
+    save(); }; }
+function dgVaultItem(){ const Dn = DUNGEONS[DG.id], t = dTier(), x = Math.random(), boss = mobDef(Dn.boss);
+  if (x < .08 + t * .01){ const rare = (boss.drop || []).map(d => d[0]).filter(i => ITEMS[i] && ITEMS[i].rare); if (rare.length) return [pick(rare), 1]; }
+  if (x < .32){ const pool = Object.entries(ITEMS).filter(([i, it]) => it.slot && !it.unique && !it.rare && !it.base && it.lvl && it.lvl >= Dn.lvl - 3 && it.lvl <= Math.min(10, Dn.lvl) && it.price > 0).map(([i]) => i); if (pool.length) return [pick(pool), 1]; }
+  if (x < .62){ const g = pick(["ruby", "topaz", "onyx", "emer"]), q = t >= 5 ? 3 : t >= 3 ? 2 : Dn.lvl >= 9 ? 2 : 1; return ["gem_" + g + q, 1]; }
+  if (x < .8) return [Dn.lvl >= 8 ? "raw3" : "raw2", 1];
+  return [pick(["elix_str", "elix_skin", "potion_xe", "scroll_fire"]), 2]; }
+function dgOpenVault(){ if (!DG || !DG.done || !DG.vault) return; DG.vault--; const [id, n] = dgVaultItem(); if (!ITEMS[id]) return dgOpenVault();
+  give(id, n, true); const cop = Math.round(DUNGEONS[DG.id].lvl * 30 * (1 + .15 * (dTier() - 1)) * dgRewK()); earn("loot", cop);
+  DG.loot.push(ITEMS[id].name + (n > 1 ? " ×" + n : "")); msg(`Скриня скарбниці: ${ITEMS[id].name}${n > 1 ? " ×" + n : ""} і ${moneyTxt(cop)}.`, ITEMS[id].rare ? "quest" : "good"); renderTop(); save(); render(); }
+
+/* ---------- бій у підземеллі: прокляття, натхнення, друга фаза боса ---------- */
+{ const sb0 = startBattle; startBattle = function(list, ref, origin, scene){ const o = sb0.apply(this, arguments);
+    if (B && origin === "dungeon" && DG){
+      for (const e of B.enemies){ if (DG.mod === "wealth"){ e.hp = e.maxHp = Math.round(e.maxHp * 1.1); } if (DG.mod === "frenzy") e.dmg = e.dmg.map(v => Math.round(v * 1.15)); if (DG.mod === "stone") e.def = Math.round(e.def * 1.25); if (DG.insp){ e.hp = e.maxHp = Math.round(e.maxHp / 1.1); } }
+      if (DG.mod === "fumes"){ B.poison = Math.max(B.poison || 0, 3); B.poisonDmg = Math.max(B.poisonDmg || 0, Math.round(DUNGEONS[DG.id].lvl * 1.2)); blog("Отруйні випари: ви отруєні.", "warn"); }
+      render(); }
+    return o; }; }
+{ const re1 = abilRoundEnd; abilRoundEnd = function(){ re1.apply(this, arguments); if (!B || B.origin !== "dungeon" || !DG) return;
+    if (DG.mod === "murk" && B.round % 4 === 0 && !B.blind){ B.blind = 1; blog("Морок згущується: ви майже нічого не бачите.", "warn"); }
+    const Dn = DUNGEONS[DG.id], bo = DG.cur && DG.cur.type === "boss" && B.enemies.find(e => e.type === Dn.boss && alive(e));
+    if (bo && !B.phase2 && bo.hp < bo.maxHp * .5){ B.phase2 = true; bo.dmg = bo.dmg.map(v => Math.round(v * 1.2)); bo.enraged = true;
+      const n = B.enemies.filter(alive).length >= 4 ? 0 : 2;
+      for (let i = 0; i < n; i++){ const t = pick(Dn.pool), e = mkEnemy(t, Math.max(1, Dn.lvl - 1), {tier:dTier()}); B.enemies.push(e); discover(t); }
+      blog(`${bo.name} ревe від болю й лютує${n ? ": з темряви на поклик лізуть прислужники" : ""}! Шкода боса +20%.`, "warn"); B.log.push([B.round, `${bo.name}: друга фаза`, "", "hurt"]); render(); } }; }
+
+/* ---------- збереження походу (оновлення сторінки не губить його) ---------- */
+let DG_LIVE = false;
+{ const sv0 = save; save = function(){ if (typeof S === "object" && S){ if (DG){ DG_LIVE = true; const d = JSON.parse(JSON.stringify(DG)); if (d.cur && !d.cur.done && ["fight", "elite", "boss"].includes(d.cur.type)) d.cur = null; S.dgRun = d; } else if (DG_LIVE){ DG_LIVE = false; delete S.dgRun; } } return sv0.apply(this, arguments); }; }
+{ const ea0 = enterAs; enterAs = function(){ const o = ea0.apply(this, arguments);
+    DG_LIVE = false; try { if (S && S.dgRun && DUNGEONS[S.dgRun.id] && !B && !T){ DG = S.dgRun; DG_LIVE = true; if (!DG.doors || !DG.doors.length) genDoors(); UI.view = "dungeon"; msg(`Ви досі в «${DUNGEONS[DG.id].name}», кімната ${Math.min(DG.room + 1, DUNGEONS[DG.id].rooms)}.`, "warn"); render(); } } catch (e){ DG = null; delete S.dgRun; }
+    return o; }; }
+
+/* ---------- відображення ---------- */
+{ const rd1 = renderDungeon; renderDungeon = function(){ rd1(); if (!DG) return; const v = $("#view"), c = DG.cur, Dn = DUNGEONS[DG.id];
+    const tp = v.querySelector(".title-plate span"); if (tp) tp.textContent = `Тір ${dTier()} · рівень ${Dn.lvl} · ключів: ${DG.keys || 0}${DG.mod ? " · " + DG_MODS[DG.mod].name : ""}`;
+    let card = "";
+    if (c && !c.done && c.type === "camp") card = `<b>Тихий закуток</b><p>Суха ніша, де можна розпалити вогонь і поспати. Тут ніхто не шукатиме.</p><div class="acts"><button class="btn p" data-dga="camp">Відпочити (+30%)</button><button class="btn dk" data-dga="skip">Йти далі</button></div>`;
+    if (c && !c.done && c.type === "merchant") card = `<b>Мандрівний торговець</b><p>Згорблений чоловік із торбою. Як він сюди потрапив, краще не питати. Ціни відповідні.</p><div class="dgshop">${c.offer.map((o, k) => `<button class="btn${o.sold ? "" : " p"}" data-dgbuy="${k}" ${o.sold ? "disabled" : ""}>${ITEMS[o.id].name} · ${moneyTxt(o.price)}</button>`).join("")}</div><button class="btn dk" data-dga="skip">Йти далі</button>`;
+    if (c && !c.done && c.type === "prisoner") card = `<b>Полонений</b><p>Прикутий до стіни бранець просить про допомогу. Він живий. Принаймні схожий на живого.</p><div class="acts"><button class="btn p" data-dga="free">Звільнити</button><button class="btn dk" data-dga="skip">Пройти повз</button></div>`;
+    if (DG.done) card = `<b>Скарбниця</b><p>${c && c.text ? c.text : "Підземелля пройдено!"}</p>${DG.vault ? `<p>За босом скарбниця. Ключів: <b>${DG.vault}</b>.</p><button class="btn p" data-dga="vault">Відкрити скриню (1 ключ)</button>` : `<p class="hint">${DG.loot && DG.loot.length ? "Скарбниця порожня." : "Ключів нема: скрині скарбниці лишилися замкненими. Сильні вороги носять ключі."}</p>`}${DG.loot && DG.loot.length ? `<p class="hint">Зі скарбниці: ${DG.loot.join(", ")}.</p>` : ""}`;
+    if (card){ v.querySelectorAll(".dcard").forEach(x => x.remove()); v.insertAdjacentHTML("beforeend", `<div class="card dcard">${card}</div>`); }
+    const p = $("#panel"); if (p){ const kv = p.querySelectorAll(".kv"); if (kv[2]) kv[2].innerHTML = `<span>Тір</span><b>${dTier()}</b>`;
+      p.querySelector(".kv").insertAdjacentHTML("afterend", `<div class="kv"><span>Ключі</span><b>${DG.keys || 0}</b></div><div class="kv"><span>Проходи сьогодні</span><b>${dgToday(DG.id)} / ${DG_DAILY}</b></div>`);
+      if (DG.mod || DG.insp || DG.seer) p.querySelector(".sub").insertAdjacentHTML("beforebegin", `<div class="dgmods">${DG.mod ? `<div class="regrule"><b>Прокляття: ${DG_MODS[DG.mod].name}.</b> ${DG_MODS[DG.mod].text} Нагорода +${Math.round(DG_MODS[DG.mod].rew * 100)}%.</div>` : ""}${DG.insp ? `<div class="regrule good"><b>Натхнення.</b> +10% шкоди до кінця походу.</div>` : ""}${DG.seer ? `<div class="regrule good"><b>Провідник.</b> Ви бачите всі кімнати наперед.</div>` : ""}</div>`);
+      const tips = [...p.querySelectorAll(".hint")].pop(); if (tips) tips.textContent = "Двері з «?» можуть приховувати будь-що. Сильні вороги дають ключі до скарбниці за босом. Коли в боса лишається половина здоров'я, він лютує й кличе прислужників. Кожен пройдений тір відкриває наступний."; } }; }
+document.addEventListener("click", e => { const t = e.target.closest && e.target.closest("[data-dga],[data-dgbuy]"); if (!t || !isLive()) return;
+  if (t.dataset.dgbuy) return dgBuy(+t.dataset.dgbuy);
+  ({camp:dgCamp, skip:dgSkip, free:dgFree, vault:dgOpenVault})[t.dataset.dga](); });
+
+/* ---------- Золота гробниця Царя-Ліча; у Піраміді тепер сторожує Сфінкс ---------- */
+DUNGEONS.sd_dg.boss = "sphinx";
+DUNGEONS.sd_dg.text = "Під пірамідою сходи ведуть глибше за гробниці. Внизу, біля запечатаних дверей, лежить Сфінкс і загадує останню загадку. Хто не відгадав, той лишається тут назавжди.";
+QUESTS.sd_q7.text = "Під пірамідою є сходи, що ведуть глибше за гробниці. Там поховані царі, чиї імена стерли з літописів, а прохід стереже сам Сфінкс. Спустися в Глибини Піраміди й дізнайся чому.";
+QUESTS.sd_q8.text = "Сфінкс знову лежить біля дверей, ніби й не падав. Пройди Глибини Піраміди ще двічі: може, тоді він відповість, що ховає.";
+DUNGEONS.sd_tomb_dg = {name:"Золота гробниця", node:"sd_lich", lvl:11, rooms:8, pool:["mummy", "ghoul", "jackal_priest", "scarab_swarm"], boss:"lich_king", scene:"goldtomb",
+  text:"Під гробницею Царя-Ліча лежать зали з золотом, яке ніхто не наважився взяти. Цар сидить на троні в найглибшій із них і досі рахує своїх підданих. Мертвих."};
+LOCS.sd_lich.buildings = (LOCS.sd_lich.buildings || []).concat([["Золота гробниця", "dungeon:sd_tomb_dg"]]);
+DG_COL.goldtomb = ["#5a4620", "#2e2410"];
+DG_DECOR.goldtomb = function(r){ let s = "";
+  for (let i = 0; i < 5; i++){ const x = 110 + i * 170; s += `<rect x="${x}" y="40" width="22" height="230" fill="#8a6a2a" opacity=".55"/><rect x="${x - 6}" y="34" width="34" height="12" fill="#c8a040" opacity=".6"/>`;
+    for (let k = 0; k < 6; k++) s += `<path d="M${x + 4} ${70 + k * 30}h14" stroke="#3a2a10" stroke-width="3" opacity=".6"/>`; }
+  for (let i = 0; i < 4; i++){ const x = 80 + r() * 740, y = 400 + r() * 90; s += `<rect x="${x}" y="${y}" width="90" height="34" rx="8" fill="#b8902a"/><rect x="${x + 6}" y="${y - 10}" width="78" height="14" rx="6" fill="#d8b040"/><circle cx="${x + 45}" cy="${y + 17}" r="7" fill="#3a8aa8"/>`; }
+  for (let i = 0; i < 20; i++) s += `<circle cx="${r() * 900}" cy="${380 + r() * 160}" r="${2 + r() * 4}" fill="#f0c850" opacity=".75"/>`;
+  return s; };
+Object.assign(QUESTS, {
+  sd_q9:{name:"Золото мертвих", giver:"yusuf", req:"sd_q6", text:"Ліча ти поклав, але він підвівся знову: під його гробницею є ще зали, і там він сильніший. Спустися в Золоту гробницю й поклади його на його ж троні.", goal:{dungeon:"sd_tomb_dg", n:1}, reward:{cop:3600, xp:900, item:"box"}},
+  sd_q10:{name:"Цар без підданих", giver:"yusuf", req:"sd_q9", text:"Кожного разу, як Цар-Ліч підводиться, з ним підводяться всі його мертві. Пройди Золоту гробницю ще двічі, щоб йому не було кого рахувати.", goal:{dungeon:"sd_tomb_dg", n:2}, reward:{cop:4200, xp:1100, perk:{wil:2, hp:20}}, perkText:"+2 волі, +20 здоров'я"},
+});
+NPCS.yusuf.quests.push("sd_q9", "sd_q10");
+ACH.push({id:"dg_lich", icon:"crowned-skull", name:"Царський сон", text:"Пройти Золоту гробницю на 3 тірі або вище", val:() => Math.min(1, (S.dgBest && S.dgBest.sd_tomb_dg || 0) >= 3 ? 1 : 0), n:1, rew:{cop:5000}},
+  {id:"dg_t7", icon:"dungeon-gate", name:"Сьомий тір", text:"Пройти будь-яке підземелля на 7 тірі", val:() => Object.values(S.dgBest || {}).some(v => v >= 7) ? 1 : 0, n:1, rew:{hp:30, dmg:2}});
+{ const ld0 = leaveDungeon; leaveDungeon = function(){ const r = ld0.apply(this, arguments); save(); return r; }; }
+
+/* ============ лут: топові речі на всі слоти з босів + трофейні комплекти ============ */
+Object.assign(ITEMS, {
+  // взуття 10 рівня (рідкісне, з босів)
+  jotun_boots:{name:"Чоботи Йотуна", slot:"boots", def:6, hp:30, str:2, price:6200, lvl:10, sock:1, rare:true, unique:true},
+  lich_sandals:{name:"Золоті сандалі Царя", slot:"boots", def:5, hp:24, wil:3, agi:2, price:6200, lvl:10, sock:1, rare:true, unique:true},
+  deep_boots:{name:"Чоботи з жару Безодні", slot:"boots", def:6, hp:32, str:2, crit:1, price:6400, lvl:10, sock:1, rare:true, unique:true},
+  queen_boots:{name:"Павучі ступні", slot:"boots", def:5, hp:22, agi:4, crit:2, price:6400, lvl:10, sock:1, rare:true, unique:true},
+  // наголінники
+  oak_legs:{name:"Наголінники з кори Батька", slot:"legs", def:6, hp:36, wil:2, price:6200, lvl:10, sock:1, rare:true, unique:true},
+  abyss_legs:{name:"Наголінники Безодні", slot:"legs", def:6, hp:34, str:2, price:6200, lvl:10, sock:1, rare:true, unique:true},
+  // рукавиці
+  queen_gloves:{name:"Рукавиці з павучої шкіри", slot:"gloves", def:2, str:2, agi:2, crit:3, price:6200, lvl:10, sock:1, rare:true, unique:true},
+  sphinx_gloves:{name:"Рукавиці Сфінкса", slot:"gloves", def:3, hp:14, wil:3, crit:2, price:6200, lvl:10, sock:1, rare:true, unique:true},
+  // плащі
+  lich_cloak:{name:"Саван Царя-Ліча", slot:"cloak", hp:34, wil:3, agi:2, crit:1, price:6400, lvl:10, sock:1, rare:true, unique:true},
+  kraken_cloak:{name:"Плащ із шкіри кракена", slot:"cloak", hp:36, agi:2, def:2, price:6400, lvl:10, sock:1, rare:true, unique:true},
+  // пояси
+  deep_belt:{name:"Пояс Владаря Глибин", slot:"belt", hp:34, str:3, crit:2, price:6400, lvl:10, sock:1, rare:true, unique:true},
+  gorynych_belt:{name:"Пояс із луски Горинича", slot:"belt", hp:32, str:2, def:2, price:6200, lvl:10, sock:1, rare:true, unique:true},
+});
+for (const [id, it] of Object.entries(ITEMS)) if (!it.id) prepItem(id, it);
+Object.assign(ITEM_IC, {jotun_boots:"metal-boot", lich_sandals:"leather-boot", deep_boots:"metal-boot", queen_boots:"boots", oak_legs:"leg-armor", abyss_legs:"leg-armor",
+  queen_gloves:"gloves", sphinx_gloves:"gloves", lich_cloak:"cape", kraken_cloak:"cloak", deep_belt:"belt", gorynych_belt:"belt"});
+// хто що носить
+for (const [mob, list] of Object.entries({
+  jotun:[["jotun_boots", .25]], lich_king:[["lich_sandals", .22], ["lich_cloak", .18]], deep_lord:[["deep_boots", .22], ["deep_belt", .18]],
+  spider_queen:[["queen_boots", .22], ["queen_gloves", .18]], oak_father:[["oak_legs", .25]], abyss_lord:[["abyss_legs", .2]],
+  sphinx:[["sphinx_gloves", .25]], kraken:[["kraken_cloak", .22]], gorynych:[["gorynych_belt", .22]],
+  // трофейний Комплект Тіні з дроу
+  drow_assassin:[["drow_hood", .035], ["drow_boots", .035], ["drow_dagger", .03]], drow_knight:[["drow_mail", .035], ["drow_belt", .035]], spider_priestess:[["drow_cloak", .04]],
+})){ const m = MOBS[mob]; if (!m) continue; m.drop = (m.drop || []).concat(list.filter(([i]) => ITEMS[i] && !(m.drop || []).some(d => d[0] === i))); }
+
+// еліта й отамани 9+ рівня іноді носять спорядження свого рівня (як у Кристалі: з сильних ворогів падає одяг)
+const GEAR_DROP = Object.entries(ITEMS).filter(([i, it]) => it.slot && !it.rare && !it.unique && !it.base && (it.lvl || 0) >= 9 && it.price > 0 && Object.values(SHOPS).some(l => l.includes(i))).map(([i]) => i);
+{ const ms0 = mobStats; mobStats = function(type, lvl, o = {}){ const st = ms0.apply(this, arguments);
+    if ((o.elite || o.distBoss) && lvl >= 9 && GEAR_DROP.length){ const g = GEAR_DROP[Math.floor(Math.random() * GEAR_DROP.length)]; st.drop = st.drop.concat([[g, o.distBoss ? .12 : .07]]); }
+    return st; }; }
 
 /* ============ старт ============ */
 initDrag();
