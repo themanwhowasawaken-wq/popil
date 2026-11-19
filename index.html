@@ -1290,6 +1290,17 @@ svg.scfx{position:absolute;left:0;top:0;pointer-events:none;overflow:hidden}
 .dcard .acts{display:flex;gap:8px;justify-content:center;margin:0}
 .dgshop{display:flex;flex-direction:column;gap:6px;width:100%}.dgshop .btn{width:100%}
 .dgmods .regrule{margin:6px 0}.regrule.good{border-color:#5a8a4a;background:rgba(90,138,74,.1)}
+/* ---------- спільний бій ---------- */
+.coopbar{position:absolute;left:12px;top:84px;z-index:40;background:rgba(20,16,12,.82);border:1px solid rgba(201,162,74,.55);border-radius:8px;padding:6px 9px;min-width:150px;max-width:200px;color:#efe4cc;font-size:12px;pointer-events:none}
+.coopbar b{display:block;font-family:var(--serif);font-size:13px;color:#e9c46a;margin-bottom:3px}
+.coopbar .cpm{display:flex;flex-direction:column;gap:2px;margin-top:3px}.coopbar .cpm span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.coopbar .cpm i{display:block;height:5px;background:#3a2a22;border-radius:3px;overflow:hidden}.coopbar .cpm u{display:block;height:100%;background:#c0392b}
+.coopbar .cpm.dead span{text-decoration:line-through;opacity:.6}
+.coopally{position:absolute;z-index:20;display:flex;flex-direction:column;align-items:center;gap:2px;pointer-events:none;transform:translate(-50%,-100%)}
+.coopally .cf{display:block;filter:drop-shadow(0 3px 3px rgba(0,0,0,.5))}
+.coopally .cn{font:700 11px "PT Sans",sans-serif;color:#fff;background:rgba(30,60,120,.88);padding:1px 6px;border-radius:8px;white-space:nowrap}
+.coopally i{display:block;width:56px;height:4px;background:#3a2a22;border-radius:2px;overflow:hidden}.coopally u{display:block;height:100%;background:#c0392b}
+.coopally.dead{opacity:.45;filter:grayscale(1)}
 
 </style>
 </head>
@@ -12356,7 +12367,7 @@ setInterval(socPoll, 12000);
 const locName = id => id === "road" ? "у дорозі" : id === "dungeon" ? "у підземеллі" : NODES[id] ? NODES[id].name : "десь у світі";
 function openSocial(tab, keep){ if (!NET.on) return msg(tab === "party" ? "Група працює лише у світі: вийдіть і увійдіть із паролем." : "Друзі працюють лише у світі: вийдіть і увійдіть із паролем.", "warn");
   SOC.tab = tab || SOC.tab; const isP = SOC.tab === "party"; const s = NET.soc, tb = (k, l, n) => `<button class="btn${SOC.tab === k ? " p" : ""}" data-soc="${k}">${l}${n ? ` <b class="sbadge">${n}</b>` : ""}</button>`;
-  const row = (p, acts) => `<div class="mkr"><span class="dotx ${p.online ? "on" : ""}"></span><span class="mkn"><b>${esc(p.nick)}</b><i>${p.lvl} рівень · ${p.online ? locName(p.loc) : "не в грі"}</i></span>${acts}</div>`;
+  const row = (p, acts) => `<div class="mkr"><span class="dotx ${p.online ? "on" : ""}"></span><span class="mkn"><b>${esc(p.nick)}</b><i>${p.lvl} рівень · ${p.online ? posText(p) : "не в грі"}</i></span>${acts}</div>`;
   let body = "";
   if (SOC.tab === "friends"){
     body = (s.requests.length ? `${lbl("Заявки в друзі")}<div class="mkl">${s.requests.map(n => `<div class="mkr"><span class="mkn"><b>${esc(n)}</b><i>хоче дружити</i></span><button class="btn p sm" data-fadd="${esc(n)}">Прийняти</button><button class="btn sm" data-frem="${esc(n)}">Відхилити</button></div>`).join("")}</div>` : "") +
@@ -13268,6 +13279,109 @@ const GEAR_DROP = Object.entries(ITEMS).filter(([i, it]) => it.slot && !it.rare 
 { const ms0 = mobStats; mobStats = function(type, lvl, o = {}){ const st = ms0.apply(this, arguments);
     if ((o.elite || o.distBoss) && lvl >= 9 && GEAR_DROP.length){ const g = GEAR_DROP[Math.floor(Math.random() * GEAR_DROP.length)]; st.drop = st.drop.concat([[g, o.distBoss ? .12 : .07]]); }
     return st; }; }
+
+/* ===================================================================
+   ГРУПА: точне місце гравця й спільні бої (приєднатися до бою сокомандника)
+   =================================================================== */
+// де я зараз: дорога, підземелля, бій, арена чи локація
+function netPos(){
+  if (T){ const l = T.legs[T.i]; return `road:${l[0]}:${l[1]}`; }
+  if (DG) return `dg:${DG.id}`;
+  if (B) return B.origin === "loc" ? `fight:${S.loc}` : "arena";
+  return `at:${S.loc}`;
+}
+function posText(p){ const s = (p && p.pos) || "", [k, a, b] = s.split(":"), nm = id => NODES[id] ? NODES[id].name : "десь у світі";
+  if (k === "road") return `іде: ${nm(a)} → ${nm(b)}`;
+  if (k === "dg") return `у підземеллі «${DUNGEONS[a] ? DUNGEONS[a].name : "?"}»`;
+  if (k === "fight") return `б'ється: ${nm(a)}`;
+  if (k === "arena") return "на арені";
+  if (k === "at") return nm(a);
+  return locName(p.loc); }
+{ const rp0 = rpc; rpc = function(fn, args, k){ if (fn === "heartbeat" && typeof S === "object" && S) args = Object.assign({}, args, {p_pos:netPos()}); return rp0.call(this, fn, args, k); }; }
+// пульс одразу після зміни місця, а не раз на 10 секунд
+let BEAT_T = 0;
+function netBeatSoon(){ if (!NET.on) return; clearTimeout(BEAT_T); BEAT_T = setTimeout(() => { netBeat(); }, 400); }
+for (const fn of ["arrive", "startTravel", "leaveDungeon", "turnBack"]){ if (typeof window[fn] !== "function") continue; const f0 = window[fn]; window[fn] = function(){ const r = f0.apply(this, arguments); netBeatSoon(); return r; }; }
+{ const ed2 = enterDungeon; enterDungeon = function(id, tier){ const r = ed2.apply(this, arguments); if (tier != null) netBeatSoon(); return r; }; }
+
+/* ---------- спільний бій ---------- */
+let COOP_JOINING = false;
+const coopEnemyList = () => B.enemies.slice(0, B.coop ? B.coop.n : B.enemies.length);
+{ const sb2 = startBattle; startBattle = function(list, ref, origin, scene){ const r = sb2.apply(this, arguments); const b = B;
+    if (b && origin === "loc" && NET.on && NET.soc && NET.soc.party && !b.arena && !b.duel && !b.pvp && !b.chaos && !COOP_JOINING){
+      const en = b.enemies.map(e => ({type:e.type, lvl:e.lvl, elite:!!e.elite, tier:e.tier || 1, distBoss:!!e.distBoss, name:e.name, maxHp:e.maxHp}));
+      rpc("fight_open", {p_token:NET.tok, p_loc:S.loc, p_enemies:en}).then(res => { if (res && res.ok && B === b){ b.coop = {id:res.id, n:en.length, sent:[], oth:[], since:0, members:{}, owner:true}; renderBattle(); } }).catch(() => {}); }
+    netBeatSoon(); return r; }; }
+async function coopJoin(id){
+  if (B || T || DG) return msg("Спершу закінчіть те, що робите зараз.", "warn");
+  let r; try { r = await rpc("fight_join", {p_token:NET.tok, p_id:id}); } catch (e){ return msg("Немає зв'язку зі світом.", "warn"); }
+  if (!r.ok) return msg(esc(r.err || "Не вдалося приєднатися."), "warn");
+  closeModal(); UI.view = "loc"; COOP_JOINING = true;
+  try { startBattle(r.enemies.map(x => ({type:x.type, lvl:x.lvl, elite:x.elite, tier:x.tier, distBoss:x.distBoss})), null, "loc", S.loc); } finally { COOP_JOINING = false; }
+  if (!B) return; B.coop = {id, n:r.enemies.length, sent:[], oth:[], since:0, members:r.members || {}, owner:false};
+  blog(`Ви вриваєтеся в бій на поміч ${esc(Object.keys(r.members || {}).filter(n => n.toLowerCase() !== S.name.toLowerCase()).join(", "))}!`, "good");
+  coopApply(r.dmg || {}); renderBattle(); coopSync();
+}
+// зводимо шкоду: моя (локальна) + союзників (із сервера)
+function coopMine(i){ const e = B.enemies[i], c = B.coop; return Math.max(0, (e.maxHp - e.hp) - (c.oth[i] || 0)); }
+function coopApply(tot){ const c = B.coop; if (!c) return;
+  coopEnemyList().forEach((e, i) => { const all = +tot[i] || 0, others = Math.max(0, all - (c.sent[i] || 0)), add = others - (c.oth[i] || 0);
+    if (add > 0){ const mine = coopMine(i); c.oth[i] = others; e.hp = e.maxHp - mine - others; } }); }
+let COOP_BUSY = false;
+async function coopSync(){ const b = B; if (!b || !b.coop || !NET.on || COOP_BUSY) return; const c = b.coop; COOP_BUSY = true;
+  try {
+    const hits = []; coopEnemyList().forEach((e, i) => { const d = Math.round(coopMine(i) - (c.sent[i] || 0)); if (d > 0) hits.push({i, d}); });
+    const st = stats(), r = await rpc("fight_sync", {p_token:NET.tok, p_id:c.id, p_hits:hits, p_hp:Math.round(Math.max(0, S.hp) / st.maxHp * 100), p_since:c.since});
+    if (B !== b || !r || !r.ok) return;
+    for (const h of hits) c.sent[h.i] = (c.sent[h.i] || 0) + h.d;
+    c.members = r.members || {}; c.since = Math.max(c.since, r.seq || 0);
+    for (const ev of r.events || []){ if (ev.j){ blog(`${esc(ev.n)} приєднується до бою!`, "good"); continue; } const e = b.enemies[ev.i]; if (!e) continue;
+      fx(document.getElementById("f-e" + ev.i), `−${ev.d} ${ev.n}`, "#8fc8ff"); b.log.push([b.round, `${ev.n} → ${e.name}`, "−" + ev.d, "hit"]); }
+    if (b.phase === "choose"){ coopApply(r.dmg || {}); coopDeaths(); } else c.pending = r.dmg;
+    renderCoopBar();
+  } catch (e) {} finally { COOP_BUSY = false; } }
+setInterval(() => { if (B && B.coop) coopSync(); }, 1500);
+// вороги, яких добили союзники, падають у вас теж
+function coopDeaths(){ if (!B) return; let died = false;
+  for (const e of B.enemies) if (e.hp <= 0 && !e.deadLogged){ e.deadLogged = true; died = true; try { onEnemyDeath(e); abilDeath(e); } catch (er) {} blog(`${e.name} падає від спільних ударів групи.`, "good"); }
+  if (died) render();
+  if (!B.enemies.some(alive)){ setTimeout(() => { if (B && !B.enemies.some(alive)) endBattle("win"); }, 400); } }
+// на початку свого ходу підтягуємо відкладену шкоду союзників
+{ const rb2 = renderBattle; renderBattle = function(){ const o = rb2.apply(this, arguments); try { if (B && B.coop && B.phase === "choose" && B.coop.pending){ const p = B.coop.pending; B.coop.pending = null; coopApply(p); coopDeaths(); } renderCoopBar(); } catch (e) {} return o; }; }
+// вороги ділять удари між усіма, хто в бою
+{ const ap0 = abilPre; abilPre = function(e, i){ const m = ap0.apply(this, arguments); if (!B || !B.coop) return m;
+    const n = Object.values(B.coop.members || {}).filter(x => (x.hp || 0) > 0).length; return n > 1 ? m / n : m; }; }
+{ const eb2 = endBattle; endBattle = function(res){ const b = B; if (b && b.coop){ rpc("fight_close", {p_token:NET.tok, p_id:b.coop.id, p_status:res === "win" ? "won" : "left"}).catch(() => {}); }
+    const r = eb2.apply(this, arguments); netBeatSoon(); return r; }; }
+function renderCoopBar(){ const v = document.getElementById("view"); if (!v || !B) return; v.querySelectorAll(".coopbar,.coopally").forEach(x => x.remove()); if (!B.coop) return;
+  const al = Object.entries(B.coop.members || {}).filter(([n]) => n.toLowerCase() !== S.name.toLowerCase());
+  al.slice(0, 4).forEach(([n, x], k) => { const h = (NET.here || []).find(p => p.nick === n), st = {look:h && h.look && h.look.look, crest:(h && h.look && h.look.crest) || 0, equip:(h && h.look && h.look.equip) || {}};
+    v.insertAdjacentHTML("beforeend", `<div class="coopally${x.hp > 0 ? "" : " dead"}" style="left:${[245, 175, 290, 140][k]}px;top:${[262, 410, 545, 545][k]}px"><span class="cf">${heroArt(46, st)}</span><span class="cn">${esc(n)}</span><i><u style="width:${x.hp}%"></u></i></div>`); });
+  v.insertAdjacentHTML("beforeend", `<div class="coopbar"><b>Група в бою</b>${al.length ? al.map(([n, x]) => `<div class="cpm${x.hp > 0 ? "" : " dead"}"><span>${esc(n)} [${x.lvl}]</span><i><u style="width:${x.hp}%"></u></i></div>`).join("") : `<div class="hint">Чекаємо, поки хтось приєднається…</div>`}</div>`); }
+
+/* ---------- сповіщення групи: хто з ким б'ється ---------- */
+SOC.seenFight = new Set();
+{ const sp0 = socPoll; socPoll = async function(){ await sp0.apply(this, arguments); const P = NET.soc && NET.soc.party; if (!P) return;
+    for (const m of P.members){ const f = m.fight; if (!f || m.nick.toLowerCase() === S.name.toLowerCase() || SOC.seenFight.has(f.id)) continue; SOC.seenFight.add(f.id);
+      const foes = f.enemies.map(x => x.name).slice(0, 3).join(", "), here = f.loc === S.loc && !T && !DG;
+      msg(`${esc(m.nick)} б'ється: ${esc(foes)} (${NODES[f.loc] ? NODES[f.loc].name : "?"}). ${here ? `<button class="lnk" data-fjoin="${f.id}">Приєднатися</button>` : NODES[f.loc] ? `<button class="lnk" data-goto="${f.loc}">Іти до</button>` : ""}`, "party"); } }; }
+setInterval(() => { if (NET.on && NET.soc && NET.soc.party && !B) socPoll(); }, 5000);
+document.addEventListener("click", e => { const t = e.target.closest && e.target.closest("[data-fjoin]"); if (!t || !isLive()) return; e.stopPropagation(); coopJoin(+t.dataset.fjoin); }, true);
+// у вікні групи: кнопка «Приєднатися» біля того, хто б'ється
+{ const os0 = openSocial; openSocial = function(tab, keep){ const r = os0.apply(this, arguments); if ((tab || SOC.tab) !== "party") return r; const P = NET.soc && NET.soc.party; if (!P) return r;
+    const rows = document.querySelectorAll("#modal .socbox .mkr"); P.members.forEach((m, k) => { const row = rows[k]; if (!row || !m.fight || m.nick.toLowerCase() === S.name.toLowerCase()) return;
+      const here = m.fight.loc === S.loc && !T && !DG && !B; row.insertAdjacentHTML("beforeend", here ? `<button class="btn p sm" data-fjoin="${m.fight.id}">Приєднатися до бою</button>` : ""); });
+    return r; }; }
+
+/* ---------- мітки на карті: у дорозі — на самій дорозі ---------- */
+{ const sm0 = socMapMarks; socMapMarks = function(){ sm0.apply(this, arguments); const ov = document.getElementById("mapov"); if (!ov || !NET.on) return;
+    const list = [...(NET.soc.party ? NET.soc.party.members.map(p => [p, true]) : []), ...NET.soc.friends.map(p => [p, false])];
+    const seen = new Set();
+    for (const [p, party] of list){ if (seen.has(p.nick) || !p.online || p.nick.toLowerCase() === S.name.toLowerCase()) continue; seen.add(p.nick);
+      const [k, a, b] = (p.pos || "").split(":"); if (k !== "road" || !NODES[a] || !NODES[b]) continue; if (!!NODES[a].ug !== !!ugView()) continue;
+      const x = (NODES[a].x + NODES[b].x) / 2, y = (NODES[a].y + NODES[b].y) / 2;
+      ov.insertAdjacentHTML("beforeend", `<div class="node frm${party ? " party" : ""}" data-x="${x | 0}" data-y="${y | 0}" style="--i:0"><span class="frb">${heroArt(26, {crest:0})}</span><span class="frl">${esc(p.nick)} · у дорозі</span></div>`); }
+    placeMap(); }; }
 
 /* ============ старт ============ */
 initDrag();
